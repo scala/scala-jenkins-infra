@@ -16,23 +16,28 @@ aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp -
 ```
 
 # get (ssh) key pair
+```
 echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/chef.pem
 chmod 0600 ~/.ssh/chef.pem
+```
 
-make sure knife[:aws_ssh_key_id] = 'chef' matches --identity-file ~/.ssh/chef.pem 
+make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef.pem`
 
 # install chef/knife
 
+```
 brew cask install chefdk
 eval "$(chef shell-init zsh)" # set up gem environment
 gem install knife-ec2 knife-windows knife-github-cookbooks
+```
 
 ## create chef.io organization 
 https://manage.chef.io/organizations/typesafe-scala
+
 download:
   - user key
   - org validation key
-  - knife config
+  - knife config (knife.rb)
 
 ## get cookbooks
 
@@ -78,7 +83,10 @@ doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 ```
-knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-45332200 -G Windows --user-data userdata.txt --bootstrap-protocol winrm --identity-file ~/.ssh/chef.pem --run-list "scala-jenkins-infra::jenkins-worker-windows"
+knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-45332200 \
+   -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
+   --identity-file ~/.ssh/chef.pem \
+   --run-list "scala-jenkins-infra::jenkins-worker-windows"
 ```
 
 #### during development, don't set name (-N jenkins-worker-windows) to avoid name clashes 
