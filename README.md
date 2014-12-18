@@ -15,15 +15,7 @@ aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp -
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 3389 --cidr $YOUR_LOCAL_IP/32 # RDP (only for diagnosing)
 ```
 
-# get (ssh) key pair
-```
-echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/chef.pem
-chmod 0600 ~/.ssh/chef.pem
-```
-
-make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef.pem`
-
-# install chef/knife
+# Install chef/knife
 
 ```
 brew cask install chefdk
@@ -31,7 +23,7 @@ eval "$(chef shell-init zsh)" # set up gem environment
 gem install knife-ec2 knife-windows knife-github-cookbooks
 ```
 
-## create chef.io organization 
+## Create chef.io organization 
 https://manage.chef.io/organizations/typesafe-scala
 
 download:
@@ -39,7 +31,7 @@ download:
   - org validation key
   - knife config (knife.rb)
 
-## get cookbooks
+## Get cookbooks
 
 ```
 git init cookbooks
@@ -65,8 +57,17 @@ g commit --allow-empty -m"Initial"
 - checksum is computed with `shasum -a 256`
 - TODO: host them on an s3 bucket (credentials are available automatically)
 
+# Launch instance on EC2 
+## Create (ssh) key pair
+```
+echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/chef.pem
+chmod 0600 ~/.ssh/chef.pem
+```
 
-# Select AMI
+make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef.pem`
+
+
+## Select AMI
 
 current: ami-cfa5b68a Windows_Server-2012-R2_R~TM-English-64Bit-Base-2014.12.10
 
@@ -79,7 +80,7 @@ userdata.txt: '<script>winrm quickconfig -q & winrm set winrm/config/service @{A
 older: ami-6b34252e Windows_Server-2008-R2_SP1-English-64Bit-Base-2014.11.19
 doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12.10
 
-# Bootstrap
+## Bootstrap
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 ```
@@ -92,15 +93,20 @@ knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-45332200 \
 #### during development, don't set name (-N jenkins-worker-windows) to avoid name clashes 
 
 
-## re-run chef-client on windows
+## Develop/test recipe
+
+To re-run chef-client on windows
+
 ```
 knife winrm $IP chef-client -m -P $PASSWORD
 ```
 
-## set run-list
+## set run-list (recipe to be executed by chef-client)
+
 ```
 knife node run_list set jenkins-worker-windows jenkins-worker-windows
 ``` 
+
 ## If the bootstrap didn't work at first, complete:
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
