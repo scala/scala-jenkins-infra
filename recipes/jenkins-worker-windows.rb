@@ -16,11 +16,12 @@ include_recipe "java"
 include_recipe "git"
 include_recipe "chef-sbt"
 
-# must come later or it won't find ruby.exe, which is installed by 
+# ??? must come later or it won't find ruby.exe, which is installed by git?
 include_recipe "wix"
 
 # include_recipe 'jenkins'
 
+# for the jenkins recipe: ensure_update_center_present! bombs without it (https://github.com/opscode-cookbooks/jenkins/issues/305)
 ruby_block 'Enable ruby ssl on windows' do
   block do
     ENV[SSL_CERT_FILE] = 'c:\opscode\chef\embedded\ssl\certs\cacert.pem'
