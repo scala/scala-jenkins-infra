@@ -94,21 +94,23 @@ doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 ```
-knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-45332200 \
+knife ec2 server create -N worker-windows \
+   --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::jenkins-worker-windows"
+   --run-list "scala-jenkins-infra::worker-windows"
 ```
 
 
 ```
-knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-4b6f650e \
+knife ec2 server create -N master \
+   --region us-west-1 --flavor t2.medium -I ami-4b6f650e \
    -G Master --sudo --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::jenkins-master"
+   --run-list "scala-jenkins-infra::master"
 ```
 
-#### during development, don't set name (-N jenkins-worker-windows) to avoid name clashes 
+#### during development, don't set name to avoid name clashes
 
 
 ## Develop/test recipe
@@ -122,7 +124,7 @@ knife winrm $IP chef-client -m -P $PASSWORD
 ## set run-list (recipe to be executed by chef-client)
 
 ```
-knife node run_list set jenkins-worker-windows jenkins-worker-windows
+knife node run_list set worker-windows "scala-jenkins-infra::worker-windows"
 ``` 
 
 ## If the bootstrap didn't work at first, complete:

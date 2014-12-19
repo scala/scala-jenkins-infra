@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: jenkins-worker-windows
+# Recipe:: worker-windows
 #
 # Copyright 2014, Typesafe, Inc.
 #
