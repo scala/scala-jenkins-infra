@@ -1,6 +1,9 @@
 # Scala's Jenkins Cluster 
 The idea is to use chef to configure EC2 instances for both the master and the slaves. The jenkins config will be captured in chef recipes. Everything is versioned, with server and workers not allowed to maintain state.
 
+This is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-your-automation-federated-jenkins-with-chef/
+
+
 # Get some tools
 ```
 brew cask install awscli cord
@@ -13,6 +16,11 @@ aws ec2 create-security-group --group-name "Windows" --description "Remote acces
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 5985 --cidr $YOUR_LOCAL_IP/32 # allow WinRM from the machine that will execute `knife ec2 server create` below
 
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 3389 --cidr $YOUR_LOCAL_IP/32 # RDP (only for diagnosing)
+```
+
+```
+aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master" 
+aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr 0.0.0.0/0
 ```
 
 # Install chef/knife
@@ -69,8 +77,10 @@ make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef
 
 ## Select AMI
 
-current: ami-cfa5b68a Windows_Server-2012-R2_R~TM-English-64Bit-Base-2014.12.10
+current windows: ami-cfa5b68a Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10
+current linux: ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
 
+## Alternative windows AMIs
 too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
 userdata.txt: `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
 
@@ -88,6 +98,14 @@ knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::jenkins-worker-windows"
+```
+
+
+```
+knife ec2 server create --region us-west-1 --flavor t2.medium -I ami-4b6f650e \
+   -G Master --sudo --ssh-user ec2-user \
+   --identity-file ~/.ssh/chef.pem \
+   --run-list "scala-jenkins-infra::jenkins-master"
 ```
 
 #### during development, don't set name (-N jenkins-worker-windows) to avoid name clashes 
