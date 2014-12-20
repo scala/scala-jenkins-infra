@@ -148,16 +148,18 @@ knife bootstrap -V windows winrm $IP
 
 # Configuring the jenkins cluster
 ```
-$ knife tag create ip-172-31-14-55.us-west-1.compute.internal jenkins-master
-Created tags jenkins-master for node ip-172-31-14-55.us-west-1.compute.internal.
+$ knife tag create master jenkins-master
+Created tags jenkins-master for node master.
 $ knife search tags:jenkins-master
 1 items found
 
-Node Name:   ip-172-31-14-55.us-west-1.compute.internal
+Node Name:   master
 ...
+
+$ knife tag create worker-windows jenkins-worker
 ```
 
-## github oauth
+## Secure data
 https://github.com/settings/applications/new -->
  - Authorization callback URL = http://ec2-54-67-28-42.us-west-1.compute.amazonaws.com:8080/securityRealm/finishLogin
 
@@ -166,11 +168,8 @@ from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-v
 
 NOTE: the JSON must not have a field "id"!!!
 
-knife vault create master github-api \
-  '{"client-id":"<Client ID>","client-secret":"<Client secret>"}' \
-  --search 'tags:jenkins-master' \
-  --admins adriaan
-
+### Chef user with keypair for cli
+```
 eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
 ruby keypair.rb > keypair.json
 
@@ -178,3 +177,14 @@ knife vault create master scala-jenkins-keypair \
   --json keypair.json \
   --search 'tags:jenkins*' \
   --admins adriaan
+```
+
+### For github oauth
+
+```
+knife vault create master github-api \
+  '{"client-id":"<Client ID>","client-secret":"<Client secret>"}' \
+  --search 'tags:jenkins-master' \
+  --admins adriaan
+```
+
