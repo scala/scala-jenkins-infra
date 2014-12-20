@@ -28,7 +28,7 @@ aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --
 ```
 brew cask install chefdk
 eval "$(chef shell-init zsh)" # set up gem environment
-gem install knife-ec2 knife-windows knife-github-cookbooks
+gem install knife-ec2 knife-windows knife-github-cookbooks chef-vault
 ```
 
 ## Create chef.io organization 
@@ -110,10 +110,10 @@ knife ec2 server create -N master \
    --run-list "scala-jenkins-infra::master"
 ```
 
-#### during development, don't set name to avoid name clashes
+note: name can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
 
 
-## Develop/test recipe
+### Develop/test recipe
 
 To re-run chef-client on windows
 
@@ -121,13 +121,13 @@ To re-run chef-client on windows
 knife winrm $IP chef-client -m -P $PASSWORD
 ```
 
-## set run-list (recipe to be executed by chef-client)
+### set run-list (recipe to be executed by chef-client)
 
 ```
 knife node run_list set worker-windows "scala-jenkins-infra::worker-windows"
 ``` 
 
-## If the bootstrap didn't work at first, complete:
+### If the bootstrap didn't work at first, complete:
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
 
@@ -142,3 +142,39 @@ cord $IP, log in using password above and open a command line:
 knife bootstrap -V windows winrm $IP
 
 ```
+
+
+
+
+# Configuring the jenkins cluster
+```
+$ knife tag create ip-172-31-14-55.us-west-1.compute.internal jenkins-master
+Created tags jenkins-master for node ip-172-31-14-55.us-west-1.compute.internal.
+$ knife search tags:jenkins-master
+1 items found
+
+Node Name:   ip-172-31-14-55.us-west-1.compute.internal
+...
+```
+
+## github oauth
+https://github.com/settings/applications/new -->
+ - Authorization callback URL = http://ec2-54-67-28-42.us-west-1.compute.amazonaws.com:8080/securityRealm/finishLogin
+
+
+from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-vault/
+
+NOTE: the JSON must not have a field "id"!!!
+
+knife vault create master github-api \
+  '{"client-id":"<Client ID>","client-secret":"<Client secret>"}' \
+  --search 'tags:jenkins-master' \
+  --admins adriaan
+
+eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
+ruby keypair.rb > keypair.json
+
+knife vault create master scala-jenkins-keypair \
+  --json keypair.json \
+  --search 'tags:jenkins*' \
+  --admins adriaan
