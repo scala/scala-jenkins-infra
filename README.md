@@ -24,7 +24,7 @@ aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 ```
 
-aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes"
+aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes" 
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
 
@@ -121,7 +121,7 @@ knife ec2 server create -N master \
 ```
 knife ec2 server create -N worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
-   -G Workers --ssh-user ec2-user \
+   -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ```
