@@ -48,3 +48,19 @@ end
 if node['master']['auth']
   include_recipe "scala-jenkins-infra::_auth-#{node['master']['auth']}"
 end
+
+search(:node, 'tags:jenkins-worker* AND os:linux').each do |worker|
+  jenkins_ssh_slave 'builder-publish' do
+    host    worker.ipaddress
+    credentials "jenkins" # they are firewalled
+
+    # TODO filter tags that don't start with "jenkins-worker-"
+    labels worker.tags.map{|t| t.tap{|s| s.slice!("jenkins-worker-"); s}} + ["linux"]
+
+    executors 2
+
+    environment(node["worker"]["env"])
+
+    action [:create, :connect]
+  end
+end

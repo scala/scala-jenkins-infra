@@ -21,9 +21,12 @@ aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp -
 ```
 aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master" 
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 ```
 
 aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes"
+aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32
+aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
 
 # Install chef/knife
 
@@ -80,7 +83,10 @@ make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef
 ## Select AMI
 
 current windows: ami-cfa5b68a Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10
-current linux: ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
+current linux-publisher: ami-b11b09f4 ubuntu/images-testing/hvm/ubuntu-trusty-daily-amd64-server-20141212
+
+current linux (master/worker): ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
+
 
 ## Alternative windows AMIs
 too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
@@ -106,7 +112,7 @@ knife ec2 server create -N worker-windows \
 
 ```
 knife ec2 server create -N master \
-   --region us-west-1 --flavor t2.medium -I ami-4b6f650e \
+   --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --sudo --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::master"
@@ -114,8 +120,8 @@ knife ec2 server create -N master \
 
 ```
 knife ec2 server create -N worker-linux-publish \
-   --region us-west-1 --flavor t2.medium -I ami-4b6f650e \
-   -G Worker --ssh-user ec2-user \
+   --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
+   -G Workers --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ```
@@ -169,6 +175,8 @@ Node Name:   master
 ...
 
 $ knife tag create worker-windows jenkins-worker
+
+$ knife tag create worker-linux-publish jenkins-worker-publish
 ```
 
 ## Secure data
@@ -211,4 +219,11 @@ knife vault create worker-publish private-repo \
   '{"user":"XXX","pass":"XXX"}' \
   --search 'tags:jenkins-worker-publish' \
   --admins adriaan
+```
+
+### Adding nodes that may access the vault items:
+
+```
+knife vault update worker-publish sonatype --search 'tags:jenkins-worker-publish'
+knife vault update worker-publish private-repo --search 'tags:jenkins-worker-publish'
 ```
