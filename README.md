@@ -23,6 +23,8 @@ aws ec2 create-security-group --group-name "Master" --description "Remote access
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr 0.0.0.0/0
 ```
 
+aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes"
+
 # Install chef/knife
 
 ```
@@ -110,6 +112,16 @@ knife ec2 server create -N master \
    --run-list "scala-jenkins-infra::master"
 ```
 
+```
+knife ec2 server create -N worker-linux-publish \
+   --region us-west-1 --flavor t2.medium -I ami-4b6f650e \
+   -G Worker --ssh-user ec2-user \
+   --identity-file ~/.ssh/chef.pem \
+   --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
+```
+
+-T jenkins-worker-publish
+
 note: name can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
 
 
@@ -168,7 +180,7 @@ from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-v
 
 NOTE: the JSON must not have a field "id"!!!
 
-### Chef user with keypair for cli
+### Chef user with keypair for jenkins cli access
 ```
 eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
 ruby keypair.rb > keypair.json
@@ -188,3 +200,15 @@ knife vault create master github-api \
   --admins adriaan
 ```
 
+### Workers that need to publish
+```
+knife vault create worker-publish sonatype \
+  '{"user":"XXX","pass":"XXX"}' \
+  --search 'tags:jenkins-worker-publish' \
+  --admins adriaan
+
+knife vault create worker-publish private-repo \
+  '{"user":"XXX","pass":"XXX"}' \
+  --search 'tags:jenkins-worker-publish' \
+  --admins adriaan
+```
