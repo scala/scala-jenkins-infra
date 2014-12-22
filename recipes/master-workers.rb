@@ -10,6 +10,12 @@
 chef_gem "chef-vault"
 require "chef-vault"
 
+ruby_block 'set private key' do
+  block do
+    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
+  end
+end
+
 jenkins_private_key_credentials 'jenkins' do # username == name of resource
   id '954dd564-ce8c-43d1-bcc5-97abffc81c54'
   private_key ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
