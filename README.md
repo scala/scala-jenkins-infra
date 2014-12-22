@@ -124,7 +124,7 @@ knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-windows"
+   --run-list "scala-jenkins-infra::worker-windows, worker-windows-agent"
 
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
