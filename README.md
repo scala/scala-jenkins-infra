@@ -12,21 +12,22 @@ brew cask install awscli cord
 # Create security group (ec2 firewall)
 
 ```
-aws ec2 create-security-group --group-name "Windows" --description "Remote access to Windows instances" 
-aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 5985 --cidr $YOUR_LOCAL_IP/32 # allow WinRM from the machine that will execute `knife ec2 server create` below
-
-aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 3389 --cidr $YOUR_LOCAL_IP/32 # RDP (only for diagnosing)
-```
-
-```
 aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master" 
-aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32 # ssh bootstrap
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 ```
 
+```
+aws ec2 create-security-group --group-name "Windows" --description "Remote access to Windows instances" 
+aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 5985 --cidr $MACHINE-INITIATING-BOOTSTRAP/32 # allow WinRM from the machine that will execute `knife ec2 server create` below
+aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 0-65535 --source-group Master
+```
+
+```
 aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes" 
-aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32
+aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32 # ssh bootstrap
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
+```
 
 # Install chef/knife
 
@@ -44,6 +45,24 @@ download:
   - org validation key
   - knife config (knife.rb)
 
+### knife.rb
+```
+current_dir = File.dirname(__FILE__)
+log_level                :info
+log_location             STDOUT
+node_name                "adriaan"
+client_key               "#{current_dir}/config/adriaan.pem"
+validation_client_name   "typesafe-scala-validator"
+validation_key           "#{current_dir}/config/typesafe-scala-validator.pem"
+chef_server_url          "https://api.opscode.com/organizations/typesafe-scala"
+cache_type               'BasicFile'
+cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
+cookbook_path            ["#{current_dir}/cookbooks"]
+knife[:aws_credential_file] = "/Users/adriaan/.aws/credentials"
+knife[:aws_ssh_key_id] = 'chef' # the pem file name without the .pem extension and it has to be located in: ~/.ssh/ 
+
+knife[:vault_mode] = 'client'
+```
 ## Get cookbooks
 
 ```
@@ -81,7 +100,7 @@ chmod 0600 ~/.ssh/chef.pem
 make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef.pem`
 
 
-## Select AMI
+## Selected AMIs
 
 current windows: ami-cfa5b68a Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10
 current linux-publisher: ami-b11b09f4 ubuntu/images-testing/hvm/ubuntu-trusty-daily-amd64-server-20141212
@@ -89,26 +108,9 @@ current linux-publisher: ami-b11b09f4 ubuntu/images-testing/hvm/ubuntu-trusty-da
 current linux (master/worker): ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
 
 
-## Alternative windows AMIs
-too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
-userdata.txt: `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
-
-older: ami-e9a4b7ac amazon/Windows_Server-2008-SP2-English-64Bit-Base-2014.12.10
-userdata.txt: '<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}</script>'
-
-older: ami-6b34252e Windows_Server-2008-R2_SP1-English-64Bit-Base-2014.11.19
-doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12.10
-
 ## Bootstrap
-NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
-
-```
-knife ec2 server create -N jenkins-worker-windows \
-   --region us-west-1 --flavor t2.medium -I ami-45332200 \
-   -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
-   --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-windows"
-```
+NOTE: name is important (used to allow access to vault etc)
+it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
 
 
 ```
@@ -120,48 +122,24 @@ knife ec2 server create -N jenkins-master \
 ```
 
 ```
+knife ec2 server create -N jenkins-worker-windows \
+   --region us-west-1 --flavor t2.medium -I ami-45332200 \
+   -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
+   --identity-file ~/.ssh/chef.pem \
+   --run-list "scala-jenkins-infra::worker-windows"
+```
+
+NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
+`<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
+
+
+```
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ```
-
-NOTE: name is important (used to allow access to vault etc)
-it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
-
-
-### Develop/test recipe
-
-To re-run chef-client on windows
-
-```
-knife winrm $IP chef-client -m -P $PASSWORD
-```
-
-### set run-list (recipe to be executed by chef-client)
-
-```
-knife node run_list set jenkins-worker-windows "scala-jenkins-infra::worker-windows"
-``` 
-
-### If the bootstrap didn't work at first, complete:
-If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
-(check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
-
-```
-aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/.ssh/chef.pem
-
-cord $IP, log in using password above and open a command line:
-
-  winrm set winrm/config/service @{AllowUnencrypted="true"}
-  winrm set winrm/config/service/auth @{Basic="true"}
-
-knife bootstrap -V windows winrm $IP
-
-```
-
-
 
 
 # Configuring the jenkins cluster
@@ -212,6 +190,52 @@ knife vault create worker-publish private-repo \
 ### Adding nodes that may access the vault items:
 
 ```
+knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
 knife vault update worker-publish sonatype --search 'name:jenkins-worker-publish'
 knife vault update worker-publish private-repo --search 'name:jenkins-worker-publish'
 ```
+
+# Misc
+
+## Set run list (recipe to be executed by chef-client)
+
+```
+knife node run_list set jenkins-worker-windows "scala-jenkins-infra::worker-windows"
+``` 
+
+## Run chef manually
+
+### Windows
+
+```
+knife winrm $IP chef-client -m -P $PASSWORD
+```
+
+
+## If the bootstrap didn't work at first, complete:
+If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
+(check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
+
+```
+aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/.ssh/chef.pem
+
+cord $IP, log in using password above and open a command line:
+
+  winrm set winrm/config/service @{AllowUnencrypted="true"}
+  winrm set winrm/config/service/auth @{Basic="true"}
+
+knife bootstrap -V windows winrm $IP
+
+```
+
+
+
+## Alternative windows AMIs
+too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
+userdata.txt: `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
+
+older: ami-e9a4b7ac amazon/Windows_Server-2008-SP2-English-64Bit-Base-2014.12.10
+userdata.txt: '<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}</script>'
+
+older: ami-6b34252e Windows_Server-2008-R2_SP1-English-64Bit-Base-2014.11.19
+doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12.10
