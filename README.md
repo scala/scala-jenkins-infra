@@ -116,7 +116,7 @@ it can't be changed later, and duplicates aren't allowed (can bite when repeatin
 ```
 knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
-   -G Master --sudo --ssh-user ec2-user \
+   -G Master --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::master" &
 
