@@ -1,15 +1,15 @@
-default['master']['auth']                 = 'github'
-default['master']['github']['webUri']        = 'https://github.com/'
-default['master']['github']['apiUri']        = 'https://api.github.com'
+default['master']['auth']             = 'github'
+default['master']['github']['webUri'] = 'https://github.com/'
+default['master']['github']['apiUri'] = 'https://api.github.com'
 
-default['master']['github']['adminUserNames']                       = 'adriaanm'
-default['master']['github']['organizationNames']                    = 'scala'
-default['master']['github']['useRepositoryPermissions']             = 'true'
-default['master']['github']['allowAnonymousReadPermission']         = 'true'
-default['master']['github']['authenticatedUserReadPermission']      = 'true'
+default['master']['github']['adminUserNames']                  = 'adriaanm,chef'
+default['master']['github']['organizationNames']               = 'scala'
+default['master']['github']['useRepositoryPermissions']        = 'true'
+default['master']['github']['allowAnonymousReadPermission']    = 'true'
+default['master']['github']['authenticatedUserReadPermission'] = 'true'
 
-default['master']['github']['allowGithubWebHookPermission']         = 'true'
-default['master']['github']['allowCcTrayPermission']                = 'false'
+default['master']['github']['allowGithubWebHookPermission'] = 'true'
+default['master']['github']['allowCcTrayPermission']        = 'false'
 
 default['master']['github']['authenticatedUserCreateJobPermission'] = 'false'
 

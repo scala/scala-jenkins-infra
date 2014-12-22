@@ -65,7 +65,7 @@ g commit --allow-empty -m"Initial"
 
 - knife cookbook upload --all
 
-## cache installers locally
+## Cache installers locally
 - they are tricky to access, might disappear,...
 - checksum is computed with `shasum -a 256`
 - TODO: host them on an s3 bucket (credentials are available automatically)
@@ -102,7 +102,7 @@ doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 ```
-knife ec2 server create -N worker-windows \
+knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
@@ -111,7 +111,7 @@ knife ec2 server create -N worker-windows \
 
 
 ```
-knife ec2 server create -N master \
+knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --sudo --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
@@ -119,7 +119,7 @@ knife ec2 server create -N master \
 ```
 
 ```
-knife ec2 server create -N worker-linux-publish \
+knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
@@ -188,6 +188,7 @@ from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-v
 
 NOTE: the JSON must not have a field "id"!!!
 
+### TODO: search by name, not tag (can't set tag during bootstrap)
 ### Chef user with keypair for jenkins cli access
 ```
 eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem

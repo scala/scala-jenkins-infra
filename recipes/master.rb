@@ -39,7 +39,7 @@ ruby_block 'set private key' do
   end
 end
 
-%w(github-oauth job-dsl greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
+%w(ssh-credentials github-oauth job-dsl greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
   plugin, version = plugin.split('=') # in case we decide to pin versions later
   jenkins_plugin plugin
 end
@@ -49,17 +49,23 @@ if node['master']['auth']
   include_recipe "scala-jenkins-infra::_auth-#{node['master']['auth']}"
 end
 
+jenkins_private_key_credentials 'jenkins-private-key' do
+  id '2d765436-f9d5-45f2-9a61-7669323eec1a'
+  description 'Jenkins'
+  private_key ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
+end
+
 search(:node, 'tags:jenkins-worker* AND os:linux').each do |worker|
   jenkins_ssh_slave 'builder-publish' do
     host    worker.ipaddress
-    credentials "jenkins" # they are firewalled
+    credentials '2d765436-f9d5-45f2-9a61-7669323eec1a' # must use id -- the groovy script fails if you use the name
 
     # TODO filter tags that don't start with "jenkins-worker-"
     labels worker.tags.map{|t| t.tap{|s| s.slice!("jenkins-worker-"); s}} + ["linux"]
 
     executors 2
 
-    environment(node["worker"]["env"])
+    environment(worker["worker"]["env"])
 
     action [:create, :connect]
   end
