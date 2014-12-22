@@ -25,7 +25,7 @@ search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
 
     executors 2
 
-    environment(worker["worker"]["env"])
+    environment(node["master"]["env"].merge(worker["worker"]["env"]))
 
     action [:create, :connect]
   end

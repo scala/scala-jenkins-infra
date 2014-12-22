@@ -22,3 +22,9 @@ default['master']['jenkinsUrl']   = "http://scala-ci.typesafe.com/"
 # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
 # override['jenkins']['master']['version']        = '1.555'
 # override['jenkins']['master']['checksum']       = '31f5c2a3f7e843f7051253d640f07f7c24df5e9ec271de21e92dac0d7ca19431'
+
+
+default['master']['env']["ANT_OPTS"]      = "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4"
+default['master']['env']["JAVA_OPTS"]     = "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4"
+default['master']['env']["prRepoUrl"]     = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
+default['master']['env']["scriptsRemote"] = "https://github.com/scala/jenkins-scripts.git"

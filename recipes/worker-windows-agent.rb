@@ -38,7 +38,7 @@ jenkins_windows_slave 'windows' do
 
   executors 2
 
-  environment(node["worker"]["env"])
+  environment(node["master"]["env"].merge(node["worker"]["env"])) # TODO: factor out (can't configure jenkins global properties, so emulate at node-level using chef)
 
   action [:create, :connect, :online] # TODO: are both connect and online needed?
 end

@@ -7,8 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-node.set["worker"]["env"]["JAVA_OPTS"]   = "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -XX:+UseCompressedOops"
-node.set["worker"]["env"]["ANT_OPTS"]    = node["worker"]["env"]["JAVA_OPTS"]
 node.set["worker"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launcher.jar") # from chef-sbt cookbook
 node.set["worker"]["env"]["sbtCmd"]      = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
 
