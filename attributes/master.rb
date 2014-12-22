@@ -16,6 +16,9 @@ default['master']['github']['authenticatedUserCreateJobPermission'] = 'false'
 
 override['jenkins']['master']['install_method'] = 'war'
 
+default['master']['adminAddress'] = "adriaan@typesafe.com"
+default['master']['jenkinsUrl']   = "http://scala-ci.typesafe.com/"
+
 # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
 # override['jenkins']['master']['version']        = '1.555'
 # override['jenkins']['master']['checksum']       = '31f5c2a3f7e843f7051253d640f07f7c24df5e9ec271de21e92dac0d7ca19431'
