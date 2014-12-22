@@ -58,7 +58,7 @@ ruby_block 'set private key' do
   end
 end
 
-%w(ssh-credentials job-dsl greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
+%w(ssh-credentials job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
   plugin, version = plugin.split('=') # in case we decide to pin versions later
   jenkins_plugin plugin
 end
