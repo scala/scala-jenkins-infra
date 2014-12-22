@@ -62,6 +62,7 @@ g commit --allow-empty -m"Initial"
   - knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows
   - knife cookbook github install adriaanm/scala-jenkins-infra
   - knife cookbook github install adriaanm/chef-sbt
+  - knife cookbook github install gildegoma/chef-sbt-extras
 
 - knife cookbook upload --all
 
@@ -126,9 +127,8 @@ knife ec2 server create -N jenkins-worker-linux-publish \
    --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ```
 
--T jenkins-worker-publish
-
-note: name can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
+NOTE: name is important (used to allow access to vault etc)
+it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
 
 
 ### Develop/test recipe
@@ -142,7 +142,7 @@ knife winrm $IP chef-client -m -P $PASSWORD
 ### set run-list (recipe to be executed by chef-client)
 
 ```
-knife node run_list set worker-windows "scala-jenkins-infra::worker-windows"
+knife node run_list set jenkins-worker-windows "scala-jenkins-infra::worker-windows"
 ``` 
 
 ### If the bootstrap didn't work at first, complete:
@@ -165,19 +165,6 @@ knife bootstrap -V windows winrm $IP
 
 
 # Configuring the jenkins cluster
-```
-$ knife tag create master jenkins-master
-Created tags jenkins-master for node master.
-$ knife search tags:jenkins-master
-1 items found
-
-Node Name:   master
-...
-
-$ knife tag create worker-windows jenkins-worker
-
-$ knife tag create worker-linux-publish jenkins-worker-publish
-```
 
 ## Secure data
 https://github.com/settings/applications/new -->
@@ -196,7 +183,7 @@ ruby keypair.rb > keypair.json
 
 knife vault create master scala-jenkins-keypair \
   --json keypair.json \
-  --search 'tags:jenkins*' \
+  --search 'name:jenkins*' \
   --admins adriaan
 ```
 
@@ -205,7 +192,7 @@ knife vault create master scala-jenkins-keypair \
 ```
 knife vault create master github-api \
   '{"client-id":"<Client ID>","client-secret":"<Client secret>"}' \
-  --search 'tags:jenkins-master' \
+  --search 'name:jenkins-master' \
   --admins adriaan
 ```
 
@@ -213,18 +200,18 @@ knife vault create master github-api \
 ```
 knife vault create worker-publish sonatype \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'tags:jenkins-worker-publish' \
+  --search 'name:jenkins-worker-publish' \
   --admins adriaan
 
 knife vault create worker-publish private-repo \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'tags:jenkins-worker-publish' \
+  --search 'name:jenkins-worker-publish' \
   --admins adriaan
 ```
 
 ### Adding nodes that may access the vault items:
 
 ```
-knife vault update worker-publish sonatype --search 'tags:jenkins-worker-publish'
-knife vault update worker-publish private-repo --search 'tags:jenkins-worker-publish'
+knife vault update worker-publish sonatype --search 'name:jenkins-worker-publish'
+knife vault update worker-publish private-repo --search 'name:jenkins-worker-publish'
 ```

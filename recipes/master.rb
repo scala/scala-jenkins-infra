@@ -54,7 +54,7 @@ jenkins_private_key_credentials 'jenkins' do # username == name of resource
   private_key ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
 end
 
-search(:node, 'tags:jenkins-worker* AND os:linux').each do |worker|
+search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
   jenkins_ssh_slave 'builder-publish' do
     host    worker.ipaddress
     credentials '954dd564-ce8c-43d1-bcc5-97abffc81c54' # must use id (groovy script fails otherwise)
