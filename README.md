@@ -118,13 +118,13 @@ knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::master" &
+   --run-list "scala-jenkins-infra::master"
 
 knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-windows" &
+   --run-list "scala-jenkins-infra::worker-windows"
 
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
@@ -137,6 +137,8 @@ knife ec2 server create -N jenkins-worker-linux-publish \
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
 
+```
+knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers"
 
 ```
 
@@ -152,7 +154,6 @@ from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-v
 
 NOTE: the JSON must not have a field "id"!!!
 
-### TODO: search by name, not tag (can't set tag during bootstrap)
 ### Chef user with keypair for jenkins cli access
 ```
 eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
@@ -177,41 +178,42 @@ knife vault create master github-api \
 ```
 knife vault create worker-publish sonatype \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-publish' \
+  --search 'name:jenkins-worker-linux-publish' \
   --admins adriaan
 
 knife vault create worker-publish private-repo \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-publish' \
+  --search 'name:jenkins-worker-linux-publish' \
   --admins adriaan
 ```
 
-### Adding nodes that may access the vault items:
+### Updating the vaults so new nodes may access them:
 
 ```
+knife vault update master github-api            --search 'name:jenkins-master'
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
-knife vault update worker-publish sonatype --search 'name:jenkins-worker-linux-publish'
-knife vault update worker-publish private-repo --search 'name:jenkins-worker-linux-publish'
+knife vault update worker-publish sonatype      --search 'name:jenkins-worker-linux-publish'
+knife vault update worker-publish private-repo  --search 'name:jenkins-worker-linux-publish'
 ```
 
 # Misc
 
+## If connections hang
+Make sure security groups allow access...
+
 ## Set run list (recipe to be executed by chef-client)
 
 ```
-knife node run_list set jenkins-master "scala-jenkins-infra::master"
-knife node run_list set jenkins-worker-windows "scala-jenkins-infra::worker-windows"
+knife node run_list set jenkins-master               "scala-jenkins-infra::master"
+knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worker-windows"
 knife node run_list set jenkins-worker-linux-publish "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ``` 
 
 ## Run chef manually
 
-### Windows
-
-```
-knife winrm $IP chef-client -m -P $PASSWORD
-```
-
+- windows: `knife winrm $IP chef-client -m -P $PASS`
+- ubuntu:  `ssh ubuntu@$IP -i chef.pem sudo chef-client`
+- amazon linux: `ssh ec2-user@$IP -i chef.pem`, and then `sudo chef-client`
 
 ## If the bootstrap didn't work at first, complete:
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
@@ -226,7 +228,6 @@ cord $IP, log in using password above and open a command line:
   winrm set winrm/config/service/auth @{Basic="true"}
 
 knife bootstrap -V windows winrm $IP
-
 ```
 
 

@@ -1,2 +1,3 @@
 # TODO
-override['jenkins']['master']['host'] = "ip-172-31-14-55.us-west-1.compute.internal"
+# NOTE: also update callback URL at https://github.com/settings/applications/154904
+#override['jenkins']['master']['host'] = "scala-ci.typesafe.com"

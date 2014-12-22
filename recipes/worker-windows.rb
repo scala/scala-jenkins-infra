@@ -47,10 +47,10 @@ require "chef-vault"
 ruby_block 'set private key' do
   block do
     node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
-    ## TODO why don't our attributes take effect??
-    jenkinsMaster = search(:node, 'tags:jenkins-master').first
-    node.set['jenkins']['master']['endpoint'] = jenkinsMaster.jenkins.master.endpoint
-    Chef::Log.warn("End point: #{jenkinsMaster.jenkins.master.endpoint}")
+    ## TODO why don't our attributes take effect?? tried override[..] in default.rb
+    jenkinsMaster = search(:node, 'name:jenkins-master').first
+    node.set['jenkins']['master']['endpoint'] = "http://#{jenkinsMaster.ipaddress}:#{jenkinsMaster.jenkins.master.port}"
+    Chef::Log.warn("Master end point: #{jenkinsMaster.jenkins.master.endpoint} / computed: #{node['jenkins']['master']['endpoint']}")
   end
 end
 

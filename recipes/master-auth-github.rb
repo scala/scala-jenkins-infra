@@ -1,3 +1,12 @@
+#
+# Cookbook Name:: scala-jenkins-infra
+# Recipe:: master-auth-github
+#
+# Copyright 2014, Typesafe, Inc.
+#
+# All rights reserved - Do Not Redistribute
+#
+
 chef_gem "chef-vault"
 require "chef-vault"
 
