@@ -118,27 +118,26 @@ knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --sudo --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::master"
-```
+   --run-list "scala-jenkins-infra::master" &
 
-```
 knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-windows"
-```
+   --run-list "scala-jenkins-infra::worker-windows" &
 
-NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
-`<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
-
-
-```
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
+```
+
+
+NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
+`<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
+
+
 ```
 
 
@@ -191,8 +190,8 @@ knife vault create worker-publish private-repo \
 
 ```
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
-knife vault update worker-publish sonatype --search 'name:jenkins-worker-publish'
-knife vault update worker-publish private-repo --search 'name:jenkins-worker-publish'
+knife vault update worker-publish sonatype --search 'name:jenkins-worker-linux-publish'
+knife vault update worker-publish private-repo --search 'name:jenkins-worker-linux-publish'
 ```
 
 # Misc
@@ -200,7 +199,9 @@ knife vault update worker-publish private-repo --search 'name:jenkins-worker-pub
 ## Set run list (recipe to be executed by chef-client)
 
 ```
+knife node run_list set jenkins-master "scala-jenkins-infra::master"
 knife node run_list set jenkins-worker-windows "scala-jenkins-infra::worker-windows"
+knife node run_list set jenkins-worker-linux-publish "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ``` 
 
 ## Run chef manually
