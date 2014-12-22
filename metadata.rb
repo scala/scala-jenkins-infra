@@ -12,8 +12,10 @@ depends 'windows'
 depends 'wix', '~> 1.0.2'
 
 depends 'java'
-depends 'git'
 depends 'jenkins'
+
+depends 'git'
+depends 'git_user'
 
 # TODO remove chef-sbt dependency, but not sure sbt-extras supports windows
 depends 'chef-sbt'

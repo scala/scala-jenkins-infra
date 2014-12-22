@@ -74,6 +74,8 @@ g commit --allow-empty -m"Initial"
 - knife cookbook site install wix 1.0.2 # newer versions don't work for me; also installs windows
 - knife cookbook site install aws
 - knife cookbook site install git
+- knife cookbook site install git_user
+  - knife cookbook site install partial_search
  
 - move to unreleased versions on github:
   - knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)

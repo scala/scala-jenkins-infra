@@ -32,6 +32,11 @@ directory "/home/jenkins/.ssh" do
   owner "jenkins"
 end
 
+git_user 'jenkins' do
+  full_name   'Scala Jenkins'
+  email       'adriaan@typesafe.com'
+end
+
 chef_gem "chef-vault"
 require "chef-vault"
 
