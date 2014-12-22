@@ -1,3 +1,3 @@
-# TODO
 # NOTE: also update callback URL at https://github.com/settings/applications/154904
-#override['jenkins']['master']['host'] = "scala-ci.typesafe.com"
+# elastic IP for the jenkins-master node
+override['jenkins']['master']['host'] = "54.67.111.226"
