@@ -119,7 +119,7 @@ fi
 rm -rf "$(/usr/bin/cygpath --unix $WORKSPACE/.ivy2)"
 
 # want full control over sbt, so invoke the launcher directly
-java -Dsbt.log.noformat=true -Dsbt.ivy.home=$WORKSPACE/.ivy2 \
+java $JAVA_OPTS -Dsbt.log.noformat=true -Dsbt.ivy.home=$WORKSPACE/.ivy2 \
   -Dsbt.override.build.repos=true -Dsbt.repository.config="$repositoriesFile" \
   -jar $sbtLauncher \
   $sbtDistVersionOverride \
