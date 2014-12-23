@@ -27,10 +27,13 @@ include_recipe "java"
 include_recipe "git"
 include_recipe "chef-sbt"
 
+include_recipe "cygwin"
+
+
 # ??? must come later or it won't find ruby.exe, which is installed by git?
 include_recipe "wix"
 
-git_user 'jenkins' do
-  full_name   'Scala Jenkins'
-  email       'adriaan@typesafe.com'
-end
+# git_user 'jenkins' do
+#   full_name   'Scala Jenkins'
+#   email       'adriaan@typesafe.com'
+# end
