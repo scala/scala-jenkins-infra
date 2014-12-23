@@ -22,6 +22,10 @@ jenkins_private_key_credentials 'jenkins' do # username == name of resource
 end
 
 search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
+  # # TODO: is this necessary, since the master is initiating the request?
+  # worker.run_state[:jenkins_private_key] = node.run_state[:jenkins_private_key]
+  # worker.set['jenkins']['master']['endpoint'] = "http://#{node.ipaddress}:#{node.jenkins.master.port}"
+
   jenkins_ssh_slave 'builder-publish' do
     host    worker.ipaddress
     credentials '954dd564-ce8c-43d1-bcc5-97abffc81c54' # must use id (groovy script fails otherwise)

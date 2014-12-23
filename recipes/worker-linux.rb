@@ -41,23 +41,3 @@ git_user 'jenkins' do
   email       'adriaan@typesafe.com'
 end
 
-chef_gem "chef-vault"
-require "chef-vault"
-
-file "/home/jenkins/.ssh/authorized_keys" do
-  owner 'jenkins'
-  mode '644'
-  content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] #.join("\n")
-end
-
-# Set the private key on the Jenkins executor
-ruby_block 'set private key' do
-  block do
-    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
-    ## TODO why don't our attributes take effect?? tried override[..] in default.rb
-    jenkinsMaster = search(:node, 'name:jenkins-master').first
-    node.set['jenkins']['master']['endpoint'] = "http://#{jenkinsMaster.ipaddress}:#{jenkinsMaster.jenkins.master.port}"
-    Chef::Log.warn("Master end point: #{jenkinsMaster.jenkins.master.endpoint} / computed: #{node['jenkins']['master']['endpoint']}")
-  end
-end
-
