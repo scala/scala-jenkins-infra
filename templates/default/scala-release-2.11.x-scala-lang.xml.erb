@@ -17,26 +17,11 @@ Also expands api docs for library, reflect, compiler and other modules to http:/
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
           <name>version</name>
-          <description>the version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html)
-
-e.g. 2.10.3-RC2</description>
+          <description>the version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.21">
-      <autoRebuild>false</autoRebuild>
-    </com.sonyericsson.rebuild.RebuildSettings>
-    <jenkins.plugins.slack.SlackNotifier_-SlackJobProperty plugin="slack@1.2">
-      <room></room>
-      <startNotification>false</startNotification>
-      <notifySuccess>false</notifySuccess>
-      <notifyAborted>false</notifyAborted>
-      <notifyNotBuilt>false</notifyNotBuilt>
-      <notifyUnstable>false</notifyUnstable>
-      <notifyFailure>false</notifyFailure>
-      <notifyBackToNormal>false</notifyBackToNormal>
-    </jenkins.plugins.slack.SlackNotifier_-SlackJobProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.2">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
@@ -53,43 +38,7 @@ e.g. 2.10.3-RC2</description>
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>#!/bin/bash -ex
-url=&quot;http://downloads.typesafe.com/scala/$version&quot;
-
-if [[ &quot;$version&quot; =~ .*-nightly ]]
-then archivesDir=&quot;~linuxsoft/archives/scala/nightly/2.11.x&quot;
-else archivesDir=&quot;~linuxsoft/archives/scala&quot;
-fi
-
-# make this build restartable (if interrupted, partial files may remain, and resuming isn&apos;t very reliable)
-[[ -n $version ]] &amp;&amp; ssh scalatest@chara &quot;rm -f $archivesDir/scala-*$version* &amp;&amp; rm -rf $archivesDir/api/$version/ ||:&quot;
-
-cacheBuster=&quot;$(date +%s | tail -c2 | head -c1)&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-$version.msi       &apos;$url/scala-$version.msi?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-$version.zip       &apos;$url/scala-$version.zip?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-$version.tgz       &apos;$url/scala-$version.tgz?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-$version.deb       &apos;$url/scala-$version.deb?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-$version.rpm       &apos;$url/scala-$version.rpm?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-docs-$version.zip  &apos;$url/scala-docs-$version.zip?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-docs-$version.tgz  &apos;$url/scala-docs-$version.tgz?$cacheBuster&apos;&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; wget -nv -O scala-docs-$version.txz  &apos;$url/scala-docs-$version.txz?$cacheBuster&apos;&quot;
-
-echo &quot;Expanding scala-library API docs for $version to api/$version (with subdirectories for scala-compiler and scala-reflect).&quot;
-ssh scalatest@chara &quot;cd $archivesDir &amp;&amp; mkdir -p api/$version &amp;&amp; tar -xvz --strip-component 2 -f scala-docs-$version.tgz -C api/$version &amp;&amp; mv api/$version/scala-library/* api/$version/&quot; # tar on jenkins does not support the -s option
-
-echo &quot;Expanding the Scaladoc for other bundled modules&quot;
-# treat scala-actors separately because it&apos;s not cross-versioned
-ssh scalatest@chara &quot;(set -x; cd $archivesDir &amp;&amp; mkdir -p api/$version/scala-actors &amp;&amp; unzip \$(find api/$version/jars -name &apos;scala-actors-2.11*javadoc.jar&apos; -o -name scala-actors-${version}-javadoc.jar) -d api/$version/scala-actors;)&quot;
-
-modules=&quot;scala-actors-migration scala-continuations-library scala-parser-combinators scala-swing scala-xml&quot;
-for m in $modules; do 
-ssh scalatest@chara &quot;(set -x; cd $archivesDir &amp;&amp; mkdir -p api/$version/$m &amp;&amp; unzip \$(find api/$version/jars -name ${m}_&apos;*javadoc.jar&apos; -o -name ${m}-${version}-javadoc.jar) -d api/$version/$m;)&quot;
-done
-
-echo &quot;Symlinking api/$version to api/2.11.x.&quot;
-
-ssh scalatest@chara &quot;cd $archivesDir/api/ ; [[ -d $version ]] &amp;&amp; ln -sfn $version 2.11.x&quot;
-</command>
+      <command><%= @jobShellBlurb %></command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

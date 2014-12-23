@@ -75,17 +75,7 @@ e.g. 2.10.3-RC2</description>
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>#!/bin/bash -ex
-
-# the standard way of getting the jenkins-scripts directory -- do not change!
-if [[ -d jenkins-scripts ]]; then
-  ( cd jenkins-scripts &amp;&amp; git fetch $scriptsRemote HEAD &amp;&amp; git checkout -f FETCH_HEAD &amp;&amp; git clean -fxd )
-else
-  git clone $scriptsRemote
-fi
-# done getting jenkins-scripts
-
-./jenkins-scripts/job/$JOB_NAME</command>
+      <command><%= @jobShellBlurb %></command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

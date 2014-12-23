@@ -96,35 +96,7 @@ The downloads will be available at http://downloads.typesafe.com/scala/$ver/scal
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>#!C:/cygwin/bin/bash -ex
-
-# sbtDistTarget must be supplied
-# sbtDistVersionOverride may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)
-# sbtLauncher is a global jenkins configuration variable
-repositoriesFile="$WORKSPACE/conf/repositories"
-
-echo "Using repo config:"
-cat "$(/usr/bin/cygpath --unix $repositoriesFile)"
-
-tags="$(git tag --points-at HEAD)"
-
-# version is set by the scala-release-2.11.x-dist build flow, make sure it's consistent with the tag
-# this is also a backstop for https://github.com/sbt/sbt-git/issues/35
-# ignore when there is no version (job is running outside of the flow)
-[[ -z $sbtDistVersionOverride ]] && [[ -n $version ]] && if [ "$tags" != "v$version" ]; then
-  echo "Inconsistent tag/version combo detected. Abort-abort."
-  exit 255
-fi
-
-rm -rf "$(/usr/bin/cygpath --unix $WORKSPACE/.ivy2)"
-
-# want full control over sbt, so invoke the launcher directly
-java $JAVA_OPTS -Dsbt.log.noformat=true -Dsbt.ivy.home=$WORKSPACE/.ivy2 \
-  -Dsbt.override.build.repos=true -Dsbt.repository.config="$repositoriesFile" \
-  -jar $sbtLauncher \
-  $sbtDistVersionOverride \
-  clean update $sbtDistTarget
-</command>
+      <command><%= @jobShellBlurbWindows %></command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
