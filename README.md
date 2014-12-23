@@ -190,6 +190,11 @@ knife vault create worker-publish s3-downloads \
   '{"user":"XXX","pass":"XXX"}' \
   --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish' \
   --admins adriaan
+
+knife vault create worker-publish chara-keypair \
+  --json chara-keypair.json \
+  --search 'name:jenkins-worker-linux-publish' \
+  --admins adriaan
 ```
 
 
