@@ -30,7 +30,7 @@ linuxBlurb = <<-EOH.gsub(/^ {2}/, '')
 EOH
 
 
-%w(scala-release-2.11.x-dist scala-release-2.11.x-scala-lang scala-release-2.11.x-smoketest scala-release-2.11.x-unix scala-release-2.11.x-windows scala-release-2.11.x scala-release-scala-lang-update-current).each do |name|
+%w(scala-release-2.11.x scala-release-2.11.x-build scala-release-2.11.x-unix scala-release-2.11.x-windows scala-release-2.11.x-smoketest scala-release-2.11.x-scala-lang scala-release-scala-lang-update-current).each do |name|
   xml = File.join(Chef::Config[:file_cache_path], "#{name}.xml")
 
   template xml do

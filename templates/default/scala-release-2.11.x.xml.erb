@@ -1,123 +1,20 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<project>
+<com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
   <actions/>
-  <description>This job publishes a Scala distribution to maven using https://github.com/scala/jenkins-scripts/blob/master/job/scala-release-2.11.x.&#xd;
-It builds locker and uses it to build and publish the required modules&#xd;
-as well as the Scala compiler/library for this release,&#xd;
-and generates an updated versions.properties that captures the modules/STARR used.&#xd;
-&#xd;
+  <description>Run as downstream job from scala-release-2.11.x.&#xd;
 &lt;p&gt;&#xd;
-This job is run nightly to build nightly releases (unless HEAD of scala/scala is tagged, on which it builds a release and stages it on sonatype).&#xd;
-  &#xd;
+Coordinates the build of a Scala distribution based on artifacts on maven (built by scala-release-2.11.x).&#xd;
+Downstream jobs: scala-release-2.11.x-[unix|windows|scala-lang].&#xd;
 &lt;p&gt;&#xd;
-On building a release, the remaining tasks are to close the staging repo (see https://github.com/adriaanm/binfu/blob/master/sonafu.sh for scripts),&#xd;
-possibly re-run the downstream scala-release-2.11.x-dist job once all external artifacts are in place (akka-actor), and send out some emails.&#xd;
-&#xd;
-&lt;p&gt;&#xd;
-Use github.com/scala/make-release-notes to build the release notes.&#xd;
-&#xd;
-</description>
+Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ &lt;br&gt;&#xd;
+  Regular ones to http://www.scala-lang.org/files/archive/</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
-          <name>SCALA_REF</name>
-          <description>The git ref at scala/scala to build. If it&apos;s tagged, a release will be built.</description>
-          <defaultValue>2.11.x</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_VER_BASE</name>
-          <description>Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version),
-a -nightly release is built.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_VER_SUFFIX</name>
-          <description>Empty for a final release, otherwise, e.g., -RC1 for the first RC or -M3 for the third milestone. (Will be parsed from the tag on SCALA_REF, if any.)</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_BINARY_VER</name>
-          <description>For binary compatible releases (such as 2.11.0 and 2.11.1), the short binary version (e.g. 2.11). Otherwise, the full Scala version.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_FULL_VER</name>
-          <description>For non-snapshot releases, the scala version, otherwise the closest scala version that&apos;s a valid binary version.
-Used to cross-version the scala continuations plugin.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>scriptsRemote</name>
-          <description>To try a different release script.</description>
-          <defaultValue>https://github.com/scala/jenkins-scripts.git</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>XML_VER</name>
-          <description>The version to build for scala-xml. If the version already exists, it won&apos;t be published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PARSERS_VER</name>
-          <description>The version to build for scala-parser-combinators. If the version already exists, it won&apos;t be published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>CONTINUATIONS_VER</name>
-          <description>The version to build for scala-continuations-plugin and -library. The plugin will be cross-versioned with SCALA_FULL_VER.
-If the version already exists, it won&apos;t be published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SWING_VER</name>
-          <description>The version to build for scala-swing. If the version already exists, it won&apos;t be published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>ACTORS_MIGRATION_VER</name>
-          <description>The version to build for scala-partest. If the version already exists, it won&apos;t be published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PARTEST_VER</name>
-          <description>The version to build for scala-partest. If the version already exists, it won&apos;t be published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALACHECK_VER</name>
-          <description>The version to build for scalacheck. Not published.
-If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;).</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>AKKA_ACTOR_VER</name>
-          <description>The version of akka-actors to include in scala-library-all.pom.
-NOTE: the release script will NOT build akka, the version specified here needs to be released already.
-If empty, it will be parsed from versions.properties.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>JLINE_VER</name>
-          <description>The version of jline to use for building the Scala project.
-NOTE: the release script will NOT build jline, the version specified here needs to be released already.
-If empty, it will be parsed from versions.properties.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>moduleVersioning</name>
-          <description>Set to anything but &quot;versions.properties&quot; to build the latest HEAD for all modules.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>publishToSonatype</name>
-          <description>Set to anything but &quot;yes&quot; to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published.</description>
+          <name>version</name>
+          <description>version of Scala to build a distribution for, there must be a corresponding &quot;v$version&quot; tag in scala/scala-dist,&lt;br&gt;and a &quot;org.scala-lang&quot; : &quot;scala-dist&quot; : $version artifact on maven</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -128,78 +25,35 @@ If empty, it will be parsed from versions.properties.</description>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.2">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
-      <categories/>
       <throttleEnabled>false</throttleEnabled>
       <throttleOption>project</throttleOption>
-      <configVersion>1</configVersion>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <url>git://github.com/scala/scala.git</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name>${SCALA_REF}</name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
-    <extensions>
-      <hudson.plugins.git.extensions.impl.CleanCheckout/>
-      <hudson.plugins.git.extensions.impl.WipeWorkspace/>
-    </extensions>
-  </scm>
-  <assignedNode>publish</assignedNode>
-  <canRoam>false</canRoam>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers>
-    <hudson.triggers.TimerTrigger>
-      <spec>@midnight</spec>
-    </hudson.triggers.TimerTrigger>
-  </triggers>
-  <concurrentBuild>true</concurrentBuild>
-  <builders>
-    <hudson.tasks.Shell>
-      <command><%= @jobShellBlurb %></command>
-    </hudson.tasks.Shell>
-  </builders>
-  <publishers>
-    <hudson.tasks.ArtifactArchiver>
-      <artifacts>scala/versions.properties,logs/**</artifacts>
-      <allowEmptyArchive>false</allowEmptyArchive>
-      <onlyIfSuccessful>false</onlyIfSuccessful>
-      <fingerprint>false</fingerprint>
-      <defaultExcludes>true</defaultExcludes>
-    </hudson.tasks.ArtifactArchiver>
-    <hudson.tasks.Mailer plugin="mailer@1.11">
-      <recipients>adriaan@typesafe.com</recipients>
-      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
-      <sendToIndividuals>false</sendToIndividuals>
-    </hudson.tasks.Mailer>
-    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.24">
-      <configs>
-        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
-            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <propertiesFile>jenkins.properties</propertiesFile>
-              <failTriggerOnMissing>false</failTriggerOnMissing>
-              <useMatrixChild>false</useMatrixChild>
-              <onlyExactRuns>false</onlyExactRuns>
-            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-          </configs>
-          <projects>scala-release-2.11.x-dist</projects>
-          <condition>SUCCESS</condition>
-          <triggerWithNoParameters>false</triggerWithNoParameters>
-        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-      </configs>
-    </hudson.plugins.parameterizedtrigger.BuildTrigger>
-  </publishers>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders/>
+  <publishers/>
   <buildWrappers/>
-</project>
+  <icon/>
+  <dsl>ver = params[&quot;version&quot;]
+build.setDisplayName(&quot;Scala distribution ${ver} [${build.number}]&quot;)
+
+if (params.dist_ref) downParams = params
+else downParams = params + [ &apos;dist_ref&apos; : &quot;v$ver&quot; ]
+
+parallel (
+    { build(downParams, &quot;scala-release-2.11.x-unix&quot;) },
+    { build(downParams, &quot;scala-release-2.11.x-windows&quot;) }
+)
+
+parallel (
+    { build(downParams, &quot;scala-release-2.11.x-scala-lang&quot;) },
+    { build(downParams, &quot;scala-release-2.11.x-smoketest&quot;) }
+)
+</dsl>
+</com.cloudbees.plugins.flow.BuildFlow>
