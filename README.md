@@ -185,6 +185,11 @@ knife vault create worker-publish private-repo \
   '{"user":"XXX","pass":"XXX"}' \
   --search 'name:jenkins-worker-linux-publish' \
   --admins adriaan
+
+knife vault create worker-publish s3-downloads \
+  '{"user":"XXX","pass":"XXX"}' \
+  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish' \
+  --admins adriaan
 ```
 
 
@@ -195,6 +200,7 @@ knife vault update master github-api            --search 'name:jenkins-master'
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
 knife vault update worker-publish sonatype      --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish private-repo  --search 'name:jenkins-worker-linux-publish'
+knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish'
 ```
 
 ### Add run-list items that need the vault

@@ -30,7 +30,8 @@ end
 { "#{jenkinsHome}/.ivy2/.credentials-private-repo" => "ivy2-credentials-private-repo.erb",
   "#{jenkinsHome}/.ivy2/.credentials"              => "ivy2-credentials.erb",
   "#{jenkinsHome}/.m2/settings.xml"                => "m2-settings.xml.erb",
-  "#{jenkinsHome}/.sonatype-curl"                  => "sonatype-curl.erb"
+  "#{jenkinsHome}/.sonatype-curl"                  => "sonatype-curl.erb",
+  "#{jenkinsHome}/.s3credentials"                  => "s3credentials.erb"
 }.each do |target, templ|
   template target do
     source templ
@@ -41,7 +42,9 @@ end
       :sonatypePass    => ChefVault::Item.load("worker-publish", "sonatype")['pass'],
       :sonatypeUser    => ChefVault::Item.load("worker-publish", "sonatype")['user'],
       :privateRepoPass => ChefVault::Item.load("worker-publish", "private-repo")['pass'],
-      :privateRepoUser => ChefVault::Item.load("worker-publish", "private-repo")['user']
+      :privateRepoUser => ChefVault::Item.load("worker-publish", "private-repo")['user'],
+      :s3DownloadsPass => ChefVault::Item.load("worker-publish", "s3-downloads")['pass'],
+      :s3DownloadsUser => ChefVault::Item.load("worker-publish", "s3-downloads")['user']
     })
   end
 end

@@ -29,6 +29,21 @@ ruby_block 'set private key' do
   end
 end
 
+{
+  "/.s3credentials"                  => "s3credentials.erb"
+}.each do |target, templ|
+  template target do
+    source templ
+    # user node['jenkins']['master']['user']
+    # group node['jenkins']['master']['group']
+
+    variables({
+      :s3DownloadsPass => ChefVault::Item.load("worker-publish", "s3-downloads")['pass'],
+      :s3DownloadsUser => ChefVault::Item.load("worker-publish", "s3-downloads")['user']
+    })
+  end
+end
+
 # if you specify a user, must also specify a password!! by default, runs under the LocalSystem account (no password needed)
 # this is the only type of slave that will work on windows (the jnlp one does not launch automatically)
 jenkins_windows_slave 'windows' do
