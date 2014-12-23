@@ -7,7 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-node.set["worker"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launcher.jar") # from chef-sbt cookbook
+node.set["worker"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
 node.set["worker"]["env"]["sbtCmd"]      = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
 
 

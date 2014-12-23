@@ -14,7 +14,7 @@ node.set['sbt']['script_name']   = 'sbt.bat'
 node.set['sbt']['launcher_path'] = 'C:/sbt'
 node.set['sbt']['bin_path']      = 'C:/sbt'
 
-node.set["worker"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launcher.jar") # from chef-sbt cookbook
+node.set["worker"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
 node.set["worker"]["env"]["WIX"]         = node["wix"]["home"]
 
 
