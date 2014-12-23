@@ -96,12 +96,12 @@ The downloads will be available at http://downloads.typesafe.com/scala/$ver/scal
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>#!C:/cygwin64/bin/bash -ex
+      <command>#!C:/cygwin/bin/bash -ex
 
 # sbtDistTarget must be supplied
 # sbtDistVersionOverride may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)
 # sbtLauncher is a global jenkins configuration variable
-repositoriesFile="$WORKSPACE/jenkins-scripts/repositories-scala-release"
+repositoriesFile="$WORKSPACE/conf/repositories"
 
 echo "Using repo config:"
 cat "$(/usr/bin/cygpath --unix $repositoriesFile)"

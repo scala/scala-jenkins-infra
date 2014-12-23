@@ -111,8 +111,10 @@ current linux (master/worker): ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HV
 
 
 ## Bootstrap
-NOTE: name is important (used to allow access to vault etc)
-it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
+NOTE:
+
+  - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
+  - can't access the vault on bootstrap (see After bootstrap below)
 
 
 ```
@@ -126,28 +128,24 @@ knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-windows, worker-windows-agent"
+   --run-list "scala-jenkins-infra::worker-windows"
 
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
+   --run-list "scala-jenkins-infra::worker-linux"
 ```
 
 
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
 
-```
-knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers"
-
-```
-
 
 # Configuring the jenkins cluster
 
-## Secure data
+
+## Secure data (one-time setup, can be done before bootstrap)
 https://github.com/settings/applications/new -->
  - Authorization callback URL = http://ec2-54-67-28-42.us-west-1.compute.amazonaws.com:8080/securityRealm/finishLogin
 
@@ -189,14 +187,29 @@ knife vault create worker-publish private-repo \
   --admins adriaan
 ```
 
-### Updating the vaults so new nodes may access them:
 
+## After bootstrap (or when nodes are added)
+### Update access to vault
 ```
 knife vault update master github-api            --search 'name:jenkins-master'
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
 knife vault update worker-publish sonatype      --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish private-repo  --search 'name:jenkins-worker-linux-publish'
 ```
+
+### Add run-list items that need the vault
+```
+knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers"
+knife node run_list add jenkins-worker-windows "scala-jenkins-infra::worker-windows-agent"
+knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-publish"
+```
+
+### Re-run chef manually
+
+- windows: `knife winrm $IP chef-client -m -P $PASS`
+- ubuntu:  `ssh ubuntu@$IP -i chef.pem sudo chef-client`
+- amazon linux: `ssh ec2-user@$IP -i chef.pem`, and then `sudo chef-client`
+
 
 # Misc
 
@@ -211,11 +224,6 @@ knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worke
 knife node run_list set jenkins-worker-linux-publish "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
 ``` 
 
-## Run chef manually
-
-- windows: `knife winrm $IP chef-client -m -P $PASS`
-- ubuntu:  `ssh ubuntu@$IP -i chef.pem sudo chef-client`
-- amazon linux: `ssh ec2-user@$IP -i chef.pem`, and then `sudo chef-client`
 
 ## If the bootstrap didn't work at first, complete:
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
