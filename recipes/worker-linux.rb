@@ -17,6 +17,10 @@ include_recipe "git"
 include_recipe "chef-sbt" # TODO: remove, redundant with sbt-extras, but the latter won't work on windows
 include_recipe "sbt-extras"
 
+%w{ant}.each do |pkg|
+  package pkg
+end
+
 user "jenkins" do
   home "/home/jenkins"
 end
