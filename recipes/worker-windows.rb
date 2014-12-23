@@ -16,7 +16,7 @@ node.set['sbt']['bin_path']      = 'C:/sbt'
 
 node.set["worker"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
 node.set["worker"]["env"]["WIX"]         = node["wix"]["home"]
-
+node.set["worker"]["env"]["PATH"]        = "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin" # TODO link to JAVA_HOME
 
 # needed for other stuff (install ruby etc)
 include_recipe 'aws'
@@ -28,7 +28,6 @@ include_recipe "git"
 include_recipe "chef-sbt"
 
 include_recipe "cygwin"
-
 
 # ??? must come later or it won't find ruby.exe, which is installed by git?
 include_recipe "wix"
