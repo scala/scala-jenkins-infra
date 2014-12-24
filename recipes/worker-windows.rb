@@ -14,7 +14,7 @@ include_recipe 'aws'
 include_recipe 'windows'
 
 # it's the includes that actually cause these recipes to contribute to the run list
-include_recipe "java"
+include_recipe "java" # TODO detect when java is installed correctly and skip (to make this "idempotent")
 include_recipe "git"
 include_recipe "chef-sbt"
 
