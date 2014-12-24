@@ -18,6 +18,8 @@ include_recipe "java"
 include_recipe "git"
 include_recipe "chef-sbt"
 
+node.set["worker"]["env"]["JAVA_HOME"] = node['java']['java_home']
+
 ruby_block 'Add Embedded Bin Path' do
   block do
     ENV['PATH'] += ';C:/opscode/chef/embedded/bin'
