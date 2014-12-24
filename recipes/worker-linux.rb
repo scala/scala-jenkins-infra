@@ -9,6 +9,11 @@
 
 jenkinsHome = "/home/jenkins"
 
+# TODO: rework attribute setting...
+node.set['java']['jdk_version']    = '6'
+node.set['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
+node.set['java']['oracle']['accept_oracle_download_terms'] = true
+
 # it's the includes that actually cause these recipes to contribute to the run list
 include_recipe "java"
 
