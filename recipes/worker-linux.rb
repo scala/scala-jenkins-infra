@@ -20,6 +20,7 @@ node.set["worker"]["env"]["sbtLauncher"]  = File.join(node['sbt']['launcher_path
 node.set["worker"]["env"]["sbtCmd"]       = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
 node.set["worker"]["env"]["sshCharaArgs"] = "(\"scalatest@chara.epfl.ch\" \"-i\" \"#{jenkinsHome}/.ssh/for_chara\")"
 node.set["worker"]["env"]["JAVA_HOME"]    = node['java']['java_home'] # we get the jre if we don't do this
+node.set["worker"]["labels"]              = ["linux"]
 
 %w{ant}.each do |pkg|
   package pkg

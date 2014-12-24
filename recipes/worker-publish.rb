@@ -9,6 +9,8 @@
 chef_gem "chef-vault"
 require "chef-vault"
 
+node.set["worker"]["labels"] = node["worker"]["labels"] + ["publish"]
+
 jenkinsHome = "/home/jenkins"
 
 file "#{jenkinsHome}/.ssh/authorized_keys" do

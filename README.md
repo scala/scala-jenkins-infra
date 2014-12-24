@@ -210,7 +210,7 @@ knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-wi
 
 ### Add run-list items that need the vault
 ```
-knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers"
+knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers,scala-jenkins-infra::master-jobs"
 knife node run_list add jenkins-worker-windows "scala-jenkins-infra::worker-windows-agent"
 knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-publish"
 ```

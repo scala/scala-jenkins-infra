@@ -30,8 +30,7 @@ search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
     host    worker.ipaddress
     credentials '954dd564-ce8c-43d1-bcc5-97abffc81c54' # must use id (groovy script fails otherwise)
 
-    # TODO filter tags that don't start with "jenkins-worker-"
-    labels worker.tags.map{|t| t.tap{|s| s.slice!("jenkins-worker-"); s}} + ["linux"]
+    labels worker["worker"]["labels"]
 
     executors 2
 
