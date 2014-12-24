@@ -144,7 +144,7 @@ If empty, it will be parsed from versions.properties.</description>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>versions.properties,logs/**</artifacts>
+      <artifacts>versions.properties,jenkins.properties,logs/**</artifacts>
       <allowEmptyArchive>false</allowEmptyArchive>
       <onlyIfSuccessful>false</onlyIfSuccessful>
       <fingerprint>false</fingerprint>

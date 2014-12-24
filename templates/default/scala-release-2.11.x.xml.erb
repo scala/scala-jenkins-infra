@@ -50,8 +50,13 @@ else buildParams = params + [ &apos;repo_ref&apos; : &quot;v$ver&quot; ]
 
 buildRun = build(buildParams, &quot;scala-release-2.11.x-build&quot;)
 
+upstreamBuild = buildRun.build
+// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;scala-release-2.11.x-build&quot;}.builds[0]
+// defines repo_ref, version, sbtDistVersionOverride
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == &quot;jenkins.properties&quot;}
+
 buildVersionProps = new java.util.Properties()
-buildVersionProps.load(new java.io.FileInputStream(buildRun.build.artifacts[0].file))
+buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
 testParams = buildParams + buildVersionProps
 
