@@ -3,7 +3,7 @@
   <actions/>
   <description>Run as part of the scala-release-2.11.x-dist flow.&#xd;
 &lt;br/&gt;&#xd;
-It runs the program in https://github.com/scala/scala-dist-smoketest/tree/${dist_ref} to make sure all JARs&#xd;
+It runs the program in https://github.com/scala/scala-dist-smoketest/tree/${repo_ref} to make sure all JARs&#xd;
 of the distribution contain classfiles.&#xd;
 &lt;br/&gt;&#xd;
 It downloads the archives for a Scala release from http://downloads.typesafe.com/scala/$version/index.html&#xd;
@@ -13,7 +13,7 @@ and makes sure the bundled scripts work.&#xd;
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <%= scmParams("scala", "scala-dist", "2.11.x") %>
+        <%= scmParams("scala", "scala-dist-smoketest", "2.11.x") %>
         <hudson.model.StringParameterDefinition>
           <name>sbtDistVersionOverride</name>
           <description></description>
