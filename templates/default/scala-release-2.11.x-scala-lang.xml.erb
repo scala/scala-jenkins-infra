@@ -15,6 +15,7 @@ Also expands api docs for library, reflect, compiler and other modules to http:/
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <%= scmParams("scala", "scala-dist", "2.11.x") %>
         <hudson.model.StringParameterDefinition>
           <name>version</name>
           <description>the version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2</description>
@@ -29,7 +30,7 @@ Also expands api docs for library, reflect, compiler and other modules to http:/
       <throttleOption>project</throttleOption>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.scm.NullSCM"/>
+  <%= scmBlurb %>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>

@@ -12,6 +12,8 @@ Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ 
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
+        <%= scmUserParam("scala") %>
+        <%= scmRefParam("2.11.x") %>
         <hudson.model.StringParameterDefinition>
           <name>version</name>
           <description>version of Scala to build a distribution for, there must be a corresponding &quot;v$version&quot; tag in scala/scala-dist,&lt;br&gt;and a &quot;org.scala-lang&quot; : &quot;scala-dist&quot; : $version artifact on maven</description>
@@ -43,17 +45,24 @@ Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ 
   <dsl>ver = params[&quot;version&quot;]
 build.setDisplayName(&quot;Scala distribution ${ver} [${build.number}]&quot;)
 
-if (params.dist_ref) downParams = params
-else downParams = params + [ &apos;dist_ref&apos; : &quot;v$ver&quot; ]
+if (params.repo_ref) buildParams = params
+else buildParams = params + [ &apos;repo_ref&apos; : &quot;v$ver&quot; ]
+
+buildRun = build(buildParams, &quot;scala-release-2.11.x-build&quot;)
+
+buildVersionProps = new java.util.Properties()
+buildVersionProps.load(new java.io.FileInputStream(buildRun.build.artifacts[0].file))
+
+testParams = buildParams + buildVersionProps
 
 parallel (
-    { build(downParams, &quot;scala-release-2.11.x-unix&quot;) },
-    { build(downParams, &quot;scala-release-2.11.x-windows&quot;) }
+    { build(testParams, &quot;scala-release-2.11.x-unix&quot;) },
+    { build(testParams, &quot;scala-release-2.11.x-windows&quot;) }
 )
 
-parallel (
-    { build(downParams, &quot;scala-release-2.11.x-scala-lang&quot;) },
-    { build(downParams, &quot;scala-release-2.11.x-smoketest&quot;) }
-)
+build(testParams, &quot;scala-release-2.11.x-smoketest&quot;)
+
+build(testParams, &quot;scala-release-2.11.x-scala-lang&quot;)
+
 </dsl>
 </com.cloudbees.plugins.flow.BuildFlow>

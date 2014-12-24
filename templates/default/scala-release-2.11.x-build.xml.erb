@@ -21,11 +21,7 @@ Use github.com/scala/make-release-notes to build the release notes.&#xd;
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_REF</name>
-          <description>The git ref at scala/scala to build. If it&apos;s tagged, a release will be built.</description>
-          <defaultValue>2.11.x</defaultValue>
-        </hudson.model.StringParameterDefinition>
+        <%= scmParams("scala", "scala", "2.11.x") %>
         <hudson.model.StringParameterDefinition>
           <name>SCALA_VER_BASE</name>
           <description>Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version),
@@ -47,11 +43,6 @@ a -nightly release is built.</description>
           <description>For non-snapshot releases, the scala version, otherwise the closest scala version that&apos;s a valid binary version.
 Used to cross-version the scala continuations plugin.</description>
           <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>scriptsRemote</name>
-          <description>To try a different release script.</description>
-          <defaultValue>https://github.com/scala/jenkins-scripts.git</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>XML_VER</name>
@@ -134,25 +125,7 @@ If empty, it will be parsed from versions.properties.</description>
       <configVersion>1</configVersion>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <url>git://github.com/scala/scala.git</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name>${SCALA_REF}</name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
-    <extensions>
-      <hudson.plugins.git.extensions.impl.CleanCheckout/>
-      <hudson.plugins.git.extensions.impl.WipeWorkspace/>
-    </extensions>
-  </scm>
+  <%= scmBlurb %>
   <assignedNode>publish</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
@@ -166,7 +139,7 @@ If empty, it will be parsed from versions.properties.</description>
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command><%= @jobShellBlurb %></command>
+      <command><%= jobShellBlurb %></command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -182,24 +155,6 @@ If empty, it will be parsed from versions.properties.</description>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
-    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.24">
-      <configs>
-        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-          <configs>
-            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
-            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <propertiesFile>jenkins.properties</propertiesFile>
-              <failTriggerOnMissing>false</failTriggerOnMissing>
-              <useMatrixChild>false</useMatrixChild>
-              <onlyExactRuns>false</onlyExactRuns>
-            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
-          </configs>
-          <projects>scala-release-2.11.x-dist</projects>
-          <condition>SUCCESS</condition>
-          <triggerWithNoParameters>false</triggerWithNoParameters>
-        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-      </configs>
-    </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers/>
 </project>

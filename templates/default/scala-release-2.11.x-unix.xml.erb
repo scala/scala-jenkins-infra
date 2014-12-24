@@ -19,21 +19,7 @@ The downloads will be available at http://downloads.typesafe.com/scala/$ver/scal
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>dist_ref</name>
-          <description>The git ref in scala/scala-dist to use for building the release. Should be the same as the tag used for scala/scala. It usually looks like v2.10.1, or v2.11.0-M3.</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>dist_remote</name>
-          <description></description>
-          <defaultValue>git://github.com/scala/scala-dist.git</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>scriptsRemote</name>
-          <description></description>
-          <defaultValue>https://github.com/scala/jenkins-scripts.git</defaultValue>
-        </hudson.model.StringParameterDefinition>
+        <%= scmParams("scala", "scala-dist", "2.11.x") %>
         <hudson.model.StringParameterDefinition>
           <name>sbtDistTarget</name>
           <description>To upload to S3, use s3-upload
@@ -60,25 +46,7 @@ A dry run (everything but uploading to S3): s3Upload::mappings</description>
       <configVersion>1</configVersion>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <name>origin</name>
-        <url>${dist_remote}</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name>${dist_ref}</name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
-    <extensions>
-      <hudson.plugins.git.extensions.impl.CleanCheckout/>
-    </extensions>
-  </scm>
+  <%= scmBlurb %>
   <assignedNode>publish</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
