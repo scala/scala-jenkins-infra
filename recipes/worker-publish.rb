@@ -33,11 +33,11 @@ end
   end
 end
 
-{ "#{jenkinsHome}/.ivy2/.credentials-private-repo" => "ivy2-credentials-private-repo.erb",
-  "#{jenkinsHome}/.ivy2/.credentials"              => "ivy2-credentials.erb",
-  "#{jenkinsHome}/.m2/settings.xml"                => "m2-settings.xml.erb",
-  "#{jenkinsHome}/.sonatype-curl"                  => "sonatype-curl.erb",
-  "#{jenkinsHome}/.s3credentials"                  => "s3credentials.erb"
+{ "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
+  "#{jenkinsHome}/.credentials"              => "credentials.erb",
+  "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
+  "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
+  "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb"
 }.each do |target, templ|
   template target do
     source templ
