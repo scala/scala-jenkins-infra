@@ -9,18 +9,14 @@
 chef_gem "chef-vault"
 require "chef-vault"
 
-node.set["worker"]["labels"] = node["worker"]["labels"] + ["publish"]
+jenkinsHome = "/home/jenkins-priv"
+jenkinsUser = "jenkins-priv"
 
-jenkinsHome = "/home/jenkins"
-
-file "#{jenkinsHome}/.ssh/authorized_keys" do
-  owner 'jenkins'
-  mode '644'
-  content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] #.join("\n")
-end
+node.set["jenkinsHomes"][jenkinsHome]["labels"] = node["jenkinsHomes"][jenkinsHome]["labels"] + ["publish"]
+node.set["jenkinsHomes"][jenkinsHome]["env"]["sshCharaArgs"] = "(\"scalatest@chara.epfl.ch\" \"-i\" \"#{jenkinsHome}/.ssh/for_chara\")"
 
 file "#{jenkinsHome}/.ssh/for_chara" do
-  owner 'jenkins'
+  owner jenkinsUser
   mode '600'
   content ChefVault::Item.load("worker-publish", "chara-keypair")['private_key']
 end
@@ -30,8 +26,7 @@ end
 # (this is why I have the redundant #{jenkinsHome}/.sbt/0.13)
 ["#{jenkinsHome}/.ivy2", "#{jenkinsHome}/.m2", "#{jenkinsHome}/.sbt/0.13", "#{jenkinsHome}/.sbt/0.13/plugins/"].each do |dir|
   directory dir do
-    user node['jenkins']['master']['user']
-    group node['jenkins']['master']['group']
+    user jenkinsUser
     recursive true
   end
 end
@@ -44,8 +39,7 @@ end
 }.each do |target, templ|
   template target do
     source templ
-    user node['jenkins']['master']['user']
-    group node['jenkins']['master']['group']
+    user jenkinsUser
 
     variables({
       :sonatypePass    => ChefVault::Item.load("worker-publish", "sonatype")['pass'],
@@ -60,8 +54,7 @@ end
 
 template "#{jenkinsHome}/.sbt/0.13/plugins/gpg.sbt" do
   source "sbt-0.13-plugins-gpg.sbt.erb"
-  user node['jenkins']['master']['user']
-  group node['jenkins']['master']['group']
+  user jenkinsUser
 end
 
 %w{zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|

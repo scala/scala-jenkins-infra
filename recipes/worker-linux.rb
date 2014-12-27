@@ -6,8 +6,9 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+chef_gem "chef-vault"
+require "chef-vault"
 
-jenkinsHome = "/home/jenkins"
 
 # TODO: rework attribute setting...
 node.set['java']['jdk_version']    = '6'
@@ -21,33 +22,51 @@ include_recipe "git"
 include_recipe "chef-sbt" # TODO: remove, redundant with sbt-extras, but the latter won't work on windows
 include_recipe "sbt-extras"
 
-node.set["worker"]["env"]["sbtLauncher"]  = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
-node.set["worker"]["env"]["sbtCmd"]       = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
-node.set["worker"]["env"]["sshCharaArgs"] = "(\"scalatest@chara.epfl.ch\" \"-i\" \"#{jenkinsHome}/.ssh/for_chara\")"
-node.set["worker"]["env"]["JAVA_HOME"]    = node['java']['java_home'] # we get the jre if we don't do this
-node.set["worker"]["labels"]              = ["linux"]
-
 %w{ant}.each do |pkg|
   package pkg
 end
 
-user "jenkins" do
-  home "/home/jenkins"
-end
+# TODO: factor out duplication
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["env"]["sbtCmd"]      = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["env"]["JAVA_HOME"]   = node['java']['java_home'] # we get the jre if we don't do this
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["executors"]          = 2
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["workerName"]         = "builder-ubuntu-priv"
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["labels"]             = ["linux"]
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["jenkinsUser"]        = "jenkins-priv"
 
-directory "/home/jenkins" do
-  owner "jenkins"
-  group "jenkins"
-  mode 00755
-  action :create
-end
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["env"]["sbtCmd"]      = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["env"]["JAVA_HOME"]   = node['java']['java_home'] # we get the jre if we don't do this
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["executors"]          = 2
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["workerName"]         = "builder-ubuntu-pub"
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["labels"]             = ["linux"]
+node.set["jenkinsHomes"]["/home/jenkins-pub"]["jenkinsUser"]        = "jenkins-pub"
 
-directory "/home/jenkins/.ssh" do
-  owner "jenkins"
-end
+node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
+  user workerConfig["jenkinsUser"] do
+    home jenkinsHome
+  end
 
-git_user 'jenkins' do
-  full_name   'Scala Jenkins'
-  email       'adriaan@typesafe.com'
-end
+  directory jenkinsHome do
+    owner workerConfig["jenkinsUser"]
+    group workerConfig["jenkinsUser"]
+    mode 00755
+    action :create
+  end
 
+  directory "#{jenkinsHome}/.ssh" do
+    owner workerConfig["jenkinsUser"]
+  end
+
+  file "#{jenkinsHome}/.ssh/authorized_keys" do
+    owner workerConfig["jenkinsUser"]
+    mode  '644'
+    content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] # TODO: distinct keypair for each jenkins user
+  end
+
+  git_user workerConfig["jenkinsUser"] do
+    full_name   'Scala Jenkins'
+    email       'adriaan@typesafe.com'
+  end
+end

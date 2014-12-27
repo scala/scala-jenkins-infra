@@ -22,16 +22,18 @@ jenkins_private_key_credentials 'jenkins' do # username == name of resource
 end
 
 search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
-  jenkins_ssh_slave 'builder-publish' do
-    host    worker.ipaddress
-    credentials '954dd564-ce8c-43d1-bcc5-97abffc81c54' # must use id (groovy script fails otherwise)
+  worker["jenkinsHomes"].each do |jenkinsHome, workerConfig|
+    jenkins_ssh_slave workerConfig["workerName"] do
+      host        worker.ipaddress
+      credentials '954dd564-ce8c-43d1-bcc5-97abffc81c54' # must use id (groovy script fails otherwise)
 
-    labels worker["worker"]["labels"]
+      labels      workerConfig["labels"]
 
-    executors 2
+      executors   workerConfig["executors"]
 
-    environment(node["master"]["env"].merge(worker["worker"]["env"]))
+      environment(node["master"]["env"].merge(workerConfig["env"]))
 
-    action [:create, :connect]
+      action [:create, :connect]
+    end
   end
 end

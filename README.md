@@ -9,7 +9,8 @@ This is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-yo
 brew cask install awscli cord
 ```
 
-# Create security group (ec2 firewall)
+# One-time EC2/IAM setup
+## Create security group (ec2 firewall)
 
 ```
 aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master" 
@@ -29,6 +30,19 @@ aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp -
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
 ```
 
+## Access role to allow chef to manage EBS volumes (not yet used)
+Based on http://domaintest001.com/aws-iam/
+
+```
+aws iam create-instance-profile --instance-profile-name JenkinsWorker
+# if you get syntax errors, check the policy doc URL
+aws iam create-role --role-name jenkins-worker-volumes --assume-role-policy-document file://~/git/scala-jenkins-infra/conf/ec2-role-trust-policy.json
+aws iam put-role-policy --role-name jenkins-worker-volumes --policy-name create-ebs-vol --policy-document file://~/git/scala-jenkins-infra/conf/ebs-create-vol.json
+aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker --role-name jenkins-worker-volumes
+```
+
+pass JenkinsWorker as the iam profile to knife bootstrap
+
 # Install chef/knife
 
 ```
@@ -37,37 +51,20 @@ eval "$(chef shell-init zsh)" # set up gem environment
 gem install knife-ec2 knife-windows knife-github-cookbooks chef-vault
 ```
 
-## Create chef.io organization 
-https://manage.chef.io/organizations/typesafe-scala
-
-download:
-  - user key
-  - org validation key
-  - knife config (knife.rb)
-
-### knife.rb
+## Get credentials for the typesafe-scala chef.io organization
 ```
-current_dir = File.dirname(__FILE__)
-log_level                :info
-log_location             STDOUT
-node_name                "adriaan"
-client_key               "#{current_dir}/config/adriaan.pem"
-validation_client_name   "typesafe-scala-validator"
-validation_key           "#{current_dir}/config/typesafe-scala-validator.pem"
-chef_server_url          "https://api.opscode.com/organizations/typesafe-scala"
-cache_type               'BasicFile'
-cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
-cookbook_path            ["#{current_dir}/cookbooks"]
-knife[:aws_credential_file] = "/Users/adriaan/.aws/credentials"
-knife[:aws_ssh_key_id] = 'chef' # the pem file name without the .pem extension and it has to be located in: ~/.ssh/ 
-
-knife[:vault_mode] = 'client'
+export CHEF_ORG="typesafe-scala"
 ```
+
+download from https://manage.chef.io/organizations/typesafe-scala:
+  - user key (to `.chef/config/#{ENV['USER']}.pem` -- name it like this to use the `.chef/knife.rb` in this repo)
+  - org validation key (to `.chef/config/#{ENV['CHEF_ORG']}-validator.pem`)
+
 ## Get cookbooks
 
 ```
-git init cookbooks
-cd cookbooks
+git init .chef/cookbooks
+cd .chef/cookbooks
 g commit --allow-empty -m"Initial" 
 ```
 
@@ -122,18 +119,19 @@ knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::master"
+   --run-list "scala-jenkins-infra::master, scala-jenkins-infra::master-proxy"
 
 knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
-   -G Windows --user-data userdata.txt --bootstrap-protocol winrm \
+   -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
    --run-list "scala-jenkins-infra::worker-windows"
 
 knife ec2 server create -N jenkins-worker-linux-publish \
-   --region us-west-1 --flavor t2.medium -I ami-b11b09f4 \
+   --region us-west-1 --flavor c3.xlarge -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
+   --user-data chef/userdata/ubuntu-publish-c3.xlarge \
    --run-list "scala-jenkins-infra::worker-linux"
 ```
 
@@ -205,6 +203,7 @@ knife vault update master github-api            --search 'name:jenkins-master'
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
 knife vault update worker-publish sonatype      --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish private-repo  --search 'name:jenkins-worker-linux-publish'
+knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish'
 ```
 
