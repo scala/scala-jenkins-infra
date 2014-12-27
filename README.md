@@ -211,7 +211,7 @@ knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-wi
 ```
 knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers,scala-jenkins-infra::master-jobs"
 knife node run_list add jenkins-worker-windows "scala-jenkins-infra::worker-windows-agent"
-knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-publish"
+knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-linux-homes,scala-jenkins-infra::worker-publish"
 ```
 
 ### Re-run chef manually
