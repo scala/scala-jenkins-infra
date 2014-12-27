@@ -29,6 +29,7 @@ ruby_block 'set private key' do
   end
 end
 
+# TODO: can we use an IAM instance profile? not urgent, but shouldn't run PR validation on windows until we separate this out
 {
   "/.s3credentials"                  => "s3credentials.erb"
 }.each do |target, templ|
