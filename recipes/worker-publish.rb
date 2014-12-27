@@ -15,18 +15,24 @@ jenkinsUser = "jenkins-priv"
 node.set["jenkinsHomes"][jenkinsHome]["labels"] = node["jenkinsHomes"][jenkinsHome]["labels"] + ["publish"]
 node.set["jenkinsHomes"][jenkinsHome]["env"]["sshCharaArgs"] = "(\"scalatest@chara.epfl.ch\" \"-i\" \"#{jenkinsHome}/.ssh/for_chara\")"
 
+# TODO: recursive doesn't set owner correctly (???), so list out all dirs explicitly
+["#{jenkinsHome}/.ssh", "#{jenkinsHome}/.ivy2", "#{jenkinsHome}/.m2", "#{jenkinsHome}/.sbt", "#{jenkinsHome}/.sbt/0.13", "#{jenkinsHome}/.sbt/0.13/plugins/"].each do |dir|
+  directory dir do
+    user jenkinsUser
+  end
+end
+
 file "#{jenkinsHome}/.ssh/for_chara" do
   owner jenkinsUser
   mode '600'
   content ChefVault::Item.load("worker-publish", "chara-keypair")['private_key']
 end
 
-
-# TODO: recursive doesn't set owner correctly (???), so list out all dirs explicitly
-["#{jenkinsHome}/.ivy2", "#{jenkinsHome}/.m2", "#{jenkinsHome}/.sbt", "#{jenkinsHome}/.sbt/0.13", "#{jenkinsHome}/.sbt/0.13/plugins/"].each do |dir|
-  directory dir do
-    user jenkinsUser
-  end
+execute 'accept chara host key' do
+  command "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"#{jenkinsHome}/.ssh/for_chara\" true"
+  user jenkinsUser
+  #
+  # not_if "grep -qs \"#{ChefVault::Item.load("worker-publish", "chara-keypair")['public_key']}\" #{jenkinsHome}/.ssh/known_hosts"
 end
 
 { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
