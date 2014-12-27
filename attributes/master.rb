@@ -1,4 +1,3 @@
-default['master']['auth']             = 'github'
 default['master']['github']['webUri'] = 'https://github.com/'
 default['master']['github']['apiUri'] = 'https://api.github.com'
 
