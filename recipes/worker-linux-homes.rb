@@ -21,7 +21,7 @@ node.set["jenkinsHomes"]["/home/jenkins-priv"]["env"]["sbtCmd"]      = File.join
 node.set["jenkinsHomes"]["/home/jenkins-priv"]["env"]["JAVA_HOME"]   = node['java']['java_home'] # we get the jre if we don't do this
 node.set["jenkinsHomes"]["/home/jenkins-priv"]["executors"]          = 2
 node.set["jenkinsHomes"]["/home/jenkins-priv"]["workerName"]         = "builder-ubuntu-priv"
-node.set["jenkinsHomes"]["/home/jenkins-priv"]["labels"]             = ["linux"]
+node.set["jenkinsHomes"]["/home/jenkins-priv"]["labels"]             = ["linux", "publish"]
 node.set["jenkinsHomes"]["/home/jenkins-priv"]["jenkinsUser"]        = "jenkins-priv"
 
 node.set["jenkinsHomes"]["/home/jenkins-pub"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook

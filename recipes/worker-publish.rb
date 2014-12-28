@@ -12,7 +12,6 @@ require "chef-vault"
 jenkinsHome = "/home/jenkins-priv"
 jenkinsUser = "jenkins-priv"
 
-node.set["jenkinsHomes"][jenkinsHome]["labels"] = node["jenkinsHomes"][jenkinsHome]["labels"] + ["publish"]
 node.set["jenkinsHomes"][jenkinsHome]["env"]["sshCharaArgs"] = "(\"scalatest@chara.epfl.ch\" \"-i\" \"#{jenkinsHome}/.ssh/for_chara\")"
 
 # TODO: recursive doesn't set owner correctly (???), so list out all dirs explicitly
