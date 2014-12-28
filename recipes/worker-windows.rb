@@ -8,13 +8,30 @@
 #
 
 # TODO: not idempotent (must stop jenkins slave service before re-installing jdk)
+# hacked around by not re-installing java when javac of the right version is found
 
 # needed for other stuff (install ruby etc)
+# it's the includes that actually cause these recipes to contribute to the run list
 include_recipe 'aws'
 include_recipe 'windows'
 
-# it's the includes that actually cause these recipes to contribute to the run list
-include_recipe "java" # TODO detect when java is installed correctly and skip (to make this "idempotent")
+def checkJavacVersion
+  javac = File.join(node['java']['java_home'], "bin", "javac.exe")
+  javacVersion = ""
+  if File.exists?(javac)
+    # http://stackoverflow.com/a/1666103/276895
+    IO.popen(javac+" -version 2>&1") do |pipe| # Redirection is performed using operators
+      pipe.sync = true
+      while str = pipe.gets
+        javacVersion = javacVersion + str # This is synchronous!
+      end
+    end
+  end
+  javacVersion.chop
+end
+
+include_recipe "java" if checkJavacVersion != node['java']['javacVersion']
+
 include_recipe "git"
 include_recipe "chef-sbt"
 

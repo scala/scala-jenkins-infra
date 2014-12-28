@@ -3,6 +3,7 @@ if platform_family?("windows")
   override['java']['windows']['package_name'] = 'Java(TM) SE Development Kit 6 (64-bit)'
   override['java']['windows']['url']          = 'https://dl.dropboxusercontent.com/u/12862572/jdk-6u45-windows-x64.exe'
   override['java']['windows']['checksum']     = '345059d5bc64275c1d8fdc03625d69c16d0c8730be1c152247f5f96d00b21b00'
+  override['java']['javacVersion']            = "javac 1.6.0_45" # we don't install if javac -version returns this string
 
   # must specify java_home on windows (issues with installer on reinstall if it's in program files)
   override['java']['java_home'] = 'C:\java\jdk-1.6'
