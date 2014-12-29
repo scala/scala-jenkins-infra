@@ -6,6 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+include_recipe 'chef-client::service'
 
 # TODO: rework attribute setting...
 node.set['java']['jdk_version']    = '6'

@@ -6,6 +6,9 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+include_recipe 'chef-client::service'
+
+
 chef_gem "chef-vault"
 require "chef-vault"
 
@@ -16,7 +19,6 @@ require "chef-vault"
     # listen_address: 0.0.0.0
     # port: 8080
     # endpoint: http://localhost:8080
-
 
 # The jenkins cookbook comes with a very simple java installer. If you need more
 #  complex java installs you are on your own.
