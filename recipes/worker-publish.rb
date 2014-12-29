@@ -43,6 +43,7 @@ end
   template target do
     source templ
     user jenkinsUser
+    sensitive true
 
     variables({
       :sonatypePass    => ChefVault::Item.load("worker-publish", "sonatype")['pass'],

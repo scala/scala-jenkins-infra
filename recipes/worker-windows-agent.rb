@@ -35,6 +35,7 @@ end
 }.each do |target, templ|
   template target do
     source templ
+    sensitive true
     # user node['jenkins']['master']['user']
     # group node['jenkins']['master']['group']
 
