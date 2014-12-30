@@ -45,16 +45,19 @@ end
   end
 end
 
-# if you specify a user, must also specify a password!! by default, runs under the LocalSystem account (no password needed)
-# this is the only type of slave that will work on windows (the jnlp one does not launch automatically)
-jenkins_windows_slave 'windows' do
-  labels  ['windows']
-  group   "Administrators"
-  tunnel  "#{jenkinsMaster.ipaddress}:" # specify tunnel that stays inside the VPC, needed to avoid going through the reverse proxy
+node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
+  # if you specify a user, must also specify a password!! by default, runs under the LocalSystem account (no password needed)
+  # this is the only type of slave that will work on windows (the jnlp one does not launch automatically)
+  jenkins_windows_slave workerConfig["workerName"] do
+    group   "Administrators"
+    tunnel  "#{jenkinsMaster.ipaddress}:" # specify tunnel that stays inside the VPC, needed to avoid going through the reverse proxy
 
-  executors 2
+    remote_fs   jenkinsHome
+    labels      workerConfig["labels"]
+    executors   workerConfig["executors"]
 
-  environment(node["master"]["env"].merge(node["worker"]["env"])) # TODO: factor out (can't configure jenkins global properties, so emulate at node-level using chef)
+    environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(node)))
 
-  action [:create, :connect, :online] # TODO: are both connect and online needed?
+    action [:create, :connect, :online] # TODO: are both connect and online needed?
+  end
 end

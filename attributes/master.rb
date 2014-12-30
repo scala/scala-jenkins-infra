@@ -20,6 +20,10 @@ default['master']['adminAddress'] = "adriaan@typesafe.com"
 default['master']['jenkinsUrl']   = "http://scala-ci.typesafe.com/"
 
 
-default['master']['env']["ANT_OPTS"]      = "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4"
-default['master']['env']["JAVA_OPTS"]     = "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4"
-default['master']['env']["prRepoUrl"]     = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
+default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
+  lambda{| node | Chef::Node::ImmutableMash.new({
+    "ANT_OPTS"  => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4",
+    "JAVA_OPTS" => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4",
+    "prRepoUrl" => "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
+  })}
+  EOH

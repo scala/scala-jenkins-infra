@@ -41,7 +41,7 @@ search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
       labels      workerConfig["labels"]
       executors   workerConfig["executors"]
 
-      environment(node["master"]["env"].merge(workerConfig["env"]))
+      environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(worker)))
 
       action [:create, :connect, :online]
     end

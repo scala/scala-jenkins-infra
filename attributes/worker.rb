@@ -22,38 +22,67 @@ when "windows"
   override['cygwin']['base']['checksum'] = "7f319644c0737895e6cea807087e4e79d117049b8f6ac3087ad3b03724653db9"
   override['cygwin']['installer']['url'] = "http://cygwin.com/setup-x86_64.exe"
 
+  # TODO: also derive PATH variable from attributes
+  ## Git is installed to Program Files (x86) on 64-bit machines and
+  ## 'Program Files' on 32-bit machines
+  ## PROGRAM_FILES = ENV['ProgramFiles(x86)'] || ENV['ProgramFiles']
+  ## GIT_PATH      = "#{ PROGRAM_FILES }\\Git\\Cmd"
 
-  # TODO: remove copy/paste, use jenkinsHomes structure as on linux
-  default["worker"]["env"]["sbtLauncher"] = 'C:\sbt\sbt-launch.jar' # from chef-sbt cookbook
-  default["worker"]["env"]["WIX"]         = 'C:\WIX' # wix
-  default["worker"]["env"]["PATH"]        = "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git/Cmd" # java, git cookbooks
-  default["worker"]["env"]["JAVA_HOME"]   = node['java']['java_home']
+  default["jenkinsHomes"]['C:\jenkins']["executors"]   = 2
+  default["jenkinsHomes"]['C:\jenkins']["workerName"]  = "windows"
+  default["jenkinsHomes"]['C:\jenkins']["labels"]      = ["windows"]
+  default["jenkinsHomes"]['C:\jenkins']["publish"]     = false
+  # can't marshall closures, but they sometimes need to be shipped, so encode as string, closing over `node`
+  default["jenkinsHomes"]['C:\jenkins']["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
+    lambda{| node | Chef::Node::ImmutableMash.new({
+      "PATH"         => "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git/Cmd", # TODO express in terms of attributes
+      "sbtLauncher"  => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
+      "WIX"          => node['wix']['home'],
+      "JAVA_HOME"    => node['java']['java_home']
+    })}
+    EOH
+
 when "debian", "rhel"
   override['java']['jdk_version']    = '6'
   override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
   override['java']['oracle']['accept_oracle_download_terms'] = true
 
-  # TODO: factor out duplication
+  default["jenkinsHomes"]["/home/jenkins-pub"]["executors"]   = 4
+  default["jenkinsHomes"]["/home/jenkins-pub"]["workerName"]  = "builder-ubuntu-pub"
+  default["jenkinsHomes"]["/home/jenkins-pub"]["labels"]      = ["linux"]
+  default["jenkinsHomes"]["/home/jenkins-pub"]["jenkinsUser"] = "jenkins-pub"
+  default["jenkinsHomes"]["/home/jenkins-pub"]["publish"]     = false
 
-  default["jenkinsHomes"]["/home/jenkins-pub"]["env"]["sbtLauncher"] = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
-  default["jenkinsHomes"]["/home/jenkins-pub"]["env"]["sbtCmd"]      = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
-  default["jenkinsHomes"]["/home/jenkins-pub"]["env"]["JAVA_HOME"]   = node['java']['java_home'] # we get the jre if we don't do this
-  default["jenkinsHomes"]["/home/jenkins-pub"]["executors"]          = 4
-  default["jenkinsHomes"]["/home/jenkins-pub"]["workerName"]         = "builder-ubuntu-pub"
-  default["jenkinsHomes"]["/home/jenkins-pub"]["labels"]             = ["linux"]
-  default["jenkinsHomes"]["/home/jenkins-pub"]["jenkinsUser"]        = "jenkins-pub"
-  default["jenkinsHomes"]["/home/jenkins-pub"]["publish"]            = false
+
+  # can't marshall closures, and this one needs to be shipped from worker to master
+  default["jenkinsHomes"]["/home/jenkins-pub"]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
+    lambda{| node | Chef::Node::ImmutableMash.new({
+      "sbtLauncher"  => File.join(node['sbt']['launcher_path'], "sbt-launch.jar"), # from chef-sbt cookbook
+      "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']), # sbt-extras
+      "JAVA_HOME"    => node['java']['java_home'] # we get the jre if we don't do this
+    })}
+    EOH
+
 
   # TODO: if node has tag "publish"
   # if node.tags ...
-    default["jenkinsHomes"]["/home/jenkins-priv"]["env"]["sbtLauncher"]  = File.join(node['sbt']['launcher_path'], "sbt-launch.jar") # from chef-sbt cookbook
-    default["jenkinsHomes"]["/home/jenkins-priv"]["env"]["sbtCmd"]       = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
-    default["jenkinsHomes"]["/home/jenkins-priv"]["env"]["JAVA_HOME"]    = node['java']['java_home'] # we get the jre if we don't do this
-    default["jenkinsHomes"]["/home/jenkins-priv"]["env"]["sshCharaArgs"] = "(\"scalatest@chara.epfl.ch\" \"-i\" \"/home/jenkins-priv/.ssh/for_chara\")"
-    default["jenkinsHomes"]["/home/jenkins-priv"]["executors"]           = 2
-    default["jenkinsHomes"]["/home/jenkins-priv"]["workerName"]          = "builder-ubuntu-priv"
-    default["jenkinsHomes"]["/home/jenkins-priv"]["labels"]              = ["linux", "publish"]
-    default["jenkinsHomes"]["/home/jenkins-priv"]["jenkinsUser"]         = "jenkins-priv"
-    default["jenkinsHomes"]["/home/jenkins-priv"]["publish"]             = true
+    default["jenkinsHomes"]["/home/jenkins-priv"]["executors"]   = 2
+    default["jenkinsHomes"]["/home/jenkins-priv"]["workerName"]  = "builder-ubuntu-priv"
+    default["jenkinsHomes"]["/home/jenkins-priv"]["labels"]      = ["linux", "publish"]
+    default["jenkinsHomes"]["/home/jenkins-priv"]["jenkinsUser"] = "jenkins-priv"
+    default["jenkinsHomes"]["/home/jenkins-priv"]["publish"]     = true
+
+    # can't marshall closures, and this one needs to be shipped from worker to master
+    default["jenkinsHomes"]["/home/jenkins-priv"]["env"]         = <<-'EOH'.gsub(/^ {6}/, '')
+      lambda{| node | Chef::Node::ImmutableMash.new({
+        "sshCharaArgs" => '("scalatest@chara.epfl.ch" "-i" "/home/jenkins-priv/.ssh/for_chara")',
+        "sbtLauncher"  => File.join(node['sbt']['launcher_path'], "sbt-launch.jar"), # from chef-sbt cookbook
+        "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']), # sbt-extras
+        "JAVA_HOME"    => node['java']['java_home'] # we get the jre if we don't do this
+      })}
+      EOH
+
   # end
+else
+  Chef::Log.warn("Unknown worker family: #{node["platform_family"]}")
 end
