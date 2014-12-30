@@ -119,20 +119,20 @@ knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --ssh-user ec2-user \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::master, scala-jenkins-infra::master-proxy"
+   --run-list "scala-jenkins-infra::master-init"
 
 knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
    --identity-file ~/.ssh/chef.pem \
-   --run-list "scala-jenkins-infra::worker-windows"
+   --run-list "scala-jenkins-infra::worker-init"
 
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor c3.xlarge -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
    --identity-file ~/.ssh/chef.pem \
    --user-data chef/userdata/ubuntu-publish-c3.xlarge \
-   --run-list "scala-jenkins-infra::worker-linux"
+   --run-list "scala-jenkins-infra::worker-init"
 ```
 
 
@@ -209,9 +209,9 @@ knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-wi
 
 ### Add run-list items that need the vault
 ```
-knife node run_list add jenkins-master "scala-jenkins-infra::master-auth-github,scala-jenkins-infra::master-workers,scala-jenkins-infra::master-jobs"
-knife node run_list add jenkins-worker-windows "scala-jenkins-infra::worker-windows-agent"
-knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-linux-homes,scala-jenkins-infra::worker-publish"
+knife node run_list add jenkins-master "scala-jenkins-infra::master-config"
+knife node run_list add jenkins-worker-windows "scala-jenkins-infra::worker-config"
+knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-config"
 ```
 
 ### Re-run chef manually

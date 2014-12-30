@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: master-workers
+# Recipe:: _master-config-workers
 #
 # Copyright 2014, Typesafe, Inc.
 #

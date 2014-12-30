@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: worker-windows-agent
+# Recipe:: _worker-config-windows
 #
 # Copyright 2014, Typesafe, Inc.
 #

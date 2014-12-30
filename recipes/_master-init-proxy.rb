@@ -1,3 +1,13 @@
+#
+# Cookbook Name:: scala-jenkins-infra
+# Recipe:: _master-init-proxy
+#
+# Copyright 2014, Typesafe, Inc.
+#
+# All rights reserved - Do Not Redistribute
+#
+
+
 # Set up a reverse proxy to allow jenkins to run on port 80
 
 package "nginx"

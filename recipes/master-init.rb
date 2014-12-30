@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: master
+# Recipe:: master-init
 #
 # Copyright 2014, Typesafe, Inc.
 #
@@ -76,3 +76,5 @@ jenkins_command 'safe-restart' do
   action :nothing
   subscribes :install, 'jenkins_plugin[github-oauth]', :immediately
 end
+
+include_recipe 'scala-jenkins-infra::_master-init-proxy'

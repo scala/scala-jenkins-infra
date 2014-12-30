@@ -1,12 +1,11 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: worker-windows
+# Recipe:: _worker-init-windows
 #
 # Copyright 2014, Typesafe, Inc.
 #
 # All rights reserved - Do Not Redistribute
 #
-include_recipe 'chef-client::service'
 
 # TODO: not idempotent (must stop jenkins slave service before re-installing jdk)
 # hacked around by not re-installing java when javac of the right version is found
@@ -31,11 +30,6 @@ def checkJavacVersion
 end
 
 include_recipe "java" if checkJavacVersion != node['java']['javacVersion']
-
-include_recipe "git"
-include_recipe "chef-sbt"
-
-node.set["worker"]["env"]["JAVA_HOME"] = node['java']['java_home']
 
 ruby_block 'Add Embedded Bin Path' do
   block do

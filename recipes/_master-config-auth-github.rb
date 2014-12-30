@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: master-auth-github
+# Recipe:: _master-config-auth-github
 #
 # Copyright 2014, Typesafe, Inc.
 #
