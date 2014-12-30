@@ -7,7 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-chef_gem "chef-vault"
 require "chef-vault"
 
 ruby_block 'set private key' do

@@ -7,7 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-chef_gem "chef-vault"
 require "chef-vault"
 
 apiVault = ChefVault::Item.load("master", "github-api")

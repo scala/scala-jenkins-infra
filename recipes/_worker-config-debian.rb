@@ -12,7 +12,6 @@
 # Also, it needs to run on every reboot of the worker instance(s),
 # since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
-chef_gem "chef-vault"
 require "chef-vault"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|

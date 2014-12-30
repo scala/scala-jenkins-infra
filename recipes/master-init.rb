@@ -8,7 +8,6 @@
 #
 include_recipe 'chef-client::service'
 
-
 chef_gem "chef-vault"
 require "chef-vault"
 

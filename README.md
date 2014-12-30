@@ -113,6 +113,7 @@ NOTE:
   - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
   - can't access the vault on bootstrap (see After bootstrap below)
 
+TODO: attach to elastic IPs `--associate-eip 54.183.176.105 --subnet <default subnetid for that region> --server-connect-attribute public_ip_address`
 
 ```
 knife ec2 server create -N jenkins-master \
@@ -207,10 +208,10 @@ knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-li
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish'
 ```
 
-### Add run-list items that need the vault
+### Add run-list items that need the vault after bootstrap
 ```
-knife node run_list add jenkins-master "scala-jenkins-infra::master-config"
-knife node run_list add jenkins-worker-windows "scala-jenkins-infra::worker-config"
+knife node run_list add jenkins-master               "scala-jenkins-infra::master-config"
+knife node run_list add jenkins-worker-windows       "scala-jenkins-infra::worker-config"
 knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-config"
 ```
 
@@ -223,16 +224,30 @@ knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worke
 
 # Misc
 
+## Testing locally using vagrant
+
+http://blog.gravitystorm.co.uk/2013/09/13/using-vagrant-to-test-chef-cookbooks/:
+
+```
+Vagrant.configure("2") do |config|
+  config.vm.box = "precise64"
+  config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = "/home/andy/src/toolkit-chef/cookbooks"
+    chef.add_recipe("toolkit")
+  end
+  config.vm.network :forwarded_port, guest: 80, host: 11180
+end
+```
+
 ## If connections hang
 Make sure security groups allow access...
 
 ## Set run list (recipe to be executed by chef-client)
-
 ```
-knife node run_list set jenkins-master               "scala-jenkins-infra::master"
-knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worker-windows"
-knife node run_list set jenkins-worker-linux-publish "scala-jenkins-infra::worker-linux, scala-jenkins-infra::worker-publish"
-``` 
+knife node run_list set jenkins-master               "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
+knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+knife node run_list set jenkins-worker-linux-publish "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+```
 
 
 ## If the bootstrap didn't work at first, complete:

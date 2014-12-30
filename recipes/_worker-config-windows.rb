@@ -15,7 +15,6 @@ ruby_block 'Enable ruby ssl on windows' do
   action :nothing
 end
 
-chef_gem "chef-vault"
 require "chef-vault"
 
 jenkinsMaster = search(:node, 'name:jenkins-master').first

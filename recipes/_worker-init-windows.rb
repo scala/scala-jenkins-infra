@@ -7,12 +7,11 @@
 # All rights reserved - Do Not Redistribute
 #
 
+include_recipe 'windows'
+
 # TODO: not idempotent (must stop jenkins slave service before re-installing jdk)
 # hacked around by not re-installing java when javac of the right version is found
 # needed for other stuff (install ruby etc)
-# it's the includes that actually cause these recipes to contribute to the run list
-include_recipe 'aws'
-include_recipe 'windows'
 
 def checkJavacVersion
   javac = File.join(node['java']['java_home'], "bin", "javac.exe")
