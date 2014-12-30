@@ -49,7 +49,7 @@ when "debian", "rhel"
 
   default["jenkinsHomes"]["/home/jenkins-pub"]["executors"]   = 4
   default["jenkinsHomes"]["/home/jenkins-pub"]["workerName"]  = "builder-ubuntu-pub"
-  default["jenkinsHomes"]["/home/jenkins-pub"]["labels"]      = ["linux"]
+  default["jenkinsHomes"]["/home/jenkins-pub"]["labels"]      = ["linux", "public"]
   default["jenkinsHomes"]["/home/jenkins-pub"]["jenkinsUser"] = "jenkins-pub"
   default["jenkinsHomes"]["/home/jenkins-pub"]["publish"]     = false
 
