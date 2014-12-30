@@ -69,5 +69,10 @@ end
 # Theory for observed failure: github-oauth plugin needs restart
 # next steps: add scala-jenkins-infra::master-auth-github, and scala-jenkins-infra::master-workers (once they are up) to run_list
 jenkins_plugin "github-oauth" do
-  notifies :restart, 'runit_service[jenkins]', :immediately
+  # To be sure, do safe restart (see subscribes below), since we're running chef every thirty minutes
+end
+
+jenkins_command 'safe-restart' do
+  action :nothing
+  subscribes :install, 'jenkins_plugin[github-oauth]', :immediately
 end
