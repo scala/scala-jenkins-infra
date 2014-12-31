@@ -17,6 +17,11 @@ Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ 
           <description>version of Scala to build a distribution for, there must be a corresponding &quot;v$version&quot; tag in scala/scala-dist,&lt;br&gt;and a &quot;org.scala-lang&quot; : &quot;scala-dist&quot; : $version artifact on maven</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>publishToSonatype</name>
+          <description>Set to "yes" to publish to sonatype without tagging a release. Assumed to be "yes" when HEAD is tagged, "no" otherwise.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
