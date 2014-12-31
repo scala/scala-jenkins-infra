@@ -15,11 +15,16 @@ ruby_block 'set private key' do
   end
 end
 
-%w(scala-release-2.11.x scala-release-2.11.x-build scala-release-2.11.x-unix scala-release-2.11.x-windows scala-release-2.11.x-smoketest scala-release-2.11.x-scala-lang scala-release-scala-lang-update-current).each do |name|
+# TODO: auto-discover templates, organize them in views according to subdirs under templates/defaults
+# run_context.cookbook_collection[cookbook_name].manifest[:templates] is an array of
+# {"name"=>"scala-release-2.11.x-unix.xml.erb",
+# "path"=>"templates/default/scala-release-2.11.x/scala-release-2.11.x-unix.xml.erb", ...}
+
+%w(scala-release-2.11.x scala-release-2.11.x-build scala-release-2.11.x-unix scala-release-2.11.x-windows scala-release-2.11.x-smoketest scala-release-2.11.x-scala-lang scala-release-2.11.x-scala-lang-update-current).each do |name|
   xml = File.join(Chef::Config[:file_cache_path], "#{name}.xml")
 
   template xml do
-    source "#{name}.xml.erb"
+    source "scala-release-2.11.x/#{name}.xml.erb"
     helpers(ScalaJenkinsInfra::JobBlurbs)
   end
 
