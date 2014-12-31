@@ -1,5 +1,44 @@
+require 'cgi'
+
 module ScalaJenkinsInfra
   module JobBlurbs
+    def githubProject(options = {})
+      # chef's still stuck on ruby 1.9 (on our amazon linux)
+      repoUser        = options[:repoUser]
+      repoName        = options[:repoName]
+      repoRef         = options[:repoRef]
+      description     = options.fetch(:description, '')
+      nodeRestriction = options.fetch(:nodeRestriction, nil)
+      params          = options.fetch(:params, [])
+
+      stringPar =
+      """<hudson.model.StringParameterDefinition>
+        <name>%{name}</name>
+        <description>%{desc}</description>
+        <defaultValue>%{default}</defaultValue>
+      </hudson.model.StringParameterDefinition>""".gsub(/      /, '')
+
+      paramDefaults = {:default => nil}
+
+      restriction =
+      """<assignedNode>%{nodes}</assignedNode>
+      <canRoam>false</canRoam>""".gsub(/      /, '')
+
+      <<-EOX
+        <description>#{CGI.escapeHTML(description)}</description>
+        <properties>
+          <hudson.model.ParametersDefinitionProperty>
+            <parameterDefinitions>
+              #{scmParams(repoUser, repoName, repoRef)}
+              #{params.map { |param| stringPar % paramDefaults.merge(param) }.join("\n")}
+            </parameterDefinitions>
+          </hudson.model.ParametersDefinitionProperty>
+        </properties>
+        #{scmBlurb}
+        #{restriction % {nodes: nodeRestriction} if nodeRestriction}
+      EOX
+    end
+
     def scmBlurb
       <<-EOH.gsub(/^ {8}/, '')
         <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
@@ -23,20 +62,25 @@ module ScalaJenkinsInfra
       EOH
     end
 
-    def jobShellBlurb
-      <<-EOH.gsub(/^ {8}/, '')
-        #!/bin/bash -ex
-
+    def scriptBuild
+      <<-EOH.gsub(/^ {4}/, '')
+      <hudson.tasks.Shell>
+        <command>#!/bin/bash -ex
         source scripts/jobs/$JOB_NAME
+        </command>
+      </hudson.tasks.Shell>
       EOH
     end
 
-    def jobShellBlurbWindows
-      <<-EOH.gsub(/^ {8}/, '')
-        #!C:/cygwin/bin/bash -ex
+    def scriptBuildWindows
+      <<-EOH.gsub(/^ {4}/, '')
+      <hudson.tasks.Shell>
+        <command>#!C:/cygwin/bin/bash -ex
         set -o igncr # ignore crlf issues on cygwin
 
         source scripts/jobs/$JOB_NAME
+        </command>
+      </hudson.tasks.Shell>
       EOH
     end
 

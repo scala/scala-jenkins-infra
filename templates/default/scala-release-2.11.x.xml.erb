@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
-  <actions/>
   <description>Run as downstream job from scala-release-2.11.x.&#xd;
 &lt;p&gt;&#xd;
 Coordinates the build of a Scala distribution based on artifacts on maven (built by scala-release-2.11.x).&#xd;
@@ -8,7 +7,6 @@ Downstream jobs: scala-release-2.11.x-[unix|windows|scala-lang].&#xd;
 &lt;p&gt;&#xd;
 Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ &lt;br&gt;&#xd;
   Regular ones to http://www.scala-lang.org/files/archive/</description>
-  <keepDependencies>false</keepDependencies>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
@@ -21,27 +19,14 @@ Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ 
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.21">
-      <autoRebuild>false</autoRebuild>
-    </com.sonyericsson.rebuild.RebuildSettings>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.2">
-      <maxConcurrentPerNode>0</maxConcurrentPerNode>
-      <maxConcurrentTotal>0</maxConcurrentTotal>
-      <throttleEnabled>false</throttleEnabled>
-      <throttleOption>project</throttleOption>
-    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
-  <disabled>false</disabled>
-  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
-  <concurrentBuild>false</concurrentBuild>
-  <builders/>
-  <publishers/>
-  <buildWrappers/>
-  <icon/>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>@midnight</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <dsl>ver = params[&quot;version&quot;]
 build.setDisplayName(&quot;Scala distribution ${ver} [${build.number}]&quot;)
 
@@ -68,6 +53,12 @@ parallel (
 build(testParams, &quot;scala-release-2.11.x-smoketest&quot;)
 
 build(testParams, &quot;scala-release-2.11.x-scala-lang&quot;)
-
 </dsl>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>adriaan@typesafe.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
 </com.cloudbees.plugins.flow.BuildFlow>

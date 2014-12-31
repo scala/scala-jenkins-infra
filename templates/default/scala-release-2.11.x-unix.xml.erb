@@ -1,70 +1,29 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
-  <actions/>
-  <description>Run as part of the scala-release-2.11.x-dist flow.&#xd;
-&lt;p&gt;&#xd;
-Builds and uploads the universal and unix-specific artifacts for a Scala release.&lt;br&gt;&#xd;
-&#xd;
-Specify a tag that exists on &lt;a href=&quot;https://github.com/scala/scala-dist&quot;&gt;scala/scala-dist&lt;/a&gt;,&lt;br&gt;&#xd;
-and that points to a version of scala-dist that&apos;s available in one of the repositories listed in repositories-scala-release (see scala/jenkins-scripts), and sit back.&lt;p&gt;&#xd;
-&#xd;
-NOTE: the sbt build derives the version to build from the tag, which must thus be of the shape vNN.NN.NN-suffix for version NN.NN.NN-suffix&lt;p&gt;&#xd;
-&#xd;
-NOTE2: multiple tags on the same commit will lead to havoc -- you&apos;ll have to create a new commit and tag it&#xd;
-(or set sbtDistVersionOverride to -Dproject.version=$SCALA_VER)&#xd;
-&#xd;
-The downloads will be available at http://downloads.typesafe.com/scala/$ver/scala-$ver*&#xd;
-</description>
-  <keepDependencies>false</keepDependencies>
-  <properties>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <%= scmParams("scala", "scala-dist", "2.11.x") %>
-        <hudson.model.StringParameterDefinition>
-          <name>sbtDistTarget</name>
-          <description>To upload to S3, use s3-upload
-A dry run (everything but uploading to S3): s3Upload::mappings</description>
-          <defaultValue>s3-upload</defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>sbtDistVersionOverride</name>
-          <description>may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)
-</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.21">
-      <autoRebuild>false</autoRebuild>
-    </com.sonyericsson.rebuild.RebuildSettings>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.2">
-      <maxConcurrentPerNode>0</maxConcurrentPerNode>
-      <maxConcurrentTotal>0</maxConcurrentTotal>
-      <categories/>
-      <throttleEnabled>false</throttleEnabled>
-      <throttleOption>project</throttleOption>
-      <configVersion>1</configVersion>
-    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
-  </properties>
-  <%= scmBlurb %>
-  <assignedNode>publish</assignedNode>
-  <canRoam>false</canRoam>
-  <disabled>false</disabled>
-  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
-  <concurrentBuild>true</concurrentBuild>
-  <builders>
-    <hudson.tasks.Shell>
-      <command><%= jobShellBlurb %></command>
-    </hudson.tasks.Shell>
-  </builders>
-  <publishers>
-    <hudson.tasks.Mailer plugin="mailer@1.8">
-      <recipients>adriaan@typesafe.com</recipients>
-      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
-      <sendToIndividuals>false</sendToIndividuals>
-    </hudson.tasks.Mailer>
-  </publishers>
-  <buildWrappers/>
+<%= githubProject(
+  repoUser:    "scala",
+  repoName:    "scala-dist",
+  repoRef:     "2.11.x",
+  description: %{ Run as part of the scala-release-2.11.x-dist flow. <p> Builds and uploads the universal and unix-specific artifacts for a
+    Scala release.<br>
+
+    Specify a tag that exists on <a href="https://github.com/scala/scala-dist">scala/scala-dist</a>,<br> and that points to a
+    version of scala-dist that&apos;s available in one of the repositories listed in repositories-scala-release (see
+    scala/jenkins-scripts), and sit back.<p>
+
+    NOTE: the sbt build derives the version to build from the tag, which must thus be of the shape vNN.NN.NN-suffix for
+    version NN.NN.NN-suffix<p>
+
+    NOTE2: multiple tags on the same commit will lead to havoc -- you&apos;ll have to create a new commit and tag it (or set
+    sbtDistVersionOverride to -Dproject.version=$SCALA_VER)
+
+    The downloads will be available at http://downloads.typesafe.com/scala/$ver/scala-$ver*
+   }.gsub(/^ {4}/, ''),
+  nodeRestriction: "publish",
+  params: [
+    {:name => "sbtDistTarget", :default => "s3-upload", :desc => "To upload to S3, use s3-upload. A dry run (everything but uploading to S3): s3Upload::mappings"},
+    {:name => "sbtDistVersionOverride", :desc => "may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)"}
+  ])
+%>
+  <builders><%= scriptBuild %></builders>
 </project>

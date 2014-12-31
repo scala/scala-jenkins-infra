@@ -1,48 +1,24 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
-  <actions/>
-  <description>Run as part of the scala-release-2.11.x-dist flow.&#xd;
-&lt;p&gt;&#xd;
-It downloads the archives for a Scala release from http://downloads.typesafe.com/scala/$version/index.html&#xd;
-  and re-organizes them into the right hiearchy fro scala-lang.org/files/archive.&#xd;
-&lt;p&gt;&#xd;
-Also expands api docs for library, reflect, compiler and other modules to http://www.scala-lang.org/api/2.11.x/$module&#xd;
-(it expands under api/$version and updates the api/2.11.x symlink to point there).&#xd;
-&lt;p&gt;&#xd;
-  When version ends in -nightly, the root for the expansion process is http://www.scala-lang.org/files/archive/nightly/2.11.x/&#xd;
-  instead of http://www.scala-lang.org/files/archive/</description>
-  <keepDependencies>false</keepDependencies>
-  <properties>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <%= scmParams("scala", "scala-dist", "2.11.x") %>
-        <hudson.model.StringParameterDefinition>
-          <name>version</name>
-          <description>the version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
-    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.2">
-      <maxConcurrentPerNode>0</maxConcurrentPerNode>
-      <maxConcurrentTotal>0</maxConcurrentTotal>
-      <throttleEnabled>false</throttleEnabled>
-      <throttleOption>project</throttleOption>
-    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
-  </properties>
-  <%= scmBlurb %>
-  <assignedNode>publish</assignedNode>
-  <canRoam>false</canRoam>
-  <disabled>false</disabled>
-  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
-  <concurrentBuild>false</concurrentBuild>
-  <builders>
-    <hudson.tasks.Shell>
-      <command><%= jobShellBlurb %></command>
-    </hudson.tasks.Shell>
-  </builders>
-  <publishers/>
-  <buildWrappers/>
+<%= githubProject(
+  repoUser:    "scala",
+  repoName:    "scala-dist",
+  repoRef:     "2.11.x",
+  description: %{ <H1>Run as part of the scala-release-2.11.x-dist flow.</H1>
+    <p>It downloads the archives for a Scala release
+       from http://downloads.typesafe.com/scala/$version/index.html and
+       re-organizes them into the right hierarchy for scala-lang.org/files/archive.</p>
+    <p>Also expands api docs for library, reflect, compiler and other modules
+       to http://www.scala-lang.org/api/2.11.x/$module (it expands under api/$version
+       and updates the api/2.11.x symlink to point there).</p>
+    <p>When version ends in -nightly, the root for the expansion process
+       is http://www.scala-lang.org/files/archive/nightly/2.11.x/
+       instead of http://www.scala-lang.org/files/archive/</p>
+   }.gsub(/^ {4}/, ''),
+  nodeRestriction: "publish",
+  params: [
+    {:name => "version", :desc => "The version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2"}
+  ])
+%>
+  <builders><%= scriptBuild %></builders>
 </project>
