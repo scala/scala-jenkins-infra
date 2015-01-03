@@ -46,6 +46,10 @@ end
 end
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
+  # TODO: somehow, we can't wipe the workspace -- is it because the jenkins slave service somehow hangs on to a file?
+  # As a workaround, store files on ephemeral storage so at least a reboot of the slave will give us a clean workspace. (On EBS right now.)
+  # Maybe we should move to ssh for windows to avoid the issue of the service hanging on to files (also can't reinstall java because of that)
+
   # if you specify a user, must also specify a password!! by default, runs under the LocalSystem account (no password needed)
   # this is the only type of slave that will work on windows (the jnlp one does not launch automatically)
   jenkins_windows_slave workerConfig["workerName"] do
