@@ -80,7 +80,8 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     end
 
     { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
-      "#{jenkinsHome}/.credentials"              => "credentials.erb",
+      "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
+      "#{jenkinsHome}/.credentials"              => "credentials-sonatype.erb", # TODO: remove after replacing references to it in scripts by `.credentials-sonatype`
       "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
       "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
       "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb"
