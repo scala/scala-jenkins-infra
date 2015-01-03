@@ -194,6 +194,11 @@ knife vault create worker-publish chara-keypair \
   --json chara-keypair.json \
   --search 'name:jenkins-worker-linux-publish' \
   --admins adriaan
+
+knife vault create worker-publish gnupg \
+  --json /Users/adriaan/Desktop/chef-secrets/gnupg.json \
+  --search 'name:jenkins-worker-linux-publish' \
+  --admins adriaan
 ```
 
 
@@ -205,6 +210,7 @@ knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
 knife vault update worker-publish sonatype      --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish private-repo  --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-linux-publish'
+knife vault create worker-publish gnupg         --search 'name:jenkins-worker-linux-publish'
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish'
 ```
 

@@ -12,7 +12,8 @@
 # Also, it needs to run on every reboot of the worker instance(s),
 # since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
-require "chef-vault"
+require 'chef-vault'
+require 'base64'
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   user workerConfig["jenkinsUser"] do
@@ -54,6 +55,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     file "#{jenkinsHome}/.ssh/for_chara" do
       owner jenkinsUser
       mode '600'
+      sensitive true
       content ChefVault::Item.load("worker-publish", "chara-keypair")['private_key']
     end
 
@@ -62,6 +64,19 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       user jenkinsUser
       #
       # not_if "grep -qs \"#{ChefVault::Item.load("worker-publish", "chara-keypair")['public_key']}\" #{jenkinsHome}/.ssh/known_hosts"
+    end
+
+    directory "#{jenkinsHome}/.gnupg" do
+      owner workerConfig["jenkinsUser"]
+    end
+
+    ["sec", "pub"].each do |kind|
+      file "#{jenkinsHome}/.gnupg/#{kind}ring.gpg" do
+        owner jenkinsUser
+        mode '600'
+        sensitive true
+        content Base64.decode64(ChefVault::Item.load("worker-publish", "gnupg")["#{kind}ring-base64"])
+      end
     end
 
     { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
