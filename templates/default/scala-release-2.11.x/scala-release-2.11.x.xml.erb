@@ -13,13 +13,13 @@ Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ 
         <%= scmUserParam("scala") %>
         <%= scmRefParam("2.11.x") %>
         <hudson.model.StringParameterDefinition>
-          <name>version</name>
-          <description>version of Scala to build a distribution for, there must be a corresponding &quot;v$version&quot; tag in scala/scala-dist,&lt;br&gt;and a &quot;org.scala-lang&quot; : &quot;scala-dist&quot; : $version artifact on maven</description>
+          <name>SCALA_VER_BASE</name>
+          <description>When set, a release with version "$SCALA_VER_BASE$SCALA_VER_SUFFIX" will be built. Same effect as for tagging $repo_ref as "v$SCALA_VER_BASE$SCALA_VER_SUFFIX".</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>publishToSonatype</name>
-          <description>Set to "yes" to publish to sonatype without tagging a release. Assumed to be "yes" when HEAD is tagged, "no" otherwise.</description>
+          <name>SCALA_VER_SUFFIX</name>
+          <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
@@ -32,7 +32,7 @@ Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ 
       <spec>@midnight</spec>
     </hudson.triggers.TimerTrigger>
   </triggers>
-  <dsl>ver = params[&quot;version&quot;]
+  <dsl>ver = params[&quot;SCALA_VER_BASE&quot;] + params[&quot;SCALA_VER_SUFFIX&quot;]
 build.setDisplayName(&quot;Scala distribution ${ver} [${build.number}]&quot;)
 
 if (params.repo_ref) buildParams = params
