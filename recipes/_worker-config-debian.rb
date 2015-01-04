@@ -107,7 +107,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       user jenkinsUser
     end
 
-    %w{zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|
+    %w{jq curl zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|
       package pkg
     end
   end
