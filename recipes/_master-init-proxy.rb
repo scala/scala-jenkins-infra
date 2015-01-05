@@ -7,6 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
+# TODO further optimize based on https://wiki.jenkins-ci.org/display/JENKINS/Running+Hudson+behind+Nginx
 
 # Set up a reverse proxy to allow jenkins to run on port 80
 

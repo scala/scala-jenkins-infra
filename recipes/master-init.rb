@@ -9,15 +9,6 @@
 include_recipe 'chef-client::service'
 
 chef_gem "chef-vault"
-require "chef-vault"
-
-# NOTE: the following attributes must be configured thusly (jenkins-cli comms will stay in the VPC)
-#   see also on the workers: `node.set['jenkins']['master']['endpoint'] = "http://#{jenkinsMaster.ipaddress}:#{jenkinsMaster.jenkins.master.port}"`
-# under jenkins.master
-    # host: localhost
-    # listen_address: 0.0.0.0
-    # port: 8080
-    # endpoint: http://localhost:8080
 
 # The jenkins cookbook comes with a very simple java installer. If you need more
 #  complex java installs you are on your own.
@@ -31,18 +22,15 @@ directory "#{node['jenkins']['master']['home']}/users/chef/" do
   recursive true
 end
 
-# set up chef user with public key from our master/scala-jenkins-keypair vault
-template "#{node['jenkins']['master']['home']}/users/chef/config.xml" do
-  source 'chef-user-config.erb'
-  user node['jenkins']['master']['user']
-  group node['jenkins']['master']['group']
 
-  variables({
-    :pubkey => ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key']
-  })
-end
-
-# see NOTE above about keeping endpoint at localhost (stay in VPC), but must set this for reverse proxy to work
+# NOTE: the following attributes must be configured thusly (jenkins-cli comms will stay in the VPC)
+#   see also on the workers: `node.set['jenkins']['master']['endpoint'] = "http://#{jenkinsMaster.ipaddress}:#{jenkinsMaster.jenkins.master.port}"`
+# under jenkins.master
+    # host: localhost
+    # listen_address: 0.0.0.0
+    # port: 8080
+    # endpoint: http://localhost:8080
+# keep endpoint at localhost (stay in VPC), must set this for reverse proxy to work
 template "#{node['jenkins']['master']['home']}/jenkins.model.JenkinsLocationConfiguration.xml" do
   source 'jenkins.model.JenkinsLocationConfiguration.xml.erb'
   user node['jenkins']['master']['user']
@@ -53,11 +41,8 @@ template "#{node['jenkins']['master']['home']}/jenkins.model.JenkinsLocationConf
   })
 end
 
-ruby_block 'set private key' do
-  block do
-    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
-  end
-end
+# nginx reverse proxy setup, in concert with JenkinsLocationConfiguration above
+include_recipe 'scala-jenkins-infra::_master-init-proxy'
 
 %w(ssh-credentials job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
   plugin, version = plugin.split('=') # in case we decide to pin versions later
@@ -73,7 +58,5 @@ end
 
 jenkins_command 'safe-restart' do
   action :nothing
-  subscribes :install, 'jenkins_plugin[github-oauth]', :immediately
+  subscribes :execute, 'jenkins_plugin[github-oauth]', :immediately
 end
-
-include_recipe 'scala-jenkins-infra::_master-init-proxy'
