@@ -209,18 +209,19 @@ knife ec2 server create -N jenkins-worker-ubuntu-publish \
    --region us-west-1 --flavor c3.large -I ami-5956491c \
    -G Workers --ssh-user ubuntu \
    --identity-file .chef/config/chef.pem \
-   --user-data chef/userdata/ubuntu-publish-c3 \
+   --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
 
 knife ec2 server create -N jenkins-worker-ubuntu-1 \
-   --region us-west-1 --flavor c3.large -I ami-4b6f650e \
+   --region us-west-1 --flavor c3.xlarge -I ami-4b6f650e \
    -G Workers --ssh-user ubuntu \
    --identity-file .chef/config/chef.pem \
-   --user-data chef/userdata/ubuntu-publish-c3 \
+   --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
 
 ```
 
+TODO: use /mnt/ephemeral1 for something during build?
 
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
@@ -243,7 +244,7 @@ knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-wi
 ```
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e
 aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id $windows
-aws ec2 associate-address --allocation-id eipalloc-1fc6de7d --instance-id i-93545559
+aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-7a7677b0
 ```
 
 ### Add run-list items that need the vault after bootstrap
