@@ -40,6 +40,14 @@ search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
       labels      workerConfig["labels"]
       executors   workerConfig["executors"]
 
+      usage_mode  workerConfig["usage_mode"]
+
+      # The availability of the node is managed by Jenkins,
+      # the ec2-start-stop plugin will take the corresponding ec2 node [on|off]-line.
+      availability    'demand'
+      in_demand_delay workerConfig["in_demand_delay"]
+      idle_delay      workerConfig["idle_delay"]
+
       environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(worker)))
 
       action [:create, :connect, :online]

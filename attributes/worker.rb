@@ -32,6 +32,12 @@ when "windows"
   default["jenkinsHomes"]['C:\jenkins']["workerName"]  = "windows"
   default["jenkinsHomes"]['C:\jenkins']["labels"]      = ["windows"]
   default["jenkinsHomes"]['C:\jenkins']["publish"]     = false
+
+  default["jenkinsHomes"]['C:\jenkins']["usage_mode"]  = 'exclusive' # windows is a speciality node, don't run jobs here unless they asked for a `windows` node
+
+  default["jenkinsHomes"]['C:\jenkins']["in_demand_delay"] = 1  # if builds are in queue for even one minute, launch this worker
+  default["jenkinsHomes"]['C:\jenkins']["idle_delay"]      = 15 # take worker off-line after 15 min of idling (we're charged by the hour, so no rush)
+
   # can't marshall closures, but they sometimes need to be shipped, so encode as string, closing over `node`
   default["jenkinsHomes"]['C:\jenkins']["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
     lambda{| node | Chef::Node::ImmutableMash.new({
@@ -42,7 +48,11 @@ when "windows"
     })}
     EOH
 
-when "debian", "rhel"
+else
+  # If node name ends in "-publish", configure it with necessary secrets/package to roll & publish a release
+  publisher = (node.name =~ /.*-publish$/) != nil # TODO: use tag?
+
+  # TODO: install and manage multiple jdks (only if !publisher)
   override['java']['jdk_version']    = '6'
   override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
   override['java']['oracle']['accept_oracle_download_terms'] = true
@@ -51,14 +61,15 @@ when "debian", "rhel"
   default['graphviz']['checksum'] = '76236edc36d5906b93f35e83f8f19a2045318852d3f826e920f189431967c081'
   default['graphviz']['version']  = '2.28.0-1'
 
-  publisher = (node.name =~ /.*-publish$/) != nil # TODO: use tag?
+  default["jenkinsHomes"]["/home/jenkins"]["workerName"]      = node.name
+  default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"]     = "jenkins"
+  default["jenkinsHomes"]["/home/jenkins"]["publish"]         = publisher
+  default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 1  # if builds are in queue for even one minute, launch this worker
+  default["jenkinsHomes"]["/home/jenkins"]["idle_delay"]      = 15 # take worker off-line after 15 min of idling (we're charged by the hour, so no rush)
 
-  default["jenkinsHomes"]["/home/jenkins"]["executors"]   = 3
-  default["jenkinsHomes"]["/home/jenkins"]["workerName"]  = node.name
-  default["jenkinsHomes"]["/home/jenkins"]["labels"]      = ["linux", publisher ? "publish": "public"]
-  default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"] = "jenkins"
-  default["jenkinsHomes"]["/home/jenkins"]["publish"]     = publisher
-
+  default["jenkinsHomes"]["/home/jenkins"]["executors"]  = publisher ? 2 : 3 # TODO: better heuristic...
+  default["jenkinsHomes"]["/home/jenkins"]["usage_mode"] = publisher ? "exclusive" : "normal"
+  default["jenkinsHomes"]["/home/jenkins"]["labels"]     = ["linux", publisher ? "publish": "public"]
 
   # can't marshall closures, and this one needs to be shipped from worker to master (note: sshCharaArgs only use on publisher, but doesn't contain any private date, so not bothering)
   default["jenkinsHomes"]["/home/jenkins"]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
@@ -70,8 +81,4 @@ when "debian", "rhel"
     })}
     EOH
 
-
-  # end
-else
-  Chef::Log.warn("Unknown worker family: #{node["platform_family"]}")
 end
