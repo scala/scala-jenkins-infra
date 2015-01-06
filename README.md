@@ -36,8 +36,10 @@ Based on http://domaintest001.com/aws-iam/
 ```
 aws iam create-instance-profile --instance-profile-name JenkinsMaster
 aws iam create-role --role-name jenkins-master --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
-aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
 aws iam add-role-to-instance-profile --instance-profile-name JenkinsMaster --role-name jenkins-master
+
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
+
 
 aws iam create-instance-profile --instance-profile-name JenkinsWorker
 aws iam create-role --role-name jenkins-worker-volumes --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
@@ -99,58 +101,6 @@ g commit --allow-empty -m"Initial"
 - checksum is computed with `shasum -a 256`
 - TODO: host them on an s3 bucket (credentials are available automatically)
 
-# Launch instance on EC2 
-## Create (ssh) key pair
-```
-echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/git/scala-jenkins-infra/.chef/config/chef.pem
-chmod 0600 ~/git/scala-jenkins-infra/.chef/config/chef.pem
-```
-
-make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/git/scala-jenkins-infra/.chef/config/chef.pem`
-
-
-## Selected AMIs
-
-current windows: ami-cfa5b68a Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10
-current linux-publisher: ami-b11b09f4 ubuntu/images-testing/hvm/ubuntu-trusty-daily-amd64-server-20141212
-
-current linux (master/worker): ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
-
-
-## Bootstrap
-NOTE:
-
-  - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
-  - can't access the vault on bootstrap (see After bootstrap below)
-
-
-
-```
-knife ec2 server create -N jenkins-master \
-   --region us-west-1 --flavor t2.small -I ami-4b6f650e \
-   -G Master --ssh-user ec2-user \
-   --iam-profile JenkinsMaster \
-   --identity-file .chef/config/chef.pem \
-   --run-list "scala-jenkins-infra::master-init"
-
-knife ec2 server create -N jenkins-worker-windows \
-   --region us-west-1 --flavor t2.medium -I ami-45332200 \
-   -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
-   --identity-file .chef/config/chef.pem \
-   --run-list "scala-jenkins-infra::worker-init"
-
-knife ec2 server create -N jenkins-worker-linux-publish \
-   --region us-west-1 --flavor c3.xlarge -I ami-b11b09f4 \
-   -G Workers --ssh-user ubuntu \
-   --identity-file .chef/config/chef.pem \
-   --user-data chef/userdata/ubuntu-publish-c3.xlarge \
-   --run-list "scala-jenkins-infra::worker-init"
-```
-
-
-NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
-`<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
-
 
 # Configuring the jenkins cluster
 
@@ -188,29 +138,93 @@ knife vault create master github-api \
 ```
 knife vault create worker-publish sonatype \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-linux-publish' \
+  --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 
 knife vault create worker-publish private-repo \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-linux-publish' \
+  --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 
 knife vault create worker-publish s3-downloads \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish' \
+  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 
 knife vault create worker-publish chara-keypair \
   --json chara-keypair.json \
-  --search 'name:jenkins-worker-linux-publish' \
+  --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 
 knife vault create worker-publish gnupg \
   --json /Users/adriaan/Desktop/chef-secrets/gnupg.json \
-  --search 'name:jenkins-worker-linux-publish' \
+  --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 ```
+
+
+# Launch instance on EC2
+## Create (ssh) key pair
+```
+echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/git/scala-jenkins-infra/.chef/config/chef.pem
+chmod 0600 ~/git/scala-jenkins-infra/.chef/config/chef.pem
+```
+
+make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/git/scala-jenkins-infra/.chef/config/chef.pem`
+
+
+## Selected AMIs
+
+current windows: ami-cfa5b68a Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10
+current linux-publisher: ami-b11b09f4 ubuntu/images-testing/hvm/ubuntu-trusty-daily-amd64-server-20141212
+
+ami-5956491c ubuntu/images-testing/hvm/ubuntu-utopic-daily-amd64-server-20150106
+
+current linux (master/worker): ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
+
+
+## Bootstrap
+NOTE:
+
+  - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
+  - can't access the vault on bootstrap (see After bootstrap below)
+
+
+
+```
+knife ec2 server create -N jenkins-master \
+   --region us-west-1 --flavor t2.small -I ami-4b6f650e \
+   -G Master --ssh-user ec2-user \
+   --iam-profile JenkinsMaster \
+   --identity-file .chef/config/chef.pem \
+   --run-list "scala-jenkins-infra::master-init"
+
+knife ec2 server create -N jenkins-worker-windows \
+   --region us-west-1 --flavor t2.medium -I ami-45332200 \
+   -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
+   --identity-file .chef/config/chef.pem \
+   --run-list "scala-jenkins-infra::worker-init"
+
+knife ec2 server create -N jenkins-worker-ubuntu-publish \
+   --region us-west-1 --flavor c3.large -I ami-5956491c \
+   -G Workers --ssh-user ubuntu \
+   --identity-file .chef/config/chef.pem \
+   --user-data chef/userdata/ubuntu-publish-c3 \
+   --run-list "scala-jenkins-infra::worker-init"
+
+knife ec2 server create -N jenkins-worker-ubuntu-1 \
+   --region us-west-1 --flavor c3.large -I ami-4b6f650e \
+   -G Workers --ssh-user ubuntu \
+   --identity-file .chef/config/chef.pem \
+   --user-data chef/userdata/ubuntu-publish-c3 \
+   --run-list "scala-jenkins-infra::worker-init"
+
+```
+
+
+NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
+`<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
+
 
 
 ## After bootstrap (or when nodes are added)
@@ -218,25 +232,25 @@ knife vault create worker-publish gnupg \
 ```
 knife vault update master github-api            --search 'name:jenkins-master'
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
-knife vault update worker-publish sonatype      --search 'name:jenkins-worker-linux-publish'
-knife vault update worker-publish private-repo  --search 'name:jenkins-worker-linux-publish'
-knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-linux-publish'
-knife vault create worker-publish gnupg         --search 'name:jenkins-worker-linux-publish'
-knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish'
+knife vault update worker-publish sonatype      --search 'name:jenkins-worker-ubuntu-publish'
+knife vault update worker-publish private-repo  --search 'name:jenkins-worker-ubuntu-publish'
+knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-ubuntu-publish'
+knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ubuntu-publish'
+knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish'
 ```
 
 ### Attach eips
 ```
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e
 aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id $windows
-aws ec2 associate-address --allocation-id eipalloc-1fc6de7d --instance-id $ubuntu
+aws ec2 associate-address --allocation-id eipalloc-1fc6de7d --instance-id i-93545559
 ```
 
 ### Add run-list items that need the vault after bootstrap
 ```
-knife node run_list add jenkins-master               "scala-jenkins-infra::master-config"
-knife node run_list add jenkins-worker-windows       "scala-jenkins-infra::worker-config"
-knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worker-config"
+knife node run_list add jenkins-master                "scala-jenkins-infra::master-config"
+knife node run_list add jenkins-worker-windows        "scala-jenkins-infra::worker-config"
+knife node run_list add jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-config"
 ```
 
 ### Re-run chef manually
@@ -271,7 +285,7 @@ Make sure security groups allow access...
 ```
 knife node run_list set jenkins-master               "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
 knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
-knife node run_list set jenkins-worker-linux-publish "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+knife node run_list set jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
 ```
 
 

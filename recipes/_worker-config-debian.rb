@@ -107,6 +107,9 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       user jenkinsUser
     end
 
+    # NOTE: graphviz version 2.36.0 (20140111.2315) crashes during scaladoc:
+    # *** Error in `dot': corrupted double-linked list: 0x00000000019648c0 ***
+    # this caused some diagrams not to be rendered...
     %w{graphviz jq curl zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|
       package pkg
     end

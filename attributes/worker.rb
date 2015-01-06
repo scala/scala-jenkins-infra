@@ -47,40 +47,25 @@ when "debian", "rhel"
   override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
   override['java']['oracle']['accept_oracle_download_terms'] = true
 
-  default["jenkinsHomes"]["/home/jenkins-pub"]["executors"]   = 4
-  default["jenkinsHomes"]["/home/jenkins-pub"]["workerName"]  = "builder-ubuntu-pub"
-  default["jenkinsHomes"]["/home/jenkins-pub"]["labels"]      = ["linux", "public"]
-  default["jenkinsHomes"]["/home/jenkins-pub"]["jenkinsUser"] = "jenkins-pub"
-  default["jenkinsHomes"]["/home/jenkins-pub"]["publish"]     = false
+  publisher = (node.name =~ /.*-publish$/) != nil # TODO: use tag?
+
+  default["jenkinsHomes"]["/home/jenkins"]["executors"]   = 3
+  default["jenkinsHomes"]["/home/jenkins"]["workerName"]  = node.name
+  default["jenkinsHomes"]["/home/jenkins"]["labels"]      = ["linux", publisher ? "publish": "public"]
+  default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"] = "jenkins"
+  default["jenkinsHomes"]["/home/jenkins"]["publish"]     = publisher
 
 
-  # can't marshall closures, and this one needs to be shipped from worker to master
-  default["jenkinsHomes"]["/home/jenkins-pub"]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
+  # can't marshall closures, and this one needs to be shipped from worker to master (note: sshCharaArgs only use on publisher, but doesn't contain any private date, so not bothering)
+  default["jenkinsHomes"]["/home/jenkins"]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
     lambda{| node | Chef::Node::ImmutableMash.new({
+      "sshCharaArgs" => '("scalatest@chara.epfl.ch" "-i" "/home/jenkins/.ssh/for_chara")',
       "sbtLauncher"  => File.join(node['sbt']['launcher_path'], "sbt-launch.jar"), # from chef-sbt cookbook
       "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']), # sbt-extras
       "JAVA_HOME"    => node['java']['java_home'] # we get the jre if we don't do this
     })}
     EOH
 
-
-  # TODO: if node has tag "publish"
-  # if node.tags ...
-    default["jenkinsHomes"]["/home/jenkins-priv"]["executors"]   = 2
-    default["jenkinsHomes"]["/home/jenkins-priv"]["workerName"]  = "builder-ubuntu-priv"
-    default["jenkinsHomes"]["/home/jenkins-priv"]["labels"]      = ["linux", "publish"]
-    default["jenkinsHomes"]["/home/jenkins-priv"]["jenkinsUser"] = "jenkins-priv"
-    default["jenkinsHomes"]["/home/jenkins-priv"]["publish"]     = true
-
-    # can't marshall closures, and this one needs to be shipped from worker to master
-    default["jenkinsHomes"]["/home/jenkins-priv"]["env"]         = <<-'EOH'.gsub(/^ {6}/, '')
-      lambda{| node | Chef::Node::ImmutableMash.new({
-        "sshCharaArgs" => '("scalatest@chara.epfl.ch" "-i" "/home/jenkins-priv/.ssh/for_chara")',
-        "sbtLauncher"  => File.join(node['sbt']['launcher_path'], "sbt-launch.jar"), # from chef-sbt cookbook
-        "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']), # sbt-extras
-        "JAVA_HOME"    => node['java']['java_home'] # we get the jre if we don't do this
-      })}
-      EOH
 
   # end
 else

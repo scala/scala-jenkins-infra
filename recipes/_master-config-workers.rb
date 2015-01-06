@@ -16,8 +16,7 @@ ruby_block 'set private key' do
 end
 
 credentialsMap = {
-  'jenkins-pub'  => '954dd564-ce8c-43d1-bcc5-97abffc81c54',
-  'jenkins-priv' => '954dd564-ce8c-43d1-bcc5-97abffc81c55'
+  'jenkins'  => '954dd564-ce8c-43d1-bcc5-97abffc81c57'
 }
 
 privKey = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']

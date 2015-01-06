@@ -1,0 +1,5 @@
+#cloud-config
+
+mounts:
+ - [ ephemeral0, /home/jenkins ]
+ - [ ephemeral1, /mnt/ephemeral1 ]
