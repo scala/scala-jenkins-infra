@@ -108,9 +108,28 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     end
 
     # NOTE: graphviz version 2.36.0 (20140111.2315) crashes during scaladoc:
-    # *** Error in `dot': corrupted double-linked list: 0x00000000019648c0 ***
-    # this caused some diagrams not to be rendered...
-    %w{graphviz jq curl zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|
+    #       *** Error in `dot': corrupted double-linked list: 0x00000000019648c0 ***
+    #       this caused some diagrams not to be rendered...
+    #       Same for graphviz version 2.38.0 (20140413.2041):
+    #       *** Error in `dot': corrupted double-linked list: 0x000000000196f5f0 ***
+    # The old build server was on 2.28.0.... thus:
+    #   sudo apt-get install gcc checkinstall libexpat-dev
+    #   curl -O http://graphviz.org/pub/graphviz/stable/SOURCES/graphviz-2.28.0.tar.gz
+    #   tar xvzf graphviz-2.28.0.tar.gz && cd graphviz-2.28.0/
+    #   ./configure && make && sudo checkinstall
+    deb = remote_file "#{Chef::Config[:file_cache_path]}/graphviz-#{node['graphviz']['version']}.deb" do
+      source   node['graphviz']['url']
+      checksum node['graphviz']['checksum']
+      notifies :install, "dpkg_package[graphviz]"
+    end
+
+    dpkg_package "graphviz" do
+      source  deb.path
+      version node['graphviz']['version']
+      action :nothing # triggered by the corresponding remote_file above
+    end
+
+    %w{jq curl zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|
       package pkg
     end
   end

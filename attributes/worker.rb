@@ -47,6 +47,10 @@ when "debian", "rhel"
   override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
   override['java']['oracle']['accept_oracle_download_terms'] = true
 
+  default['graphviz']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/graphviz_2.28.0-1_amd64.deb'
+  default['graphviz']['checksum'] = '76236edc36d5906b93f35e83f8f19a2045318852d3f826e920f189431967c081'
+  default['graphviz']['version']  = '2.28.0-1'
+
   publisher = (node.name =~ /.*-publish$/) != nil # TODO: use tag?
 
   default["jenkinsHomes"]["/home/jenkins"]["executors"]   = 3
