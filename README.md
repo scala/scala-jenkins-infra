@@ -34,14 +34,24 @@ aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp -
 Based on http://domaintest001.com/aws-iam/
 
 ```
+aws iam create-instance-profile --instance-profile-name JenkinsMaster
+aws iam create-role --role-name jenkins-master --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
+aws iam add-role-to-instance-profile --instance-profile-name JenkinsMaster --role-name jenkins-master
+
 aws iam create-instance-profile --instance-profile-name JenkinsWorker
-# if you get syntax errors, check the policy doc URL
-aws iam create-role --role-name jenkins-worker-volumes --assume-role-policy-document file://~/git/scala-jenkins-infra/conf/ec2-role-trust-policy.json
-aws iam put-role-policy --role-name jenkins-worker-volumes --policy-name create-ebs-vol --policy-document file://~/git/scala-jenkins-infra/conf/ebs-create-vol.json
+aws iam create-role --role-name jenkins-worker-volumes --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+aws iam put-role-policy --role-name jenkins-worker-volumes --policy-name create-ebs-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
 aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker --role-name jenkins-worker-volumes
 ```
 
+NOTE: if you get syntax errors, check the policy doc URL
 pass JenkinsWorker as the iam profile to knife bootstrap
+
+
+## Create an Elastic IP for each node
+TODO: attach to elastic IPs 
+
 
 # Install chef/knife
 
@@ -92,11 +102,11 @@ g commit --allow-empty -m"Initial"
 # Launch instance on EC2 
 ## Create (ssh) key pair
 ```
-echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/chef.pem
-chmod 0600 ~/.ssh/chef.pem
+echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/git/scala-jenkins-infra/.chef/config/chef.pem
+chmod 0600 ~/git/scala-jenkins-infra/.chef/config/chef.pem
 ```
 
-make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/.ssh/chef.pem`
+make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/git/scala-jenkins-infra/.chef/config/chef.pem`
 
 
 ## Selected AMIs
@@ -113,25 +123,26 @@ NOTE:
   - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
   - can't access the vault on bootstrap (see After bootstrap below)
 
-TODO: attach to elastic IPs `--associate-eip 54.183.176.105 --subnet <default subnetid for that region> --server-connect-attribute public_ip_address`
+
 
 ```
 knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --ssh-user ec2-user \
-   --identity-file ~/.ssh/chef.pem \
+   --iam-profile JenkinsMaster \
+   --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::master-init"
 
 knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
-   --identity-file ~/.ssh/chef.pem \
+   --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::worker-init"
 
 knife ec2 server create -N jenkins-worker-linux-publish \
    --region us-west-1 --flavor c3.xlarge -I ami-b11b09f4 \
    -G Workers --ssh-user ubuntu \
-   --identity-file ~/.ssh/chef.pem \
+   --identity-file .chef/config/chef.pem \
    --user-data chef/userdata/ubuntu-publish-c3.xlarge \
    --run-list "scala-jenkins-infra::worker-init"
 ```
@@ -214,6 +225,13 @@ knife vault create worker-publish gnupg         --search 'name:jenkins-worker-li
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-linux-publish'
 ```
 
+### Attach eips
+```
+aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e
+aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id $windows
+aws ec2 associate-address --allocation-id eipalloc-1fc6de7d --instance-id $ubuntu
+```
+
 ### Add run-list items that need the vault after bootstrap
 ```
 knife node run_list add jenkins-master               "scala-jenkins-infra::master-config"
@@ -226,6 +244,7 @@ knife node run_list add jenkins-worker-linux-publish "scala-jenkins-infra::worke
 - windows: `knife winrm $IP chef-client -m -P $PASS`
 - ubuntu:  `ssh ubuntu@$IP -i chef.pem sudo chef-client`
 - amazon linux: `ssh ec2-user@$IP -i chef.pem`, and then `sudo chef-client`
+
 
 
 # Misc
@@ -261,7 +280,7 @@ If it appears stuck at "Waiting for remote response before bootstrap.", the user
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
 
 ```
-aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/.ssh/chef.pem
+aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/git/scala-jenkins-infra/.chef/config/chef.pem
 
 cord $IP, log in using password above and open a command line:
 
