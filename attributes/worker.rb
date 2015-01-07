@@ -2,10 +2,9 @@ case node["platform_family"]
 when "windows"
   # configure windows-specific recipes (attributes not node-specific!)
   override['java']['windows']['package_name'] = 'Java(TM) SE Development Kit 6 (64-bit)'
-  override['java']['windows']['url']          = 'https://dl.dropboxusercontent.com/u/12862572/jdk-6u45-windows-x64.exe'
+  override['java']['windows']['url']          = 'https://dl.dropboxusercontent.com/u/12862572/jdk-6u45-windows-x64.exe' # if you change this, must change javacVersion below
   override['java']['windows']['checksum']     = '345059d5bc64275c1d8fdc03625d69c16d0c8730be1c152247f5f96d00b21b00'
   override['java']['java_home']               = 'C:\java\jdk-1.6' # must specify java_home on windows (issues with installer on reinstall if it's in program files)
-
   default['java']['javacVersion']            = "javac 1.6.0_45"  # we don't install if javac -version returns this string
 
   override['sbt']['script_name']   = 'sbt.bat'
@@ -13,14 +12,19 @@ when "windows"
   override['sbt']['bin_path']      = 'C:\sbt'
 
   # this zip was reworked to have the binaries under the `bin/` directory, which is what sbt-nativepackager expects
-  override['wix']['home']     = 'C:\WIX'
-  override['wix']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/wix39-binaries.zip'
-  override['wix']['checksum'] = '1f509e61462e49918bf7932e42a78bbc60e6125b712995f55279a6d721f00602'
+  override['wix']['home']     = 'C:\Program Files (x86)\WiX Toolset v3.9'
+  override['wix']['url']      = 'http://static.wixtoolset.org/releases/v3.9.421.0/wix39.exe'
+  override['wix']['checksum'] = '46eda1dd64bfdfc3cc117e76902d767f1a47a1e40f7b6aad68b32a18b609eb7c'
 
   override['cygwin']['home']             = 'c:\cygwin'
-  override['cygwin']['base']['url']      = "https://dl.dropboxusercontent.com/u/12862572/cygwin-base-x64.zip"
-  override['cygwin']['base']['checksum'] = "7f319644c0737895e6cea807087e4e79d117049b8f6ac3087ad3b03724653db9"
   override['cygwin']['installer']['url'] = "http://cygwin.com/setup-x86_64.exe"
+
+  # This zip should contain the "#{Chef::Config[:file_cache_path]}/cygwin" directory,
+  # after it was manually populated by running "#{Chef::Config[:file_cache_path]}/cygwin-setup.exe",
+  # selecting openssh, cygrunsrv in addition to cygwin's base packages.
+  # I did not succeed in automating the cygwin installer without having a local cache of the package archives
+  override['cygwin']['base']['url']      = "https://dl.dropboxusercontent.com/u/12862572/cygwin-base-x64.zip"
+  override['cygwin']['base']['checksum'] = "dab686bc685ba1447240804a47d10f3b146d4b17b6f9fea781ed9bb59c67e664"
 
   # TODO: also derive PATH variable from attributes
   ## Git is installed to Program Files (x86) on 64-bit machines and
@@ -28,23 +32,33 @@ when "windows"
   ## PROGRAM_FILES = ENV['ProgramFiles(x86)'] || ENV['ProgramFiles']
   ## GIT_PATH      = "#{ PROGRAM_FILES }\\Git\\Cmd"
 
-  default["jenkinsHomes"]['C:\jenkins']["executors"]   = 2
-  default["jenkinsHomes"]['C:\jenkins']["workerName"]  = "windows"
-  default["jenkinsHomes"]['C:\jenkins']["labels"]      = ["windows"]
-  default["jenkinsHomes"]['C:\jenkins']["publish"]     = false
+  jenkinsHome = 'y:\jenkins'
+  jenkinsTmp = 'z:\tmp'
 
-  default["jenkinsHomes"]['C:\jenkins']["usage_mode"]  = 'exclusive' # windows is a speciality node, don't run jobs here unless they asked for a `windows` node
+  default["jenkinsHomes"][jenkinsHome]["executors"]   = 2
+  default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
+  default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
+  default["jenkinsHomes"][jenkinsHome]["jvm_options"] = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp.gsub(/\\/,'/')}" # jenkins doesn't quote properly
+  default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows"] # doesn't have the publish label on purpose (the only publish job that can run here is the -windows one)
+  default["jenkinsHomes"][jenkinsHome]["publish"]     = true
 
-  default["jenkinsHomes"]['C:\jenkins']["in_demand_delay"] = 1  # if builds are in queue for even one minute, launch this worker
-  default["jenkinsHomes"]['C:\jenkins']["idle_delay"]      = 15 # take worker off-line after 15 min of idling (we're charged by the hour, so no rush)
+  default["jenkinsHomes"][jenkinsHome]["usage_mode"]  = 'exclusive' # windows is a speciality node, don't run jobs here unless they asked for a `windows` node
+
+  default["jenkinsHomes"][jenkinsHome]["in_demand_delay"] = 1  # if builds are in queue for even one minute, launch this worker
+  default["jenkinsHomes"][jenkinsHome]["idle_delay"]      = 15 # take worker off-line after 15 min of idling (we're charged by the hour, so no rush)
 
   # can't marshall closures, but they sometimes need to be shipped, so encode as string, closing over `node`
-  default["jenkinsHomes"]['C:\jenkins']["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
+  default["_jenkinsHome"] = jenkinsHome
+  default["_jenkinsTmp"] = jenkinsTmp
+  default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
     lambda{| node | Chef::Node::ImmutableMash.new({
-      "PATH"         => "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git/Cmd", # TODO express in terms of attributes
-      "sbtLauncher"  => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
-      "WIX"          => node['wix']['home'],
-      "JAVA_HOME"    => node['java']['java_home']
+      "PATH"          => "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git/Cmd", # TODO express in terms of attributes
+      "sbtLauncher"   => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
+      "WIX"           => node['wix']['home'],
+      "JAVA_HOME"     => node['java']['java_home'],
+      "TMP"           => "#{node['_jenkinsTmp']}",
+      "_JAVA_OPTIONS" => "-Duser.home=#{node['_jenkinsHome']}", # no other way to do this... sbt boot will fail pretty weirdly if it can't write to $HOME/.sbt and $TMP/...
+      "SHELLOPTS"     => "igncr" # ignore line-ending issues in shell scripts
     })}
     EOH
 

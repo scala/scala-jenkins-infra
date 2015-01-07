@@ -45,6 +45,7 @@ aws iam create-instance-profile --instance-profile-name JenkinsWorkerPublish
 aws iam create-role --role-name jenkins-worker-publish --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
 aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorkerPublish --role-name jenkins-worker-publish
 
+// TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes and use IAM profile instea
 aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
 
 
@@ -170,6 +171,39 @@ knife vault create worker-publish gnupg \
   --admins adriaan
 ```
 
+#  Dev machine convenience
+This is how I set up my desktop to make it easier to connect to the EC2 nodes.
+The README assumes you're using this as well.
+
+## /etc/hosts
+Note that the IPs are stable by allocating elastic IPs and associating them to nodes.
+
+```
+54.67.111.226 jenkins-master
+54.67.33.167  jenkins-worker-ubuntu-publish
+54.183.145.57 jenkins-worker-amali-1
+54.183.156.89 jenkins-worker-windows
+```
+
+## ~/.ssh/config
+```
+Host jenkins-worker-ubuntu-publish
+  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  User ubuntu
+
+Host jenkins-worker-amali-1
+  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  User ec2-user
+
+Host jenkins-master
+  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  User ec2-user
+
+Host jenkins-worker-windows
+  IdentityFile ~/Desktop/chef-secrets/jenkins-chef
+  User jenkins
+```
+
 
 # Launch instance on EC2
 ## Create (ssh) key pair
@@ -207,23 +241,23 @@ knife ec2 server create -N jenkins-master \
    --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::master-init"
 
-// TODO: upgrade to m3.large and mount jenkins home on ephemeral storage
 knife ec2 server create -N jenkins-worker-windows \
-   --region us-west-1 --flavor t2.medium -I ami-45332200 \
+   --region us-west-1 --flavor c3.xlarge -I ami-45332200 \
    -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
    --iam-profile JenkinsWorkerPublish \
    --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::worker-init"
 
+// NOTE: c3.large is much slower than c3.xlarge (scala-release-2.11.x-build takes 2h53min vs 1h40min )
 knife ec2 server create -N jenkins-worker-ubuntu-publish \
-   --region us-west-1 --flavor c3.large -I ami-5956491c \
+   --region us-west-1 --flavor c3.xlarge -I ami-5956491c \
    -G Workers --ssh-user ubuntu \
    --iam-profile JenkinsWorkerPublish \
    --identity-file .chef/config/chef.pem \
    --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
 
-knife ec2 server create -N jenkins-worker-ubuntu-1 \
+knife ec2 server create -N jenkins-worker-amali-1 \
    --region us-west-1 --flavor c3.xlarge -I ami-4b6f650e \
    -G Workers --ssh-user ec2-user \
    --iam-profile JenkinsWorker \
@@ -244,9 +278,9 @@ NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 ### Attach eips
 ```
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
-aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-bce5d176  # jenkins-worker-windows
-aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-7a7677b0  # jenkins-worker-ubuntu-publish
-aws ec2 associate-address --allocation-id eipalloc-9cacb4fe --instance-id i-4e262784  # jenkins-worker-ubuntu-1
+aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-a100026b  # jenkins-worker-windows
+aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-0c3c3cc6  # jenkins-worker-ubuntu-publish
+aws ec2 associate-address --allocation-id eipalloc-9cacb4fe --instance-id i-4e262784  # jenkins-worker-amali-1
 ```
 
 ### Update access to vault
@@ -267,14 +301,19 @@ knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-wi
 knife node run_list add jenkins-master                "scala-jenkins-infra::master-config"
 knife node run_list add jenkins-worker-windows        "scala-jenkins-infra::worker-config"
 knife node run_list add jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-config"
-knife node run_list add jenkins-worker-ubuntu-1       "scala-jenkins-infra::worker-config"
+knife node run_list add jenkins-worker-amali-1        "scala-jenkins-infra::worker-config"
 ```
 
 ### Re-run chef manually
 
-- windows: `knife winrm $IP chef-client -m -P $PASS`
-- ubuntu:  `ssh ubuntu@$IP -i chef.pem sudo chef-client`
-- amazon linux: `ssh ec2-user@$IP -i chef.pem`, and then `sudo chef-client`
+- windows:
+```
+PASS=$(aws ec2 get-password-data --instance-id i-a100026b --priv-launch-key ~/Desktop/chef-secrets/config/chef.pem | jq .PasswordData | xargs echo)
+knife winrm jenkins-worker-windows chef-client -m -P $PASS
+```
+
+- ubuntu:  `ssh jenkins-worker-ubuntu-publish sudo chef-client`
+- amazon linux: `ssh jenkins-worker-amali-1`, and then `sudo chef-client`
 
 
 

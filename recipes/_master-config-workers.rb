@@ -30,12 +30,17 @@ credentialsMap.each do |userName, uniqId|
 end
 
 
-search(:node, 'name:jenkins-worker* AND os:linux').each do |worker|
+search(:node, 'name:jenkins-worker*').each do |worker|
   worker["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     jenkins_ssh_slave workerConfig["workerName"] do
       host        worker.ipaddress
       credentials credentialsMap[workerConfig["jenkinsUser"]]  # must use id (groovy script fails otherwise)
+
+      max_num_retries  5  # how often to retry when the SSH connection is refused during initial connect
+      retry_wait_time  60 # seconds between retries
+
       remote_fs   jenkinsHome.dup
+      jvm_options workerConfig["jvm_options"]
 
       labels      workerConfig["labels"]
       executors   workerConfig["executors"]

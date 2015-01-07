@@ -72,18 +72,6 @@ module ScalaJenkinsInfra
       EOH
     end
 
-    def scriptBuildWindows
-      <<-EOH.gsub(/^ {4}/, '')
-      <hudson.tasks.Shell>
-        <command>#!C:/cygwin/bin/bash -ex
-        set -o igncr # ignore crlf issues on cygwin
-
-        source scripts/jobs/$JOB_NAME
-        </command>
-      </hudson.tasks.Shell>
-      EOH
-    end
-
     def scmUserParam(user)
       <<-EOH.gsub(/^ {8}/, '')
         <hudson.model.StringParameterDefinition>

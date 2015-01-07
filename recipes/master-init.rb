@@ -44,10 +44,12 @@ end
 # nginx reverse proxy setup, in concert with JenkinsLocationConfiguration above
 include_recipe 'scala-jenkins-infra::_master-init-proxy'
 
-%w(ssh-credentials job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
+%w(ssh-credentials cygpath job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
   plugin, version = plugin.split('=') # in case we decide to pin versions later
   jenkins_plugin plugin
 end
+
+# TODO: ec2-start-stop
 
 # restart jenkins (TODO: wait for it to come back up, so we can continue automatically with next recipes; until then, manually)
 # Theory for observed failure: github-oauth plugin needs restart

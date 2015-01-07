@@ -15,34 +15,7 @@
 require 'chef-vault'
 require 'base64'
 
-# TODO: remove duplicuation -- debian only used for publish workers
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
-  user workerConfig["jenkinsUser"] do
-    home jenkinsHome
-  end
-
-  directory jenkinsHome do
-    owner workerConfig["jenkinsUser"]
-    group workerConfig["jenkinsUser"]
-    mode 00755
-    action :create
-  end
-
-  directory "#{jenkinsHome}/.ssh" do
-    owner workerConfig["jenkinsUser"]
-  end
-
-  file "#{jenkinsHome}/.ssh/authorized_keys" do
-    owner workerConfig["jenkinsUser"]
-    mode  '644'
-    content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] # TODO: distinct keypair for each jenkins user
-  end
-
-  git_user workerConfig["jenkinsUser"] do
-    full_name   'Scala Jenkins'
-    email       'adriaan@typesafe.com'
-  end
-
   if workerConfig["publish"]
     jenkinsUser=workerConfig["jenkinsUser"]
 
