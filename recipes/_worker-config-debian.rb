@@ -15,6 +15,7 @@
 require 'chef-vault'
 require 'base64'
 
+# TODO: remove duplicuation -- debian only used for publish workers
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   user workerConfig["jenkinsUser"] do
     home jenkinsHome

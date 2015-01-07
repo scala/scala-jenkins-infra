@@ -41,10 +41,18 @@ aws iam add-role-to-instance-profile --instance-profile-name JenkinsMaster --rol
 aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
 
 
+aws iam create-instance-profile --instance-profile-name JenkinsWorkerPublish
+aws iam create-role --role-name jenkins-worker-publish --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorkerPublish --role-name jenkins-worker-publish
+
+aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
+
+
 aws iam create-instance-profile --instance-profile-name JenkinsWorker
-aws iam create-role --role-name jenkins-worker-volumes --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
-aws iam put-role-policy --role-name jenkins-worker-volumes --policy-name create-ebs-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
-aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker --role-name jenkins-worker-volumes
+aws iam create-role --role-name jenkins-worker --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker --role-name jenkins-worker
+
+aws iam put-role-policy --role-name jenkins-worker TODO
 ```
 
 NOTE: if you get syntax errors, check the policy doc URL
@@ -199,22 +207,26 @@ knife ec2 server create -N jenkins-master \
    --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::master-init"
 
+// TODO: upgrade to m3.large and mount jenkins home on ephemeral storage
 knife ec2 server create -N jenkins-worker-windows \
    --region us-west-1 --flavor t2.medium -I ami-45332200 \
    -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
+   --iam-profile JenkinsWorkerPublish \
    --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::worker-init"
 
 knife ec2 server create -N jenkins-worker-ubuntu-publish \
    --region us-west-1 --flavor c3.large -I ami-5956491c \
    -G Workers --ssh-user ubuntu \
+   --iam-profile JenkinsWorkerPublish \
    --identity-file .chef/config/chef.pem \
    --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
 
 knife ec2 server create -N jenkins-worker-ubuntu-1 \
    --region us-west-1 --flavor c3.xlarge -I ami-4b6f650e \
-   -G Workers --ssh-user ubuntu \
+   -G Workers --ssh-user ec2-user \
+   --iam-profile JenkinsWorker \
    --identity-file .chef/config/chef.pem \
    --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
@@ -229,10 +241,20 @@ NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 
 ## After bootstrap (or when nodes are added)
+### Attach eips
+```
+aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
+aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-bce5d176  # jenkins-worker-windows
+aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-7a7677b0  # jenkins-worker-ubuntu-publish
+aws ec2 associate-address --allocation-id eipalloc-9cacb4fe --instance-id i-4e262784  # jenkins-worker-ubuntu-1
+```
+
 ### Update access to vault
 ```
-knife vault update master github-api            --search 'name:jenkins-master'
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
+
+knife vault update master github-api            --search 'name:jenkins-master'
+
 knife vault update worker-publish sonatype      --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish private-repo  --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-ubuntu-publish'
@@ -240,18 +262,12 @@ knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ub
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish'
 ```
 
-### Attach eips
-```
-aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e
-aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id $windows
-aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-7a7677b0
-```
-
 ### Add run-list items that need the vault after bootstrap
 ```
 knife node run_list add jenkins-master                "scala-jenkins-infra::master-config"
 knife node run_list add jenkins-worker-windows        "scala-jenkins-infra::worker-config"
 knife node run_list add jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-config"
+knife node run_list add jenkins-worker-ubuntu-1       "scala-jenkins-infra::worker-config"
 ```
 
 ### Re-run chef manually
