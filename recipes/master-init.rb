@@ -49,7 +49,10 @@ include_recipe 'scala-jenkins-infra::_master-init-proxy'
   jenkins_plugin plugin
 end
 
-# TODO: ec2-start-stop
+jenkins_plugin "ec2-start-stop" do
+  source   node['master']['ec2-start-stop']['url']
+  # doesn't support checksum
+end
 
 # restart jenkins (TODO: wait for it to come back up, so we can continue automatically with next recipes; until then, manually)
 # Theory for observed failure: github-oauth plugin needs restart

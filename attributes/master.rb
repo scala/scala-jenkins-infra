@@ -27,3 +27,5 @@ default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
     "prRepoUrl" => "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
   })}
   EOH
+
+default['master']['ec2-start-stop']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
