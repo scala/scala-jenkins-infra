@@ -169,6 +169,12 @@ knife vault create worker-publish gnupg \
   --json /Users/adriaan/Desktop/chef-secrets/gnupg.json \
   --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
+
+knife vault create worker private-repo-public-jobs \
+  '{"user":"XXX","pass":"XXX"}' \
+  --search 'name:jenkins-worker-amali-*' \
+  --admins adriaan
+
 ```
 
 #  Dev machine convenience
@@ -294,6 +300,9 @@ knife vault update worker-publish private-repo  --search 'name:jenkins-worker-ub
 knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish'
+
+knife vault update worker private-repo-public-jobs  --search 'name:jenkins-worker-amali-*'
+
 ```
 
 ### Add run-list items that need the vault after bootstrap

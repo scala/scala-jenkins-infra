@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-  <!-- 
+  <!--
     Maven repos are not safe for concurrent access, thus give each job its own.
     The WORKSPACE env var is set by jenkins to the path of the current job's workspace.
     This settings file will cause ant/maven to break if WORKSPACE is not set (to a writeable directory).
@@ -9,27 +9,26 @@
   <localRepository>${WORKSPACE}/m2repo</localRepository>
   <servers>
     <server>
-      <id>sonatype-nexus</id>
-      <username><%= @sonatypeUser %></username>
-      <password><%= @sonatypePass %></password>
-    </server>
-    <server>
-      <id>private-repo</id>
+      <id>pr-scala</id>
       <username><%= @privateRepoUser %></username>
       <password><%= @privateRepoPass %></password>
     </server>
-    <!-- <server>
-      <id>mirror</id>
-      <username>jenkins</username>
-      <password></password>
-    </server> -->
+    <server> <!-- for IDE integration, I think -->
+      <id>artifactory-bot</id>
+      <username><%= @privateRepoUser %></username>
+      <password><%= @privateRepoPass %></password>
+    </server>
   </servers>
-  <!-- <mirrors>
-  <mirror>
-    <id>mirror</id>
-    <mirrorOf>central,sonatype.release,sonatype.snapshot</mirrorOf>
-    <name>Moxie Mirror of External Public repositories</name>
-    <url>https://maven-mirror.typesafe.com:8497/nexus/content/groups/everything</url>
-  </mirror>
-  </mirrors> -->
+  <profiles>
+    <profile>
+      <id>pr-scala</id> <!-- for IDE integration, I think -->
+      <repositories>
+        <repository>
+          <id>pr-scala</id>
+          <name>Scala PR validation snapshots</name>
+          <url>http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 </settings>
