@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+<%= githubProject(
+  repoUser:    "scala",
+  repoName:    "scala",
+  repoRef:     @version,
+  description: "PR validation: test suite",
+  nodeRestriction: "public",
+  params: [
+    {:name => "maven_version_number", :desc => "Set by main build flow."},
+    {:name => "testExtraArgs", :desc => "TODO"},
+    {:name => "testTarget", :desc => "TODO"}
+  ])
+%>
+  <builders><%= scriptBuild %></builders>
+</project>

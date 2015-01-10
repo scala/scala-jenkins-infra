@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+<%= githubProject(
+  repoUser:    "scala",
+  repoName:    "scala",
+  repoRef:     @version,
+  description: "PR validation: publish core",
+  nodeRestriction: "public",
+  params: [
+    {:name => "prDryRun", :desc => "Set to 'yep' to try out the jenkins flow."},
+    {:name => "antBuildArgs", :desc => "TODO"}
+  ])
+%>
+  <builders><%= scriptBuild %></builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>jenkins.properties</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+</project>

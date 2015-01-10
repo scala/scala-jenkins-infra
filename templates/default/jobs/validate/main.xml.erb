@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
+  <description>PR validation -- called for every commit in every PR</description>
+  <%= properties("scala", "scala", @version,
+     [{:name => "prDryRun",
+       :desc => ""}]) %>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <dsl>
+buildRun = build(params, &quot;<%=job("validate/publish-core")%>&quot;)
+
+upstreamBuild = buildRun.build
+// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;<%=job("validate/publish-core")%>&quot;}.builds[0]
+// defines maven_version_number
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == &quot;jenkins.properties&quot;}
+
+buildVersionProps = new java.util.Properties()
+buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
+
+testParams = params + buildVersionProps
+
+build(testParams, &quot;<%=job("validate/test")%>&quot;)
+
+//parallel (
+//    { build(testParams, &quot;<%=job("validate/test")%>&quot;) },
+//    { build(testParams, &quot;<%=job("validate/test-bla")%>&quot;) }
+//)
+  </dsl>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>adriaan@typesafe.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+</com.cloudbees.plugins.flow.BuildFlow>

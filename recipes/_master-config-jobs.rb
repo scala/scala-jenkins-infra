@@ -40,6 +40,20 @@ def templDesc(version, path)
   end
 end
 
+# TODO: jobs in integrate/ (test IDE integration, matrix, core-community)
+# if all integration builds succeed, release can be done
+# matrix:
+#  - buildArgs:
+#    - rangepos
+#  - os:
+#     - windows
+#     - linux
+#  - jdk:
+#     - 7
+#     - 8
+#     - 9
+# core-community: sbt, ensime, modules,...
+
 # create scala-$version-$jobName for every template under jobs/
 %w{ 2.11.x }.each do | version |
   node.run_context.cookbook_collection["scala-jenkins-infra"].manifest[:templates]

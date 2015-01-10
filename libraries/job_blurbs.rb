@@ -2,6 +2,27 @@ require 'cgi'
 
 module ScalaJenkinsInfra
   module JobBlurbs
+    def properties(repoUser, repoName, repoRef, params)
+      stringPar =
+        """
+        <hudson.model.StringParameterDefinition>
+          <name>%{name}</name>
+          <description>%{desc}</description>
+          <defaultValue>%{default}</defaultValue>
+        </hudson.model.StringParameterDefinition>""".gsub(/        /, '')
+
+      paramDefaults = {:default => nil}
+
+      """<properties>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            #{scmParams(repoUser, repoName, repoRef)}
+            #{params.map { |param| stringPar % paramDefaults.merge(param) }.join("\n")}
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+      </properties>"""
+    end
+
     def githubProject(options = {})
       # chef's still stuck on ruby 1.9 (on our amazon linux)
       repoUser        = options[:repoUser]
@@ -11,31 +32,17 @@ module ScalaJenkinsInfra
       nodeRestriction = options.fetch(:nodeRestriction, nil)
       params          = options.fetch(:params, [])
 
-      stringPar =
-      """<hudson.model.StringParameterDefinition>
-        <name>%{name}</name>
-        <description>%{desc}</description>
-        <defaultValue>%{default}</defaultValue>
-      </hudson.model.StringParameterDefinition>""".gsub(/      /, '')
-
-      paramDefaults = {:default => nil}
-
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
       <canRoam>false</canRoam>""".gsub(/      /, '')
 
-      def env(name) = "${ENV,var=&quot;#{name}&quot;}"
+      def env(name)
+        "${ENV,var=&quot;#{name}&quot;}"
+      end
 
       <<-EOX
         <description>#{CGI.escapeHTML(description)}</description>
-        <properties>
-          <hudson.model.ParametersDefinitionProperty>
-            <parameterDefinitions>
-              #{scmParams(repoUser, repoName, repoRef)}
-              #{params.map { |param| stringPar % paramDefaults.merge(param) }.join("\n")}
-            </parameterDefinitions>
-          </hudson.model.ParametersDefinitionProperty>
-        </properties>
+        #{properties(repoUser, repoName, repoRef, params)}
         <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@1.3">
           <template>[${BUILD_NUMBER}] of #{env(repoUser)}/#{env(repoName)}\##{env(repoRef)}</template>
         </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>

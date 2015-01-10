@@ -36,7 +36,8 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       host        worker.ipaddress
       credentials credentialsMap[workerConfig["jenkinsUser"]]  # must use id (groovy script fails otherwise)
 
-      max_num_retries  5  # how often to retry when the SSH connection is refused during initial connect
+      # TODO: make retrying more robust
+      max_num_retries  10  # how often to retry when the SSH connection is refused during initial connect
       retry_wait_time  60 # seconds between retries
 
       remote_fs   jenkinsHome.dup
@@ -55,7 +56,7 @@ search(:node, 'name:jenkins-worker*').each do |worker|
 
       environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(worker)))
 
-      action [:create, :connect, :online]
+      action [:create, :connect, :online] # TODO: allow connect/online to fail (workers may be offline)
     end
   end
 end
