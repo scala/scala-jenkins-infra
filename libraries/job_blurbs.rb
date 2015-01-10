@@ -24,6 +24,8 @@ module ScalaJenkinsInfra
       """<assignedNode>%{nodes}</assignedNode>
       <canRoam>false</canRoam>""".gsub(/      /, '')
 
+      def env(name) = "${ENV,var=&quot;#{name}&quot;}"
+
       <<-EOX
         <description>#{CGI.escapeHTML(description)}</description>
         <properties>
@@ -34,6 +36,9 @@ module ScalaJenkinsInfra
             </parameterDefinitions>
           </hudson.model.ParametersDefinitionProperty>
         </properties>
+        <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@1.3">
+          <template>[${BUILD_NUMBER}] of #{env(repoUser)}/#{env(repoName)}\##{env(repoRef)}</template>
+        </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
         #{scmBlurb}
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
       EOX
