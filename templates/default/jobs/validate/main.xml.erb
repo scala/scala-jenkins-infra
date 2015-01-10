@@ -7,19 +7,20 @@
   <scm class="hudson.scm.NullSCM"/>
   <canRoam>true</canRoam>
   <dsl>
-buildRun = build(params, &quot;<%=job("validate/publish-core")%>&quot;)
+upstreamBuild = build(params, &quot;<%=job("validate/publish-core")%>&quot;).build
 
-upstreamBuild = buildRun.build
-// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;<%=job("validate/publish-core")%>&quot;}.builds[0]
-// defines maven_version_number
+// defines maven.version.number
 upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == &quot;jenkins.properties&quot;}
 
 buildVersionProps = new java.util.Properties()
 buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
-testParams = params + buildVersionProps
+testParams = params + [ &quot;scalaVersion&quot; : buildVersionProps[&quot;maven.version.number&quot;] ]
 
 build(testParams, &quot;<%=job("validate/test")%>&quot;)
+
+// for testing, to avoid re-running the main build:
+//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;<%=job("validate/publish-core")%>&quot;}.builds[0]
 
 //parallel (
 //    { build(testParams, &quot;<%=job("validate/test")%>&quot;) },
