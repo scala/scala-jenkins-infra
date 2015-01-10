@@ -60,3 +60,33 @@ end
     end
   end
 end
+
+# TODO: make a view for each top-level directory under jobs/ that lists all jobs under it (scala-2.11.x-integrate, scala-2.11.x-release, scala-2.11.x-validate)
+# https://issues.jenkins-ci.org/browse/JENKINS-8927
+def viewXML(viewPrefix)
+  <<-EOH.gsub(/^    /, '')
+    <listView>
+      <owner class="hudson" reference="../../.."/>
+      <name>#{viewPrefix}</name>
+      <filterExecutors>false</filterExecutors>
+      <filterQueue>false</filterQueue>
+      <properties class="hudson.model.View$PropertyList"/>
+      <jobNames>
+        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+      </jobNames>
+      <jobFilters/>
+      <columns>
+        <hudson.views.StatusColumn/>
+        <hudson.views.WeatherColumn/>
+        <hudson.views.JobColumn/>
+        <hudson.views.LastSuccessColumn/>
+        <hudson.views.LastFailureColumn/>
+        <hudson.views.LastDurationColumn/>
+        <hudson.views.BuildButtonColumn/>
+      </columns>
+      <includeRegex>#{viewPrefix}-.*</includeRegex>
+      <recurse>false</recurse>
+      <statusFilter>true</statusFilter>
+    </listView>
+  EOH
+end
