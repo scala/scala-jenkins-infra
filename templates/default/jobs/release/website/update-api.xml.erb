@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+<%= githubProject(
+  repoUser:    "scala",
+  repoName:    "scala-dist",
+  repoRef:     @version,
+  description: "Update scala-lang's api/#{@version} symlink to point to api/$version",
+  nodeRestriction: "publish",
+  params: [
+    {:name => "version", :desc => "The version to be shown for the current API docs."}
+  ])
+%>
+  <builders><%= scriptBuild %></builders>
+</project>

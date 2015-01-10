@@ -1,17 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
-  <description>Run as downstream job from scala-release-2.11.x.&#xd;
-&lt;p&gt;&#xd;
-Coordinates the build of a Scala distribution based on artifacts on maven (built by scala-release-2.11.x).&#xd;
-Downstream jobs: scala-release-2.11.x-[unix|windows|scala-lang].&#xd;
-&lt;p&gt;&#xd;
-Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.11.x/ &lt;br&gt;&#xd;
+  <description>Build, package and stage a Scala release. TODO
+  Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/<%=@version%>/ &lt;br&gt;&#xd;
   Regular ones to http://www.scala-lang.org/files/archive/</description>
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <%= scmUserParam("scala") %>
-        <%= scmRefParam("2.11.x") %>
+        <%= scmRefParam(@version) %>
         <hudson.model.StringParameterDefinition>
           <name>SCALA_VER_BASE</name>
           <description>When set, a release with version "$SCALA_VER_BASE$SCALA_VER_SUFFIX" will be built. Same effect as for tagging $repo_ref as "v$SCALA_VER_BASE$SCALA_VER_SUFFIX".</description>
@@ -38,10 +34,10 @@ build.setDisplayName(&quot;Scala distribution ${ver} [${build.number}]&quot;)
 if (params.repo_ref) buildParams = params
 else buildParams = params + [ &apos;repo_ref&apos; : &quot;v$ver&quot; ]
 
-buildRun = build(buildParams, &quot;scala-release-2.11.x-build&quot;)
+buildRun = build(buildParams, &quot;<%=job("integrate/bootstrap")%>&quot;)
 
 upstreamBuild = buildRun.build
-// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;scala-release-2.11.x-build&quot;}.builds[0]
+// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;<%=job("integrate/bootstrap")%>&quot;}.builds[0]
 // defines repo_ref, version, sbtDistVersionOverride
 upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == &quot;jenkins.properties&quot;}
 
@@ -51,13 +47,13 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 testParams = buildParams + buildVersionProps
 
 parallel (
-    { build(testParams, &quot;scala-release-2.11.x-unix&quot;) },
-    { build(testParams, &quot;scala-release-2.11.x-windows&quot;) }
+    { build(testParams, &quot;<%=job("release/package/unix")%>&quot;) },
+    { build(testParams, &quot;<%=job("release/package/windows")%>&quot;) }
 )
 
-build(testParams, &quot;scala-release-2.11.x-smoketest&quot;)
+build(testParams, &quot;<%=job("release/smoketest")%>&quot;)
 
-build(testParams, &quot;scala-release-2.11.x-scala-lang&quot;)
+build(testParams, &quot;<%=job("release/website/archives")%>&quot;)
 </dsl>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.8">

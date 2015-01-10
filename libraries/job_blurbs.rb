@@ -62,11 +62,19 @@ module ScalaJenkinsInfra
       EOH
     end
 
+    def versionedJob(version, name)
+      "scala-#{version}-#{name.gsub(/\//, '-')}"
+    end
+
+    def job(name)
+      versionedJob(@version, name)
+    end
+
     def scriptBuild
-      <<-EOH.gsub(/^ {4}/, '')
+      <<-EOH.gsub(/^      /, '')
       <hudson.tasks.Shell>
         <command>#!/bin/bash -ex
-        source scripts/jobs/$JOB_NAME
+      source scripts/#{@scriptName}
         </command>
       </hudson.tasks.Shell>
       EOH

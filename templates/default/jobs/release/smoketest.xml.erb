@@ -3,8 +3,8 @@
 <%= githubProject(
   repoUser:    "scala",
   repoName:    "scala-dist-smoketest",
-  repoRef:     "2.11.x",
-  description: %{ Run as part of the scala-release-2.11.x-dist flow. <br/> It runs the program in
+  repoRef:     @version,
+  description: "Run as part of the #{job("release/main")} flow." + %{ <br/> It runs the program in
     https://github.com/scala/scala-dist-smoketest/tree/${repo_ref} to make sure all JARs of the distribution
     contain classfiles. <br/> It downloads the archives for a Scala release from
     http://downloads.typesafe.com/scala/$version/index.html and makes sure the bundled scripts work.

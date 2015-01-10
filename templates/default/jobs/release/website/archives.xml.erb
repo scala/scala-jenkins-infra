@@ -3,14 +3,13 @@
 <%= githubProject(
   repoUser:    "scala",
   repoName:    "scala-dist",
-  repoRef:     "2.11.x",
-  description: %{ <H1>Run as part of the scala-release-2.11.x-dist flow.</H1>
-    <p>It downloads the archives for a Scala release
+  repoRef:     @version,
+  description: "<H1>Run as part of the #{job("release/main")} flow.</H1>" +
+   %{<p>It downloads the archives for a Scala release
        from http://downloads.typesafe.com/scala/$version/index.html and
        re-organizes them into the right hierarchy for scala-lang.org/files/archive.</p>
     <p>Also expands api docs for library, reflect, compiler and other modules
-       to http://www.scala-lang.org/api/2.11.x/$module (it expands under api/$version
-       and updates the api/2.11.x symlink to point there).</p>
+       to http://www.scala-lang.org/api/2.11.x/$module (it expands under api/$version).</p>
     <p>When version ends in -nightly, the root for the expansion process
        is http://www.scala-lang.org/files/archive/nightly/2.11.x/
        instead of http://www.scala-lang.org/files/archive/</p>

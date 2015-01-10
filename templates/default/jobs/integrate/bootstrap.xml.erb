@@ -3,20 +3,13 @@
 <%= githubProject(
   repoUser:    "scala",
   repoName:    "scala",
-  repoRef:     "2.11.x",
-  description: %{ This job publishes a Scala distribution to maven using
-    https://github.com/scala/jenkins-scripts/blob/master/job/scala-release-2.11.x. It
-    builds locker and uses it to build and publish the required modules as well as the
+  repoRef:     @version,
+  description: %{ Stage a Scala distribution on sonatype using scripts/job/bootstrap.
+    It builds locker and uses it to build and publish the required modules as well as the
     Scala compiler/library for this release, and generates an updated versions.properties
     that captures the modules/STARR used.
 
-    <p> This job is run nightly to build nightly releases (unless HEAD of scala/scala is
-    tagged, on which it builds a release and stages it on sonatype).
-
-    <p> On building a release, the remaining tasks are to close the staging repo (see
-    https://github.com/adriaanm/binfu/blob/master/sonafu.sh for scripts), possibly re-run
-    the downstream scala-release-2.11.x-dist job once all external artifacts are in place
-    (akka-actor), and send out some emails.
+    <p> This job is run on every merge to publish a "nightly" snapshot, and on every tag, to stage a full release on sonatype.
 
     <p> Use github.com/scala/make-release-notes to build the release notes.
    }.gsub(/^    /, ''),
