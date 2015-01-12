@@ -56,7 +56,7 @@ search(:node, 'name:jenkins-worker*').each do |worker|
 
       environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(worker)))
 
-      action [:create, :connect, :online] # TODO: allow connect/online to fail (workers may be offline)
+      action [:create] # TODO: we don't need to :connect, :online since the ec2 start/stop plugin will do that -- right?? Also, if connect fails, it may be that chef-client hasn't yet run on the client to initialize jenkins home with .ssh/authorized_keys (since /home is mounted on ephemeral)
     end
   end
 end
