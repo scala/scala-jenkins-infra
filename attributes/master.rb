@@ -1,4 +1,5 @@
 override['jenkins']['master']['install_method'] = 'war'
+override['jenkins']['master']['listen_address'] = '127.0.0.1' # external traffic must go through nginx
 
 # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
 # override['jenkins']['master']['version']  = '1.555'
@@ -17,7 +18,7 @@ default['master']['github']['allowCcTrayPermission']                = 'false'
 default['master']['github']['authenticatedUserCreateJobPermission'] = 'false'
 
 default['master']['adminAddress'] = "adriaan@typesafe.com"
-default['master']['jenkinsUrl']   = "http://scala-ci.typesafe.com/"
+default['master']['jenkinsUrl']   = "https://scala-ci.typesafe.com/"
 
 
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')

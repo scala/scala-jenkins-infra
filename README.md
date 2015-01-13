@@ -143,6 +143,16 @@ knife vault create master github-api \
   --admins adriaan
 ```
 
+### For nginx ssl
+
+```
+knife vault create master scala-ci-key \
+  --json scalaci-key.json \
+  --search 'name:jenkins-master' \
+  --admins adriaan
+```
+
+
 ### Workers that need to publish
 ```
 knife vault create worker-publish sonatype \
@@ -353,6 +363,23 @@ knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worke
 knife node run_list set jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
 ```
 
+## SSL cert
+```
+$ openssl genrsa -out scala-ci.key 2048
+```
+and
+
+```
+$ openssl req -new -out scala-ci.csr -key scala-ci.key -config ssl-certs/scalaci.openssl.cnf
+```
+
+Send CSR to SSL provider, receive scalaci.csr. Store scala-ci.key securely in vault master scala-ci-key (see above).
+
+Confirm values in the csr using:
+
+```
+$ openssl req -text -noout -in scala-ci.csr
+```
 
 ## If the bootstrap didn't work at first, complete:
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 

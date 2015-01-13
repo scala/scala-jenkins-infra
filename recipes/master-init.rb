@@ -40,6 +40,3 @@ template "#{node['jenkins']['master']['home']}/jenkins.model.JenkinsLocationConf
     :jenkinsUrl   => node['master']['jenkinsUrl']
   })
 end
-
-# nginx reverse proxy setup, in concert with JenkinsLocationConfiguration above
-include_recipe 'scala-jenkins-infra::_master-init-proxy'

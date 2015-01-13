@@ -23,6 +23,21 @@ template '/etc/nginx/conf.d/jenkins.conf' do
   notifies :reload, "service[nginx]"
 end
 
+directory "/etc/nginx/ssl"
+
+cookbook_file "scala-ci.crt" do
+  owner 'root'
+  path "/etc/nginx/ssl/scala-ci.crt"
+end
+
+file "/etc/nginx/ssl/scala-ci.key" do
+  owner 'root'
+  mode  '600'
+  content ChefVault::Item.load("master", "scala-ci-key")['private_key']
+  sensitive true
+end
+
+
 service 'nginx' do
   action :start
 end

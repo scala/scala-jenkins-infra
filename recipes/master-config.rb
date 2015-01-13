@@ -9,6 +9,9 @@
 
 require "chef-vault"
 
+# nginx reverse proxy setup, in concert with JenkinsLocationConfiguration created in master-init
+include_recipe 'scala-jenkins-infra::_master-config-proxy'
+
 # set up chef user with public key from our master/scala-jenkins-keypair vault
 template "#{node['jenkins']['master']['home']}/users/chef/config.xml" do
   source 'chef-user-config.erb'
