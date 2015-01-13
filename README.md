@@ -375,6 +375,8 @@ $ openssl req -new -out scala-ci.csr -key scala-ci.key -config ssl-certs/scalaci
 
 Send CSR to SSL provider, receive scalaci.csr. Store scala-ci.key securely in vault master scala-ci-key (see above).
 
+(cd ssl-certs && cat 00\ -\ scala-ci.crt 01\ -\ COMODORSAOrganizationValidationSecureServerCA.crt 02\ -\ COMODORSAAddTrustCA.crt 03\ -\ AddTrustExternalCARoot.crt > ../files/default/scala-ci.crt)
+
 Confirm values in the csr using:
 
 ```
