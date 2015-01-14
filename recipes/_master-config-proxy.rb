@@ -30,6 +30,11 @@ cookbook_file "scala-ci.crt" do
   path "/etc/nginx/ssl/scala-ci.crt"
 end
 
+cookbook_file "dhparam.pem" do
+  owner 'root'
+  path "/etc/nginx/ssl/dhparam.pem"
+end
+
 file "/etc/nginx/ssl/scala-ci.key" do
   owner 'root'
   mode  '600'

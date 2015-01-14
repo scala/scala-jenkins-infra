@@ -375,7 +375,15 @@ $ openssl req -new -out scala-ci.csr -key scala-ci.key -config ssl-certs/scalaci
 
 Send CSR to SSL provider, receive scalaci.csr. Store scala-ci.key securely in vault master scala-ci-key (see above).
 
+Incorporate the cert into an ssl chain for nginx:
+```
 (cd ssl-certs && cat 00\ -\ scala-ci.crt 01\ -\ COMODORSAOrganizationValidationSecureServerCA.crt 02\ -\ COMODORSAAddTrustCA.crt 03\ -\ AddTrustExternalCARoot.crt > ../files/default/scala-ci.crt)
+```
+
+For [forward secrecy](http://axiacore.com/blog/enable-perfect-forward-secrecy-nginx/):
+```
+openssl dhparam -out files/default/dhparam.pem 2048
+```
 
 Confirm values in the csr using:
 
