@@ -16,10 +16,15 @@ chef_gem "chef-vault"
 include_recipe 'jenkins::java'
 include_recipe 'jenkins::master'
 
+# recursive doesn't set owner correctly??
+directory "#{node['jenkins']['master']['home']}/users" do
+  user node['jenkins']['master']['user']
+  group node['jenkins']['master']['group']
+end
+
 directory "#{node['jenkins']['master']['home']}/users/chef/" do
   user node['jenkins']['master']['user']
   group node['jenkins']['master']['group']
-  recursive true
 end
 
 

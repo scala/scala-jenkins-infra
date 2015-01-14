@@ -9,6 +9,13 @@
 
 require "chef-vault"
 
+ruby_block 'set private key' do
+  block do
+    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
+  end
+end
+
+
 # nginx reverse proxy setup, in concert with JenkinsLocationConfiguration created in master-init
 include_recipe 'scala-jenkins-infra::_master-config-proxy'
 
@@ -23,11 +30,6 @@ template "#{node['jenkins']['master']['home']}/users/chef/config.xml" do
   })
 end
 
-ruby_block 'set private key' do
-  block do
-    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
-  end
-end
 
 %w(ssh-credentials build-name-setter cygpath job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger).each do |plugin|
   plugin, version = plugin.split('=') # in case we decide to pin versions later
