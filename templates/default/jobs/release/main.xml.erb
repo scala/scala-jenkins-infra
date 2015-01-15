@@ -1,45 +1,26 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
-  <description>Build, package and stage a Scala release. TODO
-  Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/<%=@version%>/ &lt;br&gt;&#xd;
-  Regular ones to http://www.scala-lang.org/files/archive/</description>
-  <properties>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <%= scmUserParam("scala") %>
-        <%= scmRefParam(@version) %>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_VER_BASE</name>
-          <description>When set, a release with version "$SCALA_VER_BASE$SCALA_VER_SUFFIX" will be built. Same effect as for tagging $repo_ref as "v$SCALA_VER_BASE$SCALA_VER_SUFFIX".</description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>SCALA_VER_SUFFIX</name>
-          <description></description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
-  </properties>
-  <scm class="hudson.scm.NullSCM"/>
-  <canRoam>true</canRoam>
-  <triggers>
-    <hudson.triggers.TimerTrigger>
-      <spec>@midnight</spec>
-    </hudson.triggers.TimerTrigger>
-  </triggers>
-  <dsl>ver = params[&quot;SCALA_VER_BASE&quot;] + params[&quot;SCALA_VER_SUFFIX&quot;]
-build.setDisplayName(&quot;Scala distribution ${ver} [${build.number}]&quot;)
+<%= flowProject(
+    repoUser:    "scala",
+    repoRef:     @version,
+    description: "TODO: Better description. Build, package and stage a Scala release. \nNightly downloads go to http://www.scala-lang.org/files/archive/nightly/#{@version}/\nRegular ones to http://www.scala-lang.org/files/archive/.",
+    params: [
+      {:name => "SCALA_VER_BASE", :desc => "When set, a release with version \"$SCALA_VER_BASE$SCALA_VER_SUFFIX\" will be built. Same effect as for tagging $repo_ref as \"v$SCALA_VER_BASE$SCALA_VER_SUFFIX\"."},
+      {:name => "SCALA_VER_SUFFIX", :desc => ""}
+    ],
+    dsl: <<-EOX
+ver = params["SCALA_VER_BASE"] + params["SCALA_VER_SUFFIX"]
+build.setDisplayName("Scala distribution ${ver} [${build.number}]")
 
 if (params.repo_ref) buildParams = params
-else buildParams = params + [ &apos;repo_ref&apos; : &quot;v$ver&quot; ]
+else buildParams = params + [ "repo_ref" : "v$ver" ]
 
-buildRun = build(buildParams, &quot;<%=job("integrate/bootstrap")%>&quot;)
+buildRun = build(buildParams, "#{job("integrate/bootstrap")}")
 
 upstreamBuild = buildRun.build
-// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;<%=job("integrate/bootstrap")%>&quot;}.builds[0]
+// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "#{job("integrate/bootstrap")}"}.builds[0]
 // defines repo_ref, version, sbtDistVersionOverride
-upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == &quot;jenkins.properties&quot;}
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
 
 buildVersionProps = new java.util.Properties()
 buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
@@ -47,14 +28,20 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 testParams = buildParams + buildVersionProps
 
 parallel (
-    { build(testParams, &quot;<%=job("release/package/unix")%>&quot;) },
-    { build(testParams, &quot;<%=job("release/package/windows")%>&quot;) }
+    { build(testParams, "#{job("release/package/unix")}") },
+    { build(testParams, "#{job("release/package/windows")}") }
 )
 
-build(testParams, &quot;<%=job("release/smoketest")%>&quot;)
+build(testParams, "#{job("release/smoketest")}")
 
-build(testParams, &quot;<%=job("release/website/archives")%>&quot;)
-</dsl>
+build(testParams, "#{job("release/website/archives")}")
+EOX
+) %>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>@midnight</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.8">
       <recipients>adriaan@typesafe.com</recipients>

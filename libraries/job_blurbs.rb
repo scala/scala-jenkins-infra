@@ -34,10 +34,28 @@ module ScalaJenkinsInfra
       </properties>"""
     end
 
+    def flowProject(options = {})
+      # chef's still stuck on ruby 1.9 (on our amazon linux)
+      repoUser    = options[:repoUser]
+      repoName    = options.fetch(:repoName, nil)
+      repoRef     = options[:repoRef]
+      dsl         = options[:dsl]
+      description = options.fetch(:description, '')
+      params      = options.fetch(:params, [])
+
+      <<-EOX
+      <description>#{CGI.escapeHTML(description)}</description>
+      #{properties(repoUser, repoName, repoRef, params)}
+      <scm class="hudson.scm.NullSCM"/>
+      <canRoam>true</canRoam>
+      <dsl>#{CGI.escapeHTML(dsl)}</dsl>
+      EOX
+    end
+
     def githubProject(options = {})
       # chef's still stuck on ruby 1.9 (on our amazon linux)
       repoUser        = options[:repoUser]
-      repoName        = options[:repoName]
+      repoName        = options.fetch(:repoName, nil)
       repoRef         = options[:repoRef]
       description     = options.fetch(:description, '')
       nodeRestriction = options.fetch(:nodeRestriction, nil)
@@ -114,7 +132,7 @@ module ScalaJenkinsInfra
     end
 
     def scmNameParam(name)
-      <<-EOH.gsub(/^ {8}/, '')
+      name == nil ? '' : <<-EOH.gsub(/^ {8}/, '')
        <hudson.model.StringParameterDefinition>
          <name>repo_name</name>
          <description>The name of the repo to clone.</description>

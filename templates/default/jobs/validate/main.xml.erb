@@ -1,32 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
-  <description>PR validation -- called for every commit in every PR</description>
-  <%= properties("scala", "scala", @version,
-     [{:name => "prDryRun",
-       :desc => ""}]) %>
-  <scm class="hudson.scm.NullSCM"/>
-  <canRoam>true</canRoam>
-  <dsl>
-upstreamBuild = build(params, &quot;<%=job("validate/publish-core")%>&quot;).build
+<%= flowProject(
+    repoUser:    "scala",
+    repoName:    "scala",
+    repoRef:     @version,
+    description: "PR validation -- called for every commit in every PR",
+    params: [
+      {:name => "prDryRun", :desc => ""}
+    ],
+    dsl: <<-EOX
+upstreamBuild = build(params, "#{job("validate/publish-core")}").build
 
 // defines maven.version.number
-upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == &quot;jenkins.properties&quot;}
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
 
 buildVersionProps = new java.util.Properties()
 buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
-testParams = params + [ &quot;scalaVersion&quot; : buildVersionProps[&quot;maven.version.number&quot;] ]
+testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number"] ]
 
-build(testParams, &quot;<%=job("validate/test")%>&quot;)
+build(testParams, "#{job("validate/test")}")
 
 // for testing, to avoid re-running the main build:
-//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == &quot;<%=job("validate/publish-core")%>&quot;}.builds[0]
+//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "#{job("validate/publish-core")}"}.builds[0]
 
 //parallel (
-//    { build(testParams, &quot;<%=job("validate/test")%>&quot;) },
-//    { build(testParams, &quot;<%=job("validate/test-bla")%>&quot;) }
+//    { build(testParams, "#{job("validate/test")}") },
+//    { build(testParams, "#{job("validate/test-bla")}") }
 //)
-  </dsl>
+EOX
+) %>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.8">
       <recipients>adriaan@typesafe.com</recipients>
