@@ -21,7 +21,7 @@ default['master']['github']['authenticatedUserCreateJobPermission'] = 'false'
 
 default['master']['adminAddress'] = "adriaan@typesafe.com"
 default['master']['jenkinsUrl']   = "https://scala-ci.typesafe.com/"
-
+default['master']['jenkins']['notifyUrl'] = "http://scala-ci.typesafe.com:8888/jenkins"
 
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   lambda{| node | Chef::Node::ImmutableMash.new({

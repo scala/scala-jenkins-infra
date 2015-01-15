@@ -14,6 +14,17 @@ module ScalaJenkinsInfra
       paramDefaults = {:default => nil}
 
       """<properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin=\"notification@1.7\">
+          <endpoints>
+            <com.tikal.hudson.plugins.notification.Endpoint>
+              <protocol>HTTP</protocol>
+              <format>JSON</format>
+              <url>#{node['master']['jenkins']['notifyUrl']}</url>
+              <event>all</event>
+              <timeout>30000</timeout>
+            </com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
         <hudson.model.ParametersDefinitionProperty>
           <parameterDefinitions>
             #{scmParams(repoUser, repoName, repoRef)}
