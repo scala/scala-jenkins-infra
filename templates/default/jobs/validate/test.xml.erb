@@ -9,7 +9,8 @@
   params: [
     {:name => "scalaVersion", :desc => "Version of Scala to test. Set by main build flow."},
     {:name => "testExtraArgs", :desc => "TODO"},
-    {:name => "testTarget", :desc => "TODO"}
+    {:name => "testTarget", :desc => "TODO"},
+    {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ])
 %>
   <builders><%= scriptBuild %></builders>

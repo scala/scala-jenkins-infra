@@ -6,7 +6,8 @@
     repoRef:     @version,
     description: "PR validation -- called for every commit in every PR",
     params: [
-      {:name => "prDryRun", :desc => ""}
+      {:name => "prDryRun", :desc => ""},
+      {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
     ],
     dsl: <<-EOX
 upstreamBuild = build(params, "#{job("validate/publish-core")}").build
