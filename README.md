@@ -126,12 +126,26 @@ NOTE: the JSON must not have a field "id"!!!
 ### Chef user with keypair for jenkins cli access
 ```
 eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
-ruby keypair.rb > keypair.json
+ruby chef/keypair.rb > ~/Desktop/chef-secrets/config/keypair.json
+ruby chef/keypair.rb > ~/Desktop/chef-secrets/config/scabot-keypair.json
+
+# extract private key to ~/Desktop/chef-secrets/config/scabot.pem
 
 knife vault create master scala-jenkins-keypair \
-  --json keypair.json \
+  --json ~/Desktop/chef-secrets/config/keypair.json \
   --search 'name:jenkins*' \
   --admins adriaan
+
+knife vault create master scabot-keypair \
+  --json ~/Desktop/chef-secrets/config/scabot-keypair.json \
+  --search 'name:jenkins-master' \
+  --admins adriaan
+
+knife vault create master scabot \
+  --json ~/Desktop/chef-secrets/config/scabot.json \
+  --search 'name:jenkins-master' \
+  --admins adriaan
+
 ```
 
 ### For github oauth
@@ -214,6 +228,11 @@ Host jenkins-worker-amali-1
 Host jenkins-master
   IdentityFile ~/Desktop/chef-secrets/config/chef.pem
   User ec2-user
+
+Host scabot
+  HostName jenkins-master
+  IdentityFile ~/Desktop/chef-secrets/config/scabot.pem
+  User scabot
 
 Host jenkins-worker-windows
   IdentityFile ~/Desktop/chef-secrets/jenkins-chef

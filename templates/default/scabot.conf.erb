@@ -1,0 +1,14 @@
+scala: {
+  jenkins: {
+    job:   "scala-2.11.x-validate-main"
+    host:  "scala-ci.typesafe.com"
+    user:  "<%=node['scabot']['jenkins']['user']%>"
+    token: "<%=node['scabot']['jenkins']['token']%>"
+  }
+  github: {
+    user:  "<%=node['scabot']['github']['repo_user']%>"
+    repo:  "scala"
+    host:  "api.github.com"
+    token: "<%=node['scabot']['github']['token']%>"
+  }
+}

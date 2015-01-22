@@ -32,3 +32,7 @@ default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   EOH
 
 default['master']['ec2-start-stop']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
+
+
+default['scabot']['jenkins']['user']     = "scala-jenkins"
+default['scabot']['github']['repo_user'] = "adriaanm"
