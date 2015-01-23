@@ -11,4 +11,5 @@ cd /home/scabot
 touch scabot.start
 exec chpst -u scabot -U scabot \
   env HOME=/home/scabot \
+  env JAVA_OPTS='-Dconfig.file=/home/scabot/scabot/debug.conf -Dscabot.config.file=/home/scabot/scabot.conf'\
   /home/scabot/scabot/target/universal/stage/bin/scabot

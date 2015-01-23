@@ -61,7 +61,7 @@ git scabotCheckout do
   revision   "master"
 end
 
-template "#{scabotCheckout}/scabot.conf" do
+template "#{scabotHome}/scabot.conf" do
   source    'scabot.conf.erb'
   user      scabotUser
   sensitive true
