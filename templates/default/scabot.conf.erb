@@ -1,6 +1,7 @@
 scala: {
   jenkins: {
     job:   "scala-2.11.x-validate-main"
+    jobPrefix: "scala-2.11.x-validate-" // this will be stripped when reporting to github
     host:  "scala-ci.typesafe.com"
     user:  "<%=node['scabot']['jenkins']['user']%>"
     token: "<%=node['scabot']['jenkins']['token']%>"
