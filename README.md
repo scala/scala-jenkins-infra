@@ -196,7 +196,7 @@ knife vault create worker-publish gnupg \
 
 knife vault create worker private-repo-public-jobs \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-amali-*' \
+  --search 'name:jenkins-worker-behemoth-*' \
   --admins adriaan
 
 ```
@@ -211,8 +211,9 @@ Note that the IPs are stable by allocating elastic IPs and associating them to n
 ```
 54.67.111.226 jenkins-master
 54.67.33.167  jenkins-worker-ubuntu-publish
-54.183.145.57 jenkins-worker-amali-1
 54.183.156.89 jenkins-worker-windows
+54.153.2.9    jenkins-worker-behemoth-1
+54.153.1.99   jenkins-worker-behemoth-2
 ```
 
 ## ~/.ssh/config
@@ -221,7 +222,11 @@ Host jenkins-worker-ubuntu-publish
   IdentityFile ~/Desktop/chef-secrets/config/chef.pem
   User ubuntu
 
-Host jenkins-worker-amali-1
+Host jenkins-worker-behemoth-1
+  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  User ec2-user
+
+Host jenkins-worker-behemoth-2
   IdentityFile ~/Desktop/chef-secrets/config/chef.pem
   User ec2-user
 
@@ -292,12 +297,18 @@ knife ec2 server create -N jenkins-worker-ubuntu-publish \
    --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
 
-knife ec2 server create -N jenkins-worker-amali-1 \
-   --region us-west-1 --flavor c3.xlarge -I ami-4b6f650e \
+knife ec2 server create -N jenkins-worker-behemoth-1 \
+   --region us-west-1 --flavor c4.2xlarge -I ami-4b6f650e \
    -G Workers --ssh-user ec2-user \
    --iam-profile JenkinsWorker \
    --identity-file .chef/config/chef.pem \
-   --user-data chef/userdata/linux-2-ephemeral-one-home \
+   --run-list "scala-jenkins-infra::worker-init"
+
+knife ec2 server create -N jenkins-worker-behemoth-2 \
+   --region us-west-1 --flavor c4.2xlarge -I ami-4b6f650e \
+   -G Workers --ssh-user ec2-user \
+   --iam-profile JenkinsWorker \
+   --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::worker-init"
 
 ```
@@ -315,12 +326,15 @@ NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
 aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-a100026b  # jenkins-worker-windows
 aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-0c3c3cc6  # jenkins-worker-ubuntu-publish
-aws ec2 associate-address --allocation-id eipalloc-9cacb4fe --instance-id i-4e262784  # jenkins-worker-amali-1
+aws ec2 associate-address --allocation-id eipalloc-b8574dda --instance-id i-fa4e7032  # jenkins-worker-behemoth-1
+aws ec2 associate-address --allocation-id eipalloc-bb574dd9 --instance-id i-7b563db8  # jenkins-worker-behemoth-1
 ```
 
 ### Update access to vault
 ```
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
+
+knife vault update worker private-repo-public-jobs  --search 'name:jenkins-worker-behemoth-*'
 
 knife vault update master github-api            --search 'name:jenkins-master'
 
@@ -329,17 +343,14 @@ knife vault update worker-publish private-repo  --search 'name:jenkins-worker-ub
 knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish'
-
-knife vault update worker private-repo-public-jobs  --search 'name:jenkins-worker-amali-*'
-
 ```
 
 ### Add run-list items that need the vault after bootstrap
 ```
-knife node run_list add jenkins-master                "scala-jenkins-infra::master-config"
-knife node run_list add jenkins-worker-windows        "scala-jenkins-infra::worker-config"
-knife node run_list add jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-config"
-knife node run_list add jenkins-worker-amali-1        "scala-jenkins-infra::worker-config"
+knife node run_list set jenkins-master    "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
+for w in jenkins-worker-windows jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
+  do knife node run_list set jenkins-worker-behemoth-2  "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+done
 ```
 
 ### Re-run chef manually
@@ -351,7 +362,7 @@ knife winrm jenkins-worker-windows chef-client -m -P $PASS
 ```
 
 - ubuntu:  `ssh jenkins-worker-ubuntu-publish sudo chef-client`
-- amazon linux: `ssh jenkins-worker-amali-1`, and then `sudo chef-client`
+- amazon linux: `ssh jenkins-worker-behemoth-1`, and then `sudo chef-client`
 
 
 
@@ -374,13 +385,6 @@ end
 
 ## If connections hang
 Make sure security groups allow access...
-
-## Set run list (recipe to be executed by chef-client)
-```
-knife node run_list set jenkins-master               "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
-knife node run_list set jenkins-worker-windows       "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
-knife node run_list set jenkins-worker-ubuntu-publish "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
-```
 
 ## SSL cert
 ```

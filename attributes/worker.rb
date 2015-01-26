@@ -78,10 +78,10 @@ else
   default["jenkinsHomes"]["/home/jenkins"]["workerName"]      = node.name
   default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"]     = "jenkins"
   default["jenkinsHomes"]["/home/jenkins"]["publish"]         = publisher
-  default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 1  # if builds are in queue for even one minute, launch this worker
-  default["jenkinsHomes"]["/home/jenkins"]["idle_delay"]      = 15 # take worker off-line after 15 min of idling (we're charged by the hour, so no rush)
+  default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 0  # launch worker immediately
+  default["jenkinsHomes"]["/home/jenkins"]["idle_delay"]      = 20 # take worker off-line after 20 min of idling (we're charged by the hour, so no rush)
 
-  default["jenkinsHomes"]["/home/jenkins"]["executors"]  = publisher ? 2 : 3 # TODO: better heuristic...
+  default["jenkinsHomes"]["/home/jenkins"]["executors"]  = publisher ? 2 : 4 # TODO: better heuristic...
   default["jenkinsHomes"]["/home/jenkins"]["usage_mode"] = publisher ? "exclusive" : "normal"
   default["jenkinsHomes"]["/home/jenkins"]["labels"]     = ["linux", publisher ? "publish": "public"]
 
