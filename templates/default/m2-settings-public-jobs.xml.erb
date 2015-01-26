@@ -13,11 +13,6 @@
       <username><%= @privateRepoUser %></username>
       <password><%= @privateRepoPass %></password>
     </server>
-    <server> <!-- for IDE integration, I think -->
-      <id>artifactory-bot</id>
-      <username><%= @privateRepoUser %></username>
-      <password><%= @privateRepoPass %></password>
-    </server>
   </servers>
   <profiles>
     <profile>
@@ -27,6 +22,11 @@
           <id>pr-scala</id>
           <name>Scala PR validation snapshots</name>
           <url>http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots</url>
+        </repository>
+        <repository>
+          <id>scala-release-temp</id>
+          <name>Scala Relese snapshots</name>
+          <url>http://private-repo.typesafe.com/typesafe/scala-release-temp/</url>
         </repository>
       </repositories>
     </profile>

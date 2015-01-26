@@ -25,14 +25,15 @@ default['master']['jenkins']['notifyUrl'] = "http://scala-ci.typesafe.com:8888/j
 
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   lambda{| node | Chef::Node::ImmutableMash.new({
-    "ANT_OPTS"  => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4",
-    "JAVA_OPTS" => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4",
-    "prRepoUrl" => "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
+    "ANT_OPTS"   => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4",
+    "MAVEN_OPTS" => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC",
+    "JAVA_OPTS"  => "-Xms1536M -Xmx1536M -Xss1M -XX:MaxPermSize=256M -XX:ReservedCodeCacheSize=128M -XX:+UseParallelGC -Dpartest.threads=4",
+    "prRepoUrl"  => "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
   })}
   EOH
 
-default['master']['ec2-start-stop']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
+default['master']['ec2-start-stop']['url'] = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
 
 
 default['scabot']['jenkins']['user']     = "scala-jenkins"
-default['scabot']['github']['repo_user'] = "adriaanm"
+default['scabot']['github']['repo_user'] = "scala"
