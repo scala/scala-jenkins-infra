@@ -2,6 +2,14 @@ require 'cgi'
 
 module ScalaJenkinsInfra
   module JobBlurbs
+    def prRefSpec
+      "+refs/pull/${_scabot_pr}/head:refs/remotes/${repo_user}/pr/${_scabot_pr}/head"
+    end
+
+    def stdRefSpec
+      "+refs/heads/*:refs/remotes/${repo_user}/*"
+    end
+
     def properties(repoUser, repoName, repoRef, params)
       stringPar =
         """
@@ -60,6 +68,7 @@ module ScalaJenkinsInfra
       description     = options.fetch(:description, '')
       nodeRestriction = options.fetch(:nodeRestriction, nil)
       params          = options.fetch(:params, [])
+      refspec         = options.fetch(:refspec, stdRefSpec)
 
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
@@ -75,17 +84,19 @@ module ScalaJenkinsInfra
         <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@1.3">
           <template>[${BUILD_NUMBER}] of #{env(repoUser)}/#{env(repoName)}\##{env(repoRef)}</template>
         </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
-        #{scmBlurb}
+        #{scmBlurb(refspec)}
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
       EOX
     end
 
-    def scmBlurb
+    def scmBlurb(refspec)
       <<-EOH.gsub(/^ {8}/, '')
         <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
           <configVersion>2</configVersion>
           <userRemoteConfigs>
             <hudson.plugins.git.UserRemoteConfig>
+              <name>${repo_user}</name>
+              <refspec>#{refspec}</refspec>
               <url>https://github.com/${repo_user}/${repo_name}.git</url>
             </hudson.plugins.git.UserRemoteConfig>
           </userRemoteConfigs>
