@@ -153,7 +153,7 @@ module ScalaJenkinsInfra
       groovySysScript(<<-EOH.gsub(/^      /, '')
       repo_user = build.buildVariableResolver.resolve("repo_user")
       repo_name = build.buildVariableResolver.resolve("repo_name")
-      repo_ref  = build.buildVariableResolver.resolve("repo_ref").substring(0, 12)
+      repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
       build.setDisplayName("[${build.number}] of $repo_user/$repo_name\#$repo_ref")
       EOH
       )
@@ -163,7 +163,7 @@ module ScalaJenkinsInfra
       groovySysScript(<<-EOH.gsub(/^      /, '')
       repo_user   = build.buildVariableResolver.resolve("repo_user")
       repo_name   = build.buildVariableResolver.resolve("repo_name")
-      repo_ref    = build.buildVariableResolver.resolve("repo_ref").substring(0, 6)
+      repo_ref    = build.buildVariableResolver.resolve("repo_ref").take(6)
       _scabot_pr  = build.buildVariableResolver.resolve("_scabot_pr")
       build.setDisplayName("[${build.number}] of $repo_user/$repo_name\#$_scabot_pr at $repo_ref")
       EOH
