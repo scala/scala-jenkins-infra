@@ -12,46 +12,83 @@ brew cask install awscli cord
 # One-time EC2/IAM setup
 ## Create security group (ec2 firewall)
 
+CONFIGURATOR_IP is the ip of the machine running knife to initiate the bootstrap -- it can be removed once chef-client is running.
+
+
 ```
 aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master" 
-aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32 # ssh bootstrap
+aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr $CONFIGURATOR_IP/32 # ssh bootstrap
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 ```
 
+Type             | Protocol | Port Range | Source        |
+----------------------------------------------------------
+HTTP             |  TCP  |  80   | 0.0.0.0/0             |
+HTTPS            |  TCP  |  443  | 0.0.0.0/0             |
+Custom TCP Rule  |  TCP  |  8888 | 0.0.0.0/0             |
+All traffic      |  All  |  All  | sg-ecb06389 (Workers) |
+All traffic      |  All  |  All  | sg-1dec3d78 (Windows) |
+SSH              |  TCP  |  22   | $CONFIGURATOR_IP/32   |
+
+
 ```
 aws ec2 create-security-group --group-name "Windows" --description "Remote access to Windows instances" 
-aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 5985 --cidr $MACHINE-INITIATING-BOOTSTRAP/32 # allow WinRM from the machine that will execute `knife ec2 server create` below
+aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 5985 --cidr $CONFIGURATOR_IP/32 # allow WinRM from the machine that will execute `knife ec2 server create` below
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 0-65535 --source-group Master
 ```
 
+Type            | Protocol | Port Range | Source             |
+--------------------------------------------------------------
+All TCP            | TCP | 0 - 65535 |  sg-7afd2d1f (Master) |
+Custom TCP Rule    | TCP | 445       |  $CONFIGURATOR_IP/32  |
+RDP                | TCP | 3389      |  $CONFIGURATOR_IP/32  |
+SSH                | TCP | 22        |  $CONFIGURATOR_IP/32  |
+Custom TCP Rule    | TCP | 5985      |  $CONFIGURATOR_IP/32  |
+
+
 ```
 aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes" 
-aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $MACHINE-INITIATING-BOOTSTRAP/32 # ssh bootstrap
+aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $CONFIGURATOR_IP/32 # ssh bootstrap
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
 ```
 
-## Access role to allow chef to manage EBS volumes (not yet used)
+Type        | Protocol | Port Range |        Source        |
+------------------------------------------------------------
+All TCP     |   TCP    | 0 - 65535  | sg-7afd2d1f (Master) |
+SSH         |   TCP    | 22         | $CONFIGURATOR_IP/32  |
+
+
+## Instance profiles
+This avoids passing credentials for instances to use aws services.
+
+### Create instance profiles
+An instance profile must be passed when instance is created. It must contain one role. Can attach more policies to that role at any time.
+
+
 Based on http://domaintest001.com/aws-iam/
 
 ```
 aws iam create-instance-profile --instance-profile-name JenkinsMaster
-aws iam create-role --role-name jenkins-master --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
-aws iam add-role-to-instance-profile --instance-profile-name JenkinsMaster --role-name jenkins-master
-
-aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
-
-
 aws iam create-instance-profile --instance-profile-name JenkinsWorkerPublish
+aws iam create-instance-profile --instance-profile-name JenkinsWorker
+
+aws iam create-role --role-name jenkins-master         --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+aws iam create-role --role-name jenkins-worker         --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
 aws iam create-role --role-name jenkins-worker-publish --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+
+aws iam add-role-to-instance-profile --instance-profile-name JenkinsMaster        --role-name jenkins-master
+aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker        --role-name jenkins-worker
 aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorkerPublish --role-name jenkins-worker-publish
+```
+
+### Attach policies to roles:
+
+```
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-dynamodb --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/dynamodb.json
 
 // TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes and use IAM profile instea
 aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
-
-
-aws iam create-instance-profile --instance-profile-name JenkinsWorker
-aws iam create-role --role-name jenkins-worker --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
-aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker --role-name jenkins-worker
 
 aws iam put-role-policy --role-name jenkins-worker TODO
 ```
@@ -115,9 +152,6 @@ g commit --allow-empty -m"Initial"
 
 
 ## Secure data (one-time setup, can be done before bootstrap)
-https://github.com/settings/applications/new -->
- - Authorization callback URL = http://ec2-54-67-28-42.us-west-1.compute.amazonaws.com:8080/securityRealm/finishLogin
-
 
 from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-vault/
 
@@ -149,6 +183,9 @@ knife vault create master scabot \
 ```
 
 ### For github oauth
+
+https://github.com/settings/applications/new --> https://github.com/settings/applications/154904
+ - Authorization callback URL = https://scala-ci.typesafe.com/securityRealm/finishLogin
 
 ```
 knife vault create master github-api \
