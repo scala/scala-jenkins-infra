@@ -11,7 +11,8 @@
     {:name => "prDryRun", :desc => "Set to 'yep' to try out the jenkins flow."},
     {:name => "antBuildArgs", :desc => "TODO"},
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
-  ])
+  ],
+  buildNameSetter: setBuildNameValidate)
 %>
   <publishers>
     <hudson.tasks.ArtifactArchiver>

@@ -73,6 +73,7 @@ module ScalaJenkinsInfra
       refspec         = options.fetch(:refspec, stdRefSpec)
       concurrent      = options.fetch(:concurrent, true)
       timeoutMinutesElasticDefault = options.fetch(:timeoutMinutesElasticDefault, 150)
+      buildNameSetter = options.fetch(:buildNameSetter, setBuildName)
 
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
@@ -88,7 +89,10 @@ module ScalaJenkinsInfra
         #{scmBlurb(refspec)}
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
-        <builders>#{scriptBuild}</builders>
+        <builders>
+          #{buildNameSetter}
+          #{scriptBuild}
+        </builders>
         <buildWrappers>
           <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
             <strategy class="hudson.plugins.build_timeout.impl.ElasticTimeOutStrategy">
@@ -142,6 +146,37 @@ module ScalaJenkinsInfra
       source scripts/#{@scriptName}
         </command>
       </hudson.tasks.Shell>
+      EOH
+    end
+
+    def setBuildName
+      groovySysScript(<<-EOH.gsub(/^      /, '')
+      repo_user = build.buildVariableResolver.resolve("repo_user")
+      repo_name = build.buildVariableResolver.resolve("repo_name")
+      repo_ref  = build.buildVariableResolver.resolve("repo_ref").substring(0, 12)
+      build.setDisplayName("[${build.number}] of $repo_user/$repo_name\#$repo_ref")
+      EOH
+      )
+    end
+
+    def setBuildNameValidate
+      groovySysScript(<<-EOH.gsub(/^      /, '')
+      repo_user   = build.buildVariableResolver.resolve("repo_user")
+      repo_name   = build.buildVariableResolver.resolve("repo_name")
+      repo_ref    = build.buildVariableResolver.resolve("repo_ref").substring(0, 6)
+      _scabot_pr  = build.buildVariableResolver.resolve("_scabot_pr")
+      build.setDisplayName("[${build.number}] of $repo_user/$repo_name\#$_scabot_pr at $repo_ref")
+      EOH
+      )
+    end
+
+    def groovySysScript(script)
+      <<-EOH.gsub(/^      /, '')
+      <hudson.plugins.groovy.SystemGroovy plugin="groovy">
+        <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+          <command>#{CGI.escapeHTML(script)}</command>
+        </scriptSource>
+      </hudson.plugins.groovy.SystemGroovy>
       EOH
     end
 

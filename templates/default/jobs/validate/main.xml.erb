@@ -9,6 +9,7 @@
       {:name => "prDryRun", :desc => ""},
       {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
     ],
+    buildNameSetter: setBuildNameValidate,
     dsl: <<-EOX
 upstreamBuild = build(params, "#{job("validate/publish-core")}").build
 
