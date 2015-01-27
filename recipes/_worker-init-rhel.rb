@@ -14,6 +14,11 @@ include_recipe "java"
 # JAVA_HOME=/usr/lib/jvm/java implies there must be a /usr/lib/jvm-exports/java, which is not created by the oracle rpm
 directory '/usr/lib/jvm-exports/java'
 
-%w{ant ant-contrib ant-junit}.each do |pkg|
+cookbook_file "epel-apache-maven.repo.erb" do
+  owner 'root'
+  path "/etc/yum.repos.d/epel-apache-maven.repo"
+end
+
+%w{ant ant-contrib ant-junit apache-maven}.each do |pkg|
   package pkg
 end

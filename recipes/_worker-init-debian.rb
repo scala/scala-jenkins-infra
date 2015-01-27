@@ -9,6 +9,6 @@
 
 include_recipe "java"
 
-%w{ant ant-contrib ant-optional}.each do |pkg|
+%w{ant ant-contrib ant-optional maven}.each do |pkg|
   package pkg
 end
