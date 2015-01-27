@@ -90,6 +90,7 @@ module ScalaJenkinsInfra
         #{scmBlurb(refspec)}
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
+        <builders>#{scriptBuild}</builders>
       EOX
     end
 

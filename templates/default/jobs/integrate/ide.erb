@@ -10,7 +10,6 @@
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ])
 %>
-  <builders><%= scriptBuild %></builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
       <artifacts>logs/**,**/surefire-reports/*</artifacts>
