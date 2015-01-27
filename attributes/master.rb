@@ -25,9 +25,9 @@ default['master']['jenkins']['notifyUrl'] = "http://scala-ci.typesafe.com:8888/j
 
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   lambda{| node | Chef::Node::ImmutableMash.new({
-    "JAVA_OPTS"  => "-server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=384M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4",
-    "ANT_OPTS"   => "-server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=384M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4",
-    "MAVEN_OPTS" => "-server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=384M -XX:ReservedCodeCacheSize=128M",
+    "JAVA_OPTS"  => "-server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4",
+    "ANT_OPTS"   => "-server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4",
+    "MAVEN_OPTS" => "-server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M",
     "prRepoUrl"  => "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
   })}
   EOH
