@@ -50,12 +50,14 @@ module ScalaJenkinsInfra
       dsl         = options[:dsl]
       description = options.fetch(:description, '')
       params      = options.fetch(:params, [])
+      concurrent  = options.fetch(:concurrent, true)
 
       <<-EOX
       <description>#{CGI.escapeHTML(description)}</description>
       #{properties(repoUser, repoName, repoRef, params)}
       <scm class="hudson.scm.NullSCM"/>
       <canRoam>true</canRoam>
+      <concurrentBuild>#{concurrent}</concurrentBuild>
       <dsl>#{CGI.escapeHTML(dsl)}</dsl>
       EOX
     end
@@ -69,6 +71,7 @@ module ScalaJenkinsInfra
       nodeRestriction = options.fetch(:nodeRestriction, nil)
       params          = options.fetch(:params, [])
       refspec         = options.fetch(:refspec, stdRefSpec)
+      concurrent      = options.fetch(:concurrent, true)
 
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
@@ -86,6 +89,7 @@ module ScalaJenkinsInfra
         </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
         #{scmBlurb(refspec)}
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
+        <concurrentBuild>#{concurrent}</concurrentBuild>
       EOX
     end
 

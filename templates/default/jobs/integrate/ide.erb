@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+<%= githubProject(
+  repoUser:    "scala",
+  repoName:    "scala",
+  repoRef:     @version,
+  description: "PR integration testing: IDE",
+  nodeRestriction: "public",
+  params: [
+    {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
+  ])
+%>
+  <builders><%= scriptBuild %></builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>logs/**,**/surefire-reports/*</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>pr-scala-integrate-ide@typesafe.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+</project>
