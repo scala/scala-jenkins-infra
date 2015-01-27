@@ -72,6 +72,7 @@ module ScalaJenkinsInfra
       params          = options.fetch(:params, [])
       refspec         = options.fetch(:refspec, stdRefSpec)
       concurrent      = options.fetch(:concurrent, true)
+      timeoutMinutesElasticDefault = options.fetch(:timeoutMinutesElasticDefault, 150)
 
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
@@ -91,6 +92,16 @@ module ScalaJenkinsInfra
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>#{scriptBuild}</builders>
+        <buildWrappers>
+          <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
+            <strategy class="hudson.plugins.build_timeout.impl.ElasticTimeOutStrategy">
+              <timeoutPercentage>150</timeoutPercentage>
+              <numberOfBuilds>3</numberOfBuilds>
+              <timeoutMinutesElasticDefault>#{timeoutMinutesElasticDefault}</timeoutMinutesElasticDefault>
+            </strategy>
+            <operationList/>
+          </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+        </buildWrappers>
       EOX
     end
 
