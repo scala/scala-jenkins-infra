@@ -85,9 +85,6 @@ module ScalaJenkinsInfra
       <<-EOX
         <description>#{CGI.escapeHTML(description)}</description>
         #{properties(repoUser, repoName, repoRef, params)}
-        <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@1.3">
-          <template>[${BUILD_NUMBER}] of #{env(repoUser)}/#{env(repoName)}\##{env(repoRef)}</template>
-        </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
         #{scmBlurb(refspec)}
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
