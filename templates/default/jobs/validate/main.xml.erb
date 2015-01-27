@@ -7,11 +7,15 @@
     description: "PR validation -- called for every commit in every PR",
     params: [
       {:name => "prDryRun", :desc => ""},
-      {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
+      {:name => "_scabot_pr", :desc => "For internal use by Scabot."},
+      {:name => "_scabot_last", :desc => "For internal use by Scabot."}
     ],
     buildNameSetter: setBuildNameValidate,
     dsl: <<-EOX
 upstreamBuild = build(params, "#{job("validate/publish-core")}").build
+
+// for testing, to avoid re-running the main build:
+//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "#{job("validate/publish-core")}"}.builds[0]
 
 // defines maven.version.number
 upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
@@ -21,15 +25,11 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
 testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number"] ]
 
-build(testParams, "#{job("validate/test")}")
+parallel (
+   { build(testParams, "#{job("validate/test")}") },
+   { build(testParams, "#{job("integrate/ide")}") }
+)
 
-// for testing, to avoid re-running the main build:
-//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "#{job("validate/publish-core")}"}.builds[0]
-
-//parallel (
-//    { build(testParams, "#{job("validate/test")}") },
-//    { build(testParams, "#{job("validate/test-bla")}") }
-//)
 EOX
 ) %>
   <publishers>

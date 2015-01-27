@@ -7,7 +7,9 @@
   description: "PR integration testing: IDE",
   nodeRestriction: "public",
   params: [
-    {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
+    {:name => "scalaVersion", :desc => "Version of Scala to test. Set by main build flow."},
+    {:name => "_scabot_pr", :desc => "For internal use by Scabot."},
+    {:name => "_scabot_last", :desc => "For internal use by Scabot."}
   ])
 %>
   <publishers>
