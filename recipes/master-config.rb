@@ -9,8 +9,6 @@
 
 require "chef-vault"
 
-include_recipe 'scala-jenkins-infra::_master-config-scabot'
-
 ruby_block 'set private key' do
   block do
     node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
@@ -59,3 +57,6 @@ include_recipe 'scala-jenkins-infra::_master-config-auth-github'
 include_recipe 'scala-jenkins-infra::_master-config-jobs'
 
 include_recipe 'scala-jenkins-infra::_master-config-workers'
+
+include_recipe 'scala-jenkins-infra::_master-config-scabot'
+
