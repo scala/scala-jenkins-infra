@@ -2,12 +2,10 @@ require 'cgi'
 
 module ScalaJenkinsInfra
   module JobBlurbs
-    def prRefSpec
-      "+refs/pull/${_scabot_pr}/head:refs/remotes/${repo_user}/pr/${_scabot_pr}/head"
-    end
-
+    # works both for
     def stdRefSpec
-      "+refs/heads/*:refs/remotes/${repo_user}/*"
+      # can't use "+refs/pull/${_scabot_pr}/head:refs/remotes/${repo_user}/pr/${_scabot_pr}/head " because _scabot_pr isn't always set, and don't know how to default it to *
+      "+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head"
     end
 
     def properties(repoUser, repoName, repoRef, params)
