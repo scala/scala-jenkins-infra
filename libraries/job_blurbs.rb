@@ -97,7 +97,7 @@ module ScalaJenkinsInfra
           <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
             <strategy class="hudson.plugins.build_timeout.impl.ElasticTimeOutStrategy">
               <timeoutPercentage>150</timeoutPercentage>
-              <numberOfBuilds>3</numberOfBuilds>
+              <numberOfBuilds>50</numberOfBuilds>
               <timeoutMinutesElasticDefault>#{timeoutMinutesElasticDefault}</timeoutMinutesElasticDefault>
             </strategy>
             <operationList/>
