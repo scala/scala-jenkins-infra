@@ -10,7 +10,7 @@
       {:name => "_scabot_pr", :desc => "For internal use by Scabot."},
       {:name => "_scabot_last", :desc => "For internal use by Scabot."}
     ],
-    buildNameSetter: setBuildNameValidate,
+    buildNameScript: setValidateBuildNameScript,
     dsl: <<-EOX
 upstreamBuild = build(params, "#{job("validate/publish-core")}").build
 

@@ -49,6 +49,7 @@ module ScalaJenkinsInfra
       description = options.fetch(:description, '')
       params      = options.fetch(:params, [])
       concurrent  = options.fetch(:concurrent, true)
+      buildNameScript = options.fetch(:buildNameScript, setBuildNameScript)
 
       <<-EOX
       <description>#{CGI.escapeHTML(description)}</description>
@@ -56,7 +57,7 @@ module ScalaJenkinsInfra
       <scm class="hudson.scm.NullSCM"/>
       <canRoam>true</canRoam>
       <concurrentBuild>#{concurrent}</concurrentBuild>
-      <dsl>#{CGI.escapeHTML(dsl)}</dsl>
+      <dsl>#{CGI.escapeHTML(buildNameScript+"\n\n"+dsl)}</dsl>
       EOX
     end
 
@@ -71,7 +72,7 @@ module ScalaJenkinsInfra
       refspec         = options.fetch(:refspec, stdRefSpec)
       concurrent      = options.fetch(:concurrent, true)
       timeoutMinutesElasticDefault = options.fetch(:timeoutMinutesElasticDefault, 150)
-      buildNameSetter = options.fetch(:buildNameSetter, setBuildName)
+      buildNameScript = options.fetch(:buildNameScript, setBuildNameScript)
 
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
@@ -88,7 +89,7 @@ module ScalaJenkinsInfra
         #{restriction % {nodes: nodeRestriction} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
-          #{buildNameSetter}
+          #{groovySysScript(buildNameScript)}
           #{scriptBuild}
         </builders>
         <buildWrappers>
@@ -147,26 +148,35 @@ module ScalaJenkinsInfra
       EOH
     end
 
-    def setBuildName
-      groovySysScript(<<-EOH.gsub(/^      /, '')
+    def setBuildNameScript
+      <<-EOH.gsub(/^      /, '')
       repo_user = build.buildVariableResolver.resolve("repo_user")
       repo_name = build.buildVariableResolver.resolve("repo_name")
       repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
-      build.setDisplayName("[${build.number}] of $repo_user/$repo_name\#$repo_ref")
+      build.setDisplayName("[${build.number}] $repo_user/$repo_name\#$repo_ref")
       EOH
-      )
     end
 
-    def setBuildNameValidate
-      groovySysScript(<<-EOH.gsub(/^      /, '')
+    def setValidateBuildNameScript
+      <<-EOH.gsub(/^      /, '')
       repo_user   = build.buildVariableResolver.resolve("repo_user")
       repo_name   = build.buildVariableResolver.resolve("repo_name")
       repo_ref    = build.buildVariableResolver.resolve("repo_ref").take(6)
       _scabot_pr  = build.buildVariableResolver.resolve("_scabot_pr")
-      build.setDisplayName("[${build.number}] of $repo_user/$repo_name\#$_scabot_pr at $repo_ref")
+      build.setDisplayName("[${build.number}] $repo_user/$repo_name\#$_scabot_pr at $repo_ref")
       EOH
-      )
     end
+
+    def setReleaseBuildNameScript
+      <<-EOH.gsub(/^      /, '')
+      repo_user = build.buildVariableResolver.resolve("repo_user")
+      repo_name = build.buildVariableResolver.resolve("repo_name")
+      repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+      ver = params["SCALA_VER_BASE"] + params["SCALA_VER_SUFFIX"]
+      build.setDisplayName("[${build.number}] Scala dist ${ver} $repo_user/$repo_name\#$repo_ref")
+      EOH
+    end
+
 
     def groovySysScript(script)
       <<-EOH.gsub(/^      /, '')

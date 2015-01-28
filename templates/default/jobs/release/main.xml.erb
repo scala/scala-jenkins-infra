@@ -8,10 +8,8 @@
       {:name => "SCALA_VER_BASE", :desc => "When set, a release with version \"$SCALA_VER_BASE$SCALA_VER_SUFFIX\" will be built. Same effect as for tagging $repo_ref as \"v$SCALA_VER_BASE$SCALA_VER_SUFFIX\"."},
       {:name => "SCALA_VER_SUFFIX", :desc => ""}
     ],
+    buildNameScript: setReleaseBuildNameScript,
     dsl: <<-EOX
-ver = params["SCALA_VER_BASE"] + params["SCALA_VER_SUFFIX"]
-build.setDisplayName("Scala distribution ${ver} [${build.number}]")
-
 if (params.repo_ref) buildParams = params
 else buildParams = params + [ "repo_ref" : "v$ver" ]
 
