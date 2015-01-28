@@ -48,14 +48,14 @@ aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 ```
 
-Type             | Protocol | Port Range | Source        |
-----------------------------------------------------------
-HTTP             |  TCP  |  80   | 0.0.0.0/0             |
-HTTPS            |  TCP  |  443  | 0.0.0.0/0             |
-Custom TCP Rule  |  TCP  |  8888 | 0.0.0.0/0             |
-All traffic      |  All  |  All  | sg-ecb06389 (Workers) |
-All traffic      |  All  |  All  | sg-1dec3d78 (Windows) |
-SSH              |  TCP  |  22   | $CONFIGURATOR_IP/32   |
+| Type             | Protocol | Port Range | Source                |
+|------------------|----------|------------|-----------------------|
+| HTTP             |  TCP     |  80        | 0.0.0.0/0             |
+| HTTPS            |  TCP     |  443       | 0.0.0.0/0             |
+| Custom TCP Rule  |  TCP     |  8888      | 0.0.0.0/0             |
+| All traffic      |  All     |  All       | sg-ecb06389 (Workers) |
+| All traffic      |  All     |  All       | sg-1dec3d78 (Windows) |
+| SSH              |  TCP     |  22        | $CONFIGURATOR_IP/32   |
 
 
 ```
@@ -64,13 +64,13 @@ aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp -
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 0-65535 --source-group Master
 ```
 
-Type            | Protocol | Port Range | Source             |
---------------------------------------------------------------
-All TCP            | TCP | 0 - 65535 |  sg-7afd2d1f (Master) |
-Custom TCP Rule    | TCP | 445       |  $CONFIGURATOR_IP/32  |
-RDP                | TCP | 3389      |  $CONFIGURATOR_IP/32  |
-SSH                | TCP | 22        |  $CONFIGURATOR_IP/32  |
-Custom TCP Rule    | TCP | 5985      |  $CONFIGURATOR_IP/32  |
+| Type             | Protocol | Port Range | Source                |
+|------------------|----------|------------|-----------------------|
+| All TCP            | TCP | 0 - 65535 |  sg-7afd2d1f (Master) |
+| Custom TCP Rule    | TCP | 445       |  $CONFIGURATOR_IP/32  |
+| RDP                | TCP | 3389      |  $CONFIGURATOR_IP/32  |
+| SSH                | TCP | 22        |  $CONFIGURATOR_IP/32  |
+| Custom TCP Rule    | TCP | 5985      |  $CONFIGURATOR_IP/32  |
 
 
 ```
@@ -79,10 +79,10 @@ aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp -
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
 ```
 
-Type        | Protocol | Port Range |        Source        |
-------------------------------------------------------------
-All TCP     |   TCP    | 0 - 65535  | sg-7afd2d1f (Master) |
-SSH         |   TCP    | 22         | $CONFIGURATOR_IP/32  |
+| Type             | Protocol | Port Range | Source                |
+|------------------|----------|------------|-----------------------|
+| All TCP     |   TCP    | 0 - 65535  | sg-7afd2d1f (Master) |
+| SSH         |   TCP    | 22         | $CONFIGURATOR_IP/32  |
 
 
 ## Instance profiles
