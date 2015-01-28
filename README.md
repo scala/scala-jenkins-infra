@@ -388,15 +388,6 @@ NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 
 ## After bootstrap (or when nodes are added)
-### Attach eips
-
-TODO: do during knife ec2 server create as for behemoth
-
-```
-aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
-aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-a100026b  # jenkins-worker-windows
-aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-0c3c3cc6  # jenkins-worker-ubuntu-publish
-```
 
 ### Update access to vault
 ```
@@ -413,12 +404,22 @@ knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ub
 knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish'
 ```
 
-### Add run-list items that need the vault after bootstrap
+### Add run-list items that need the vault
 ```
 knife node run_list set jenkins-master    "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
 for w in jenkins-worker-windows jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
   do knife node run_list set $w  "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
 done
+```
+
+### Attach eips
+
+TODO: do during knife ec2 server create as for behemoth
+
+```
+aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
+aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-a100026b  # jenkins-worker-windows
+aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-0c3c3cc6  # jenkins-worker-ubuntu-publish
 ```
 
 ### Re-run chef manually
