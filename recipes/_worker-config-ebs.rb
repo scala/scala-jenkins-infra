@@ -15,6 +15,7 @@ jenkinsFs="ext4"
 aws_ebs_volume jenkinsDev do
   size 100
   device jenkinsDev
+  volume_type "gp2"
   availability_zone node[:ec2][:placement_availability_zone]
   action [:create, :attach]
 end
