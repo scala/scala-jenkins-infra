@@ -10,6 +10,33 @@ brew cask install awscli cord
 ```
 
 # One-time EC2/IAM setup
+## Create a script user for use with knife
+Never run scripts as root. Best to have a completely separate user.
+
+This user needs the following policy (WIP!):
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:List*",
+        "iam:Get*",
+        "iam:PassRole",
+        "iam:PutRolePolicy"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Action": "ec2:*",
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 ## Create security group (ec2 firewall)
 
 CONFIGURATOR_IP is the ip of the machine running knife to initiate the bootstrap -- it can be removed once chef-client is running.
@@ -90,7 +117,7 @@ aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-dynamod
 // TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes and use IAM profile instea
 aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
 
-aws iam put-role-policy --role-name jenkins-worker TODO
+aws iam put-role-policy --role-name jenkins-worker --policy-name jenkins-ebs-create-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
 ```
 
 NOTE: if you get syntax errors, check the policy doc URL
@@ -334,19 +361,22 @@ knife ec2 server create -N jenkins-worker-ubuntu-publish \
    --user-data chef/userdata/linux-2-ephemeral-one-home \
    --run-list "scala-jenkins-infra::worker-init"
 
-knife ec2 server create -N jenkins-worker-behemoth-1 \
-   --region us-west-1 --flavor c4.2xlarge -I ami-4b6f650e \
-   -G Workers --ssh-user ec2-user \
-   --iam-profile JenkinsWorker \
-   --identity-file .chef/config/chef.pem \
-   --run-list "scala-jenkins-infra::worker-init"
 
-knife ec2 server create -N jenkins-worker-behemoth-2 \
-   --region us-west-1 --flavor c4.2xlarge -I ami-4b6f650e \
-   -G Workers --ssh-user ec2-user \
+echo NOTE: Make sure to first remove the ips in $behemothIp from your ~/.ssh/known_hosts. Also remove the corresponding worker from the chef server (can be only one with the same name).
+behemothIp=(54.153.2.9 54.153.1.99)
+for behemoth in 1 2
+do knife ec2 server create -N jenkins-worker-behemoth-$behemoth \
+   --flavor c4.2xlarge \
+   --region us-west-1 \
+   -I ami-4b6f650e --ssh-user ec2-user \
    --iam-profile JenkinsWorker \
+   --ebs-optimized --ebs-volume-type gp2 \
+   --security-group-ids sg-ecb06389 \
+   --subnet subnet-4bb3b80d --associate-eip ${behemothIp[$behemoth]} \
+   --server-connect-attribute public_ip_address\
    --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::worker-init"
+done
 
 ```
 
@@ -359,12 +389,13 @@ NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 ## After bootstrap (or when nodes are added)
 ### Attach eips
+
+TODO: do during knife ec2 server create as for behemoth
+
 ```
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
 aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-a100026b  # jenkins-worker-windows
 aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-0c3c3cc6  # jenkins-worker-ubuntu-publish
-aws ec2 associate-address --allocation-id eipalloc-b8574dda --instance-id i-fa4e7032  # jenkins-worker-behemoth-1
-aws ec2 associate-address --allocation-id eipalloc-bb574dd9 --instance-id i-7b563db8  # jenkins-worker-behemoth-1
 ```
 
 ### Update access to vault
@@ -386,7 +417,7 @@ knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-wi
 ```
 knife node run_list set jenkins-master    "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
 for w in jenkins-worker-windows jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
-  do knife node run_list set jenkins-worker-behemoth-2  "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+  do knife node run_list set $w  "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
 done
 ```
 
@@ -404,6 +435,10 @@ knife winrm jenkins-worker-windows chef-client -m -P $PASS
 
 
 # Misc
+
+## "ERROR: null" in slave agent launch log
+There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
+Workaround: make sure EC2 instance names are unique.
 
 ## Testing locally using vagrant
 

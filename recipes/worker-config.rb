@@ -13,6 +13,9 @@
 
 require 'chef-vault'
 
+if (node.name =~ /.*-behemoth-.*/) != nil
+  include_recipe "scala-jenkins-infra::_worker-config-ebs"
+end
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   case node["platform_family"]
