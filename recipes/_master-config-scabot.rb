@@ -57,7 +57,7 @@ end
 # scabotCheckout must be an empty dir
 git scabotCheckout do
   user       scabotUser
-  repository "https://github.com/adriaanm/scabot.git"
+  repository "https://github.com/scala/scabot.git"
   revision   "master"
 end
 
