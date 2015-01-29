@@ -114,7 +114,7 @@ aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorkerPublis
 aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
 aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-dynamodb --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/dynamodb.json
 
-// TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes and use IAM profile instea
+// TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes and use IAM profile instead
 aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
 
 aws iam put-role-policy --role-name jenkins-worker --policy-name jenkins-ebs-create-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
@@ -387,8 +387,6 @@ do knife ec2 server create -N jenkins-worker-behemoth-$behemoth      \
 done
 
 ```
-
-TODO: use /mnt/ephemeral1 for something during build?
 
 NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`

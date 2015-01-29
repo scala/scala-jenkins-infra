@@ -11,7 +11,7 @@ require "chef-vault"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   if workerConfig["publish"]
-    # TODO: can we use an IAM instance profile? not urgent, but shouldn't run PR validation on windows until we separate this out
+    # TODO: once s3-plugin supports it, use instance profile instead of credentials
     {
       "#{jenkinsHome}/.s3credentials" => "s3credentials.erb"
     }.each do |target, templ|

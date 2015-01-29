@@ -21,7 +21,7 @@ credentialsMap = {
 
 privKey = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
 
-# TODO: different keypairs
+# TODO: different keypairs to sandbox different workers better, just in case?
 credentialsMap.each do |userName, uniqId|
   jenkins_private_key_credentials userName.dup do # dup is workaround for jenkins cookbook doing a gsub! in convert_to_groovy
     id uniqId
@@ -56,7 +56,7 @@ search(:node, 'name:jenkins-worker*').each do |worker|
 
       environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(worker)))
 
-      action [:create] # TODO: we don't need to :connect, :online since the ec2 start/stop plugin will do that -- right?? Also, if connect fails, it may be that chef-client hasn't yet run on the client to initialize jenkins home with .ssh/authorized_keys (since /home is mounted on ephemeral)
+      action [:create] # we don't need to :connect, :online since the ec2 start/stop plugin will do that. Also, if connect fails, it may be that chef-client hasn't yet run on the client to initialize jenkins home with .ssh/authorized_keys
     end
   end
 end

@@ -78,7 +78,6 @@ else
   publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
   lightWorker = publisher  # TODO: better heuristic...
 
-  # TODO: install and manage multiple jdks (only if !publisher)
   override['java']['jdk_version']    = '6'
   override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
   override['java']['oracle']['accept_oracle_download_terms'] = true

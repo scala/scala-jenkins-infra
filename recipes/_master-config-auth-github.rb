@@ -12,7 +12,6 @@ require "chef-vault"
 apiVault = ChefVault::Item.load("master", "github-api")
 
 # This adds Github oAuth security. (login with your github id.)
-# TODO: build bot will need support oauth
 jenkins_script 'add_gh_authentication' do
   command <<-EOH.gsub(/^ {4}/, '')
     import jenkins.model.Jenkins

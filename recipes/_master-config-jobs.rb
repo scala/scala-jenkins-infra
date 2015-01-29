@@ -40,21 +40,24 @@ def templDesc(version, path)
   end
 end
 
-# TODO: jobs in integrate/ (test IDE integration, matrix, core-community)
-# if all integration builds succeed, release can be done
+# TODO #8 #5: jobs in integrate/ (test IDE integration, matrix, core-community)
+# if all integration builds succeed, staged merge commit can be pushed to main repo
 # matrix:
 #  - buildArgs:
 #    - rangepos
+#    - checkinit
 #  - os:
 #     - windows
 #     - linux
 #  - jdk:
+#     - 6
 #     - 7
 #     - 8
 #     - 9
-# core-community: sbt, ensime, modules,...
+# core-community: sbt, ensime, modules, ide,...
 
 # create scala-$version-$jobName for every template under jobs/
+# TODO #16: add 2.12.x jobs
 %w{ 2.11.x }.each do | version |
   node.run_context.cookbook_collection["scala-jenkins-infra"].manifest[:templates]
     .flat_map { |mani| templDesc(version, mani['path']) }
@@ -75,7 +78,7 @@ end
   end
 end
 
-# TODO: make a view for each top-level directory under jobs/ that lists all jobs under it (scala-2.11.x-integrate, scala-2.11.x-release, scala-2.11.x-validate)
+# TODO #10: make a view for each top-level directory under jobs/ that lists all jobs under it (scala-2.11.x-integrate, scala-2.11.x-release, scala-2.11.x-validate)
 # https://issues.jenkins-ci.org/browse/JENKINS-8927
 def viewXML(viewPrefix)
   <<-EOH.gsub(/^    /, '')
