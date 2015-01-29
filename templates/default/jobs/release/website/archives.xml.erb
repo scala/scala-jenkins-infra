@@ -14,7 +14,7 @@
        is http://www.scala-lang.org/files/archive/nightly/2.11.x/
        instead of http://www.scala-lang.org/files/archive/</p>
    }.gsub(/^ {4}/, ''),
-  nodeRestriction: "publish",
+  nodeRestriction: "linux && publish",
   concurrent: false,
   params: [
     {:name => "version", :desc => "The version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2"}

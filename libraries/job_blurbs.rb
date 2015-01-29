@@ -86,7 +86,7 @@ module ScalaJenkinsInfra
         <description>#{CGI.escapeHTML(description)}</description>
         #{properties(repoUser, repoName, repoRef, params)}
         #{scmBlurb(refspec)}
-        #{restriction % {nodes: nodeRestriction} if nodeRestriction}
+        #{restriction % {nodes: CGI.escapeHTML(nodeRestriction)} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
           #{groovySysScript(buildNameScript)}

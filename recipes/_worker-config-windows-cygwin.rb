@@ -44,7 +44,6 @@ file "#{node['cygwin']['home']}/etc/fstab" do
   content <<-EOH.gsub(/^    /, '')
     none /cygdrive cygdrive binary,posix=0,user 0 0
     Y: /home ntfs binary 0 0
-    Z: /tmp  ntfs binary 0 0
   EOH
 end
 

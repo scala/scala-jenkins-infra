@@ -19,7 +19,7 @@
 
     The downloads will be available at http://downloads.typesafe.com/scala/$ver/scala-$ver*
    }.gsub(/^ {4}/, ''),
-  nodeRestriction: "windows",
+  nodeRestriction: "windows && publish",
   params: [
     {:name => "sbtDistTarget", :default => "s3-upload", :desc => "To upload to S3, use s3-upload. A dry run (everything but uploading to S3): s3Upload::mappings"},
     {:name => "sbtDistVersionOverride", :desc => "may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)"}

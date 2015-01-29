@@ -33,14 +33,25 @@ when "windows"
   ## GIT_PATH      = "#{ PROGRAM_FILES }\\Git\\Cmd"
 
   jenkinsHome = 'y:\jenkins'
-  jenkinsTmp = 'z:\tmp'
+  jenkinsTmp  = 'y:\tmp'
+
+  # If node name contains "-publish", configure it with necessary secrets/package to roll & publish a release
+  publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
+
+  default['ebs']['volumes']['Y']['size']      = 50
+  default['ebs']['volumes']['Y']['dev']       = "sdj"
+  default['ebs']['volumes']['Y']['disk']      = 'PCIROOT(0)#PCI(1F00)#PCI(1F00)#SCSI(P00T09L00)' # J is the 9th letter in base-0 --> T09(https://technet.microsoft.com/en-us/library/ee851589%28v=ws.10%29.aspx)
+
+  default['ebs']['volumes']['Y']['fstype']    = "ntfs"
+  default['ebs']['volumes']['Y']['user']      = "jenkins"
+  default['ebs']['volumes']['Y']['mountopts'] = ''
 
   default["jenkinsHomes"][jenkinsHome]["executors"]   = 2
   default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
   default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
   default["jenkinsHomes"][jenkinsHome]["jvm_options"] = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp.gsub(/\\/,'/')}" # jenkins doesn't quote properly
-  default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows"] # doesn't have the publish label on purpose (the only publish job that can run here is the -windows one)
-  default["jenkinsHomes"][jenkinsHome]["publish"]     = true
+  default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
+  default["jenkinsHomes"][jenkinsHome]["publish"]     = publisher
 
   default["jenkinsHomes"][jenkinsHome]["usage_mode"]  = 'exclusive' # windows is a speciality node, don't run jobs here unless they asked for a `windows` node
 
@@ -49,7 +60,7 @@ when "windows"
 
   # can't marshall closures, but they sometimes need to be shipped, so encode as string, closing over `node`
   default["_jenkinsHome"] = jenkinsHome
-  default["_jenkinsTmp"] = jenkinsTmp
+  default["_jenkinsTmp"]  = jenkinsTmp
   default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
     lambda{| node | Chef::Node::ImmutableMash.new({
       "PATH"          => "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git/Cmd", # TODO express in terms of attributes
@@ -63,8 +74,9 @@ when "windows"
     EOH
 
 else
-  # If node name ends in "-publish", configure it with necessary secrets/package to roll & publish a release
-  publisher = (node.name =~ /.*-publish$/) != nil # TODO: use tag?
+  # If node name contains "-publish", configure it with necessary secrets/package to roll & publish a release
+  publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
+  lightWorker = publisher  # TODO: better heuristic...
 
   # TODO: install and manage multiple jdks (only if !publisher)
   override['java']['jdk_version']    = '6'
@@ -75,13 +87,19 @@ else
   default['graphviz']['checksum'] = '76236edc36d5906b93f35e83f8f19a2045318852d3f826e920f189431967c081'
   default['graphviz']['version']  = '2.28.0-1'
 
+  default['ebs']['volumes']['/home/jenkins']['size']      = lightWorker ? 50 : 100 # size of the volume correlates to speed (in IOPS)
+  default['ebs']['volumes']['/home/jenkins']['dev']       = "/dev/sdj"
+  default['ebs']['volumes']['/home/jenkins']['fstype']    = "ext4"
+  default['ebs']['volumes']['/home/jenkins']['user']      = "jenkins"
+  default['ebs']['volumes']['/home/jenkins']['mountopts'] = 'noatime'
+
   default["jenkinsHomes"]["/home/jenkins"]["workerName"]      = node.name
   default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"]     = "jenkins"
   default["jenkinsHomes"]["/home/jenkins"]["publish"]         = publisher
   default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 0  # launch worker immediately
   default["jenkinsHomes"]["/home/jenkins"]["idle_delay"]      = 20 # take worker off-line after 20 min of idling (we're charged by the hour, so no rush)
 
-  default["jenkinsHomes"]["/home/jenkins"]["executors"]  = publisher ? 2 : 4 # TODO: better heuristic...
+  default["jenkinsHomes"]["/home/jenkins"]["executors"]  = lightWorker ? 2 : 4
   default["jenkinsHomes"]["/home/jenkins"]["usage_mode"] = publisher ? "exclusive" : "normal"
   default["jenkinsHomes"]["/home/jenkins"]["labels"]     = ["linux", publisher ? "publish": "public"]
 

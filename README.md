@@ -118,6 +118,8 @@ aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-dynamod
 aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
 
 aws iam put-role-policy --role-name jenkins-worker --policy-name jenkins-ebs-create-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
+
+aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-ebs-create-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
 ```
 
 NOTE: if you get syntax errors, check the policy doc URL
@@ -245,7 +247,7 @@ knife vault create worker-publish private-repo \
 
 knife vault create worker-publish s3-downloads \
   '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish' \
+  --search 'name:jenkins-worker-*-publish' \
   --admins adriaan
 
 knife vault create worker-publish chara-keypair \
@@ -275,7 +277,7 @@ Note that the IPs are stable by allocating elastic IPs and associating them to n
 ```
 54.67.111.226 jenkins-master
 54.67.33.167  jenkins-worker-ubuntu-publish
-54.183.156.89 jenkins-worker-windows
+54.183.156.89 jenkins-worker-windows-publish
 54.153.2.9    jenkins-worker-behemoth-1
 54.153.1.99   jenkins-worker-behemoth-2
 ```
@@ -303,7 +305,7 @@ Host scabot
   IdentityFile ~/Desktop/chef-secrets/config/scabot.pem
   User scabot
 
-Host jenkins-worker-windows
+Host jenkins-worker-windows-publish
   IdentityFile ~/Desktop/chef-secrets/jenkins-chef
   User jenkins
 ```
@@ -321,12 +323,9 @@ make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/git/scala
 
 ## Selected AMIs
 
-current windows: ami-cfa5b68a Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10
-current linux-publisher: ami-b11b09f4 ubuntu/images-testing/hvm/ubuntu-trusty-daily-amd64-server-20141212
-
-ami-5956491c ubuntu/images-testing/hvm/ubuntu-utopic-daily-amd64-server-20150106
-
-current linux (master/worker): ami-4b6f650e Amazon Linux AMI 2014.09.1 x86_64 HVM EBS
+amazon linux: ami-4b6f650e (Amazon Linux AMI 2014.09.1 x86_64 HVM EBS)
+windows:      ami-cfa5b68a (Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10)
+ubuntu:       ami-81afbcc4 (Ubuntu utopic 14.10 from https://cloud-images.ubuntu.com/locator/ec2/ for us-west-1/amd64/hvm:ebs-ssd/20141204)
 
 
 ## Bootstrap
@@ -345,36 +344,45 @@ knife ec2 server create -N jenkins-master \
    --identity-file .chef/config/chef.pem \
    --run-list "scala-jenkins-infra::master-init"
 
-knife ec2 server create -N jenkins-worker-windows \
-   --region us-west-1 --flavor c3.xlarge -I ami-45332200 \
-   -G Windows --user-data chef/userdata/win2012.txt --bootstrap-protocol winrm \
-   --iam-profile JenkinsWorkerPublish \
-   --identity-file .chef/config/chef.pem \
+knife ec2 server create -N jenkins-worker-windows-publish \
+   --flavor c4.xlarge                                     \
+   --region us-west-1                                     \
+   -I ami-45332200 --user-data chef/userdata/win2012.txt  \
+   --iam-profile JenkinsWorkerPublish                     \
+   --ebs-optimized --ebs-volume-type gp2                  \
+   --security-group-ids sg-1dec3d78                       \
+   --subnet subnet-4bb3b80d --associate-eip 54.183.156.89 \
+   --server-connect-attribute public_ip_address           \
+   --identity-file .chef/config/chef.pem                  \
    --run-list "scala-jenkins-infra::worker-init"
+
 
 // NOTE: c3.large is much slower than c3.xlarge (scala-release-2.11.x-build takes 2h53min vs 1h40min )
-knife ec2 server create -N jenkins-worker-ubuntu-publish \
-   --region us-west-1 --flavor c3.xlarge -I ami-5956491c \
-   -G Workers --ssh-user ubuntu \
-   --iam-profile JenkinsWorkerPublish \
-   --identity-file .chef/config/chef.pem \
-   --user-data chef/userdata/linux-2-ephemeral-one-home \
+knife ec2 server create -N jenkins-worker-ubuntu-publish  \
+   --flavor c4.xlarge                                     \
+   --region us-west-1                                     \
+   -I ami-81afbcc4 --ssh-user ubuntu                      \
+   --iam-profile JenkinsWorker                            \
+   --ebs-optimized --ebs-volume-type gp2                  \
+   --security-group-ids sg-ecb06389                       \
+   --subnet subnet-4bb3b80d --associate-eip 54.67.33.167  \
+   --server-connect-attribute public_ip_address           \
+   --identity-file .chef/config/chef.pem                  \
    --run-list "scala-jenkins-infra::worker-init"
-
 
 echo NOTE: Make sure to first remove the ips in $behemothIp from your ~/.ssh/known_hosts. Also remove the corresponding worker from the chef server (can be only one with the same name).
 behemothIp=(54.153.2.9 54.153.1.99)
 for behemoth in 1 2
-do knife ec2 server create -N jenkins-worker-behemoth-$behemoth \
-   --flavor c4.2xlarge \
-   --region us-west-1 \
-   -I ami-4b6f650e --ssh-user ec2-user \
-   --iam-profile JenkinsWorker \
-   --ebs-optimized --ebs-volume-type gp2 \
-   --security-group-ids sg-ecb06389 \
+do knife ec2 server create -N jenkins-worker-behemoth-$behemoth      \
+   --flavor c4.2xlarge                                               \
+   --region us-west-1                                                \
+   -I ami-4b6f650e --ssh-user ec2-user                               \
+   --iam-profile JenkinsWorker                                       \
+   --ebs-optimized --ebs-volume-type gp2                             \
+   --security-group-ids sg-ecb06389                                  \
    --subnet subnet-4bb3b80d --associate-eip ${behemothIp[$behemoth]} \
-   --server-connect-attribute public_ip_address\
-   --identity-file .chef/config/chef.pem \
+   --server-connect-attribute public_ip_address                      \
+   --identity-file .chef/config/chef.pem                             \
    --run-list "scala-jenkins-infra::worker-init"
 done
 
@@ -391,48 +399,45 @@ NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
 
 ### Update access to vault
 ```
+knife vault update master github-api            --search 'name:jenkins-master'
+
 knife vault update master scala-jenkins-keypair --search 'name:jenkins*'
 
-knife vault update worker private-repo-public-jobs  --search 'name:jenkins-worker-behemoth-*'
+knife vault update worker private-repo-public-jobs --search 'name:jenkins-worker-behemoth-*'
 
-knife vault update master github-api            --search 'name:jenkins-master'
+knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-*-publish'
 
 knife vault update worker-publish sonatype      --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish private-repo  --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish chara-keypair --search 'name:jenkins-worker-ubuntu-publish'
 knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ubuntu-publish'
-knife vault update worker-publish s3-downloads  --search 'name:jenkins-worker-windows OR name:jenkins-worker-ubuntu-publish'
 ```
 
 ### Add run-list items that need the vault
 ```
 knife node run_list set jenkins-master    "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
-for w in jenkins-worker-windows jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
+
+for w in jenkins-worker-windows-publish jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
   do knife node run_list set $w  "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
 done
-```
-
-### Attach eips
-
-TODO: do during knife ec2 server create as for behemoth
-
-```
-aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
-aws ec2 associate-address --allocation-id eipalloc-1cc6de7e --instance-id i-a100026b  # jenkins-worker-windows
-aws ec2 associate-address --allocation-id eipalloc-c2abb3a0 --instance-id i-0c3c3cc6  # jenkins-worker-ubuntu-publish
 ```
 
 ### Re-run chef manually
 
 - windows:
 ```
-PASS=$(aws ec2 get-password-data --instance-id i-a100026b --priv-launch-key ~/Desktop/chef-secrets/config/chef.pem | jq .PasswordData | xargs echo)
-knife winrm jenkins-worker-windows chef-client -m -P $PASS
+PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key ~/Desktop/chef-secrets/config/chef.pem | jq .PasswordData | xargs echo)
+knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
 ```
 
 - ubuntu:  `ssh jenkins-worker-ubuntu-publish sudo chef-client`
 - amazon linux: `ssh jenkins-worker-behemoth-1`, and then `sudo chef-client`
 
+### Attach eips
+
+```
+aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
+```
 
 
 # Misc
@@ -457,7 +462,7 @@ end
 ```
 
 ## If connections hang
-Make sure security groups allow access...
+Make sure security group allows access, winrm was enabled using --user-data...
 
 ## SSL cert
 ```
@@ -487,7 +492,12 @@ Confirm values in the csr using:
 $ openssl req -text -noout -in scala-ci.csr
 ```
 
-## If the bootstrap didn't work at first, complete:
+## Retry bootstrap
+```
+knife bootstrap -c .chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user ubuntu --sudo -c .chef/knife.rb -N jenkins-worker-ubuntu-publish -r "scala-jenkins-infra::worker-init"
+```
+
+## WinRM troubles?
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
 

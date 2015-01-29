@@ -5,7 +5,7 @@
   repoName:    "scala-dist",
   repoRef:     @version,
   description: "Update scala-lang's api/#{@version} symlink to point to api/$version",
-  nodeRestriction: "publish",
+  nodeRestriction: "linux && publish",
   concurrent: false,
   params: [
     {:name => "version", :desc => "The version to be shown for the current API docs."}
