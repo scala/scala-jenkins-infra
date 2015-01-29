@@ -12,11 +12,11 @@ cookbook_file "epel-apache-maven.repo.erb" do
   path "/etc/yum.repos.d/epel-apache-maven.repo"
 end
 
-%w{ant ant-contrib ant-junit apache-maven}.each do |pkg|
+%w{java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel ant ant-contrib ant-junit apache-maven}.each do |pkg|
   package pkg
 end
 
-# NOTE: MUST BE LAST -- it selects the chef-configured jdk (the above packages install openjdk 7, but we want something else)
+# NOTE: MUST BE LAST -- it selects the chef-configured jdk (the above packages install openjdk 7 & 8, but we want something else)
 include_recipe "java"
 
 # /usr/bin/build-classpath: error: JVM_LIBDIR /usr/lib/jvm-exports/java does not exist or is not a directory
