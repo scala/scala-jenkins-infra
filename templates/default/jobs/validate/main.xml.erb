@@ -27,7 +27,7 @@ testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number
 
 parallel (
    { build(testParams, "#{job("validate/test")}") },
-   { build(testParams, "#{job("integrate/ide")}") }
+   { retry(2, { build(testParams, "#{job("integrate/ide")}") }) }
 )
 
 EOX
