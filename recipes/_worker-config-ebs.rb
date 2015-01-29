@@ -36,11 +36,13 @@ node['ebs']['volumes'].each do |mountPoint, ebsConfig|
       not_if { ::File.directory?("#{mountPoint}:\\") }
     end
   else
+    device = node[:platform_family] == 'debian' ? ebsConfig['dev'].gsub(%r{^/dev/sd}, '/dev/xvd') : ebsConfig['dev']
+
     execute 'mkfs' do
-      command "mkfs -t #{ebsConfig['fstype']} #{ebsConfig['dev']}"
+      command "mkfs -t #{ebsConfig['fstype']} #{device}"
       not_if do
-        BlockDevice.wait_for(ebsConfig['dev'])
-        system("blkid -s TYPE -o value #{ebsConfig['dev']}")
+        BlockDevice.wait_for(device)
+        system("blkid -s TYPE -o value #{device}")
       end
     end
 
@@ -52,7 +54,7 @@ node['ebs']['volumes'].each do |mountPoint, ebsConfig|
     end
 
     mount mountPoint do
-      device  ebsConfig['dev']
+      device  device
       fstype  ebsConfig['fstype']
       options ebsConfig['mountopts']
 
