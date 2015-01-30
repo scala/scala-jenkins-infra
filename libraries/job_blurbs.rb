@@ -74,6 +74,18 @@ module ScalaJenkinsInfra
       timeoutMinutesElasticDefault = options.fetch(:timeoutMinutesElasticDefault, 150)
       buildNameScript = options.fetch(:buildNameScript, setBuildNameScript)
 
+      jvmFlavor  = options[:jvmFlavor]
+      jvmVersion = options[:jvmVersion]
+      jvmSelectScript = ""
+
+      if jvmFlavor && jvmVersion
+        params.concat([
+          {:name => "jvmFlavor",  :default => jvmFlavor,  :desc => "Java flavor to use (oracle/openjdk)."},
+          {:name => "jvmVersion", :default => jvmVersion, :desc => "Java version to use (6/7/8)."}
+        ])
+        jvmSelectScript=jvmSelect
+      end
+
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
       <canRoam>false</canRoam>""".gsub(/      /, '')
@@ -90,6 +102,7 @@ module ScalaJenkinsInfra
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
           #{groovySysScript(buildNameScript)}
+          #{jvmSelectScript}
           #{scriptBuild}
         </builders>
         <buildWrappers>
@@ -136,6 +149,17 @@ module ScalaJenkinsInfra
 
     def job(name)
       versionedJob(@version, name)
+    end
+
+    def jvmSelect
+      <<-EOH.gsub(/^      /, '')
+      <hudson.tasks.Shell>
+        <command>#!/bin/bash -e
+      source /usr/local/share/jvm/jvm-select
+      jvmSelect $jvmFlavor $jvmVersion
+        </command>
+      </hudson.tasks.Shell>
+      EOH
     end
 
     def scriptBuild

@@ -14,6 +14,8 @@
     <p> Use github.com/scala/make-release-notes to build the release notes.
    }.gsub(/^    /, ''),
   nodeRestriction: "linux && publish",
+  jvmVersion: 6,
+  jvmFlavor:  "oracle",
   params: [
     {:name => "SCALA_VER_BASE",
      :desc => "Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version), a -nightly release is built."},
