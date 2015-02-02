@@ -161,7 +161,7 @@ module ScalaJenkinsInfra
       <<-EOH.gsub(/^      /, '')
       <hudson.tasks.Shell>
         <command>#!/bin/bash -ex
-        #{setup}
+      #{setup}
       source scripts/#{@scriptName}
         </command>
       </hudson.tasks.Shell>
