@@ -14,4 +14,13 @@
   ],
   buildNameScript: setValidateBuildNameScript)
 %>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>build/junit/TEST-*,build/osgi/TEST-*</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
 </project>
