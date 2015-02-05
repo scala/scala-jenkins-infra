@@ -2,7 +2,7 @@ override['jenkins']['master']['install_method'] = 'war'
 override['jenkins']['master']['listen_address'] = '127.0.0.1' # external traffic must go through nginx
 override['jenkins']['master']['user']           = 'jenkins'
 override['jenkins']['master']['group']          = 'jenkins'
-override['jenkins']['master']['jvm_options']    = '-server -Xmx2G -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError' # -Dfile.encoding=UTF-8
+override['jenkins']['master']['jvm_options']    = '-server -Xmx4G -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError' # -Dfile.encoding=UTF-8
 
 # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
 # override['jenkins']['master']['version']  = '1.555'
