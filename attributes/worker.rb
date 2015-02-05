@@ -1,3 +1,7 @@
+# ssh public keys for users with access to workers
+workerAuthorizedKeys =
+  "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAva5WQeMGZxgQ1adlJQoYZCJZYTkVYSSKWu9O3EDJD+2jncUFfUdd4AsYbpYs/N2FyeoT2Gja7c03dFI6gQP3d+ZNaiO3CBYC6LvbgmCaQrffymiYw8jgD0NQqRan0nwXblmQlkxktgU0oSI/NmkpsNsMx67Pgrd+UsCchuFl7LR0CD6q+URt6Y38TY8F2x4k8P7Y2aWoQOuPk8bvEMALaOetSH0Y8zNEP5YPf7k30Z8ZUyhkt0x166gKoO/2PlzTjy5cAi+sDdCIxd74Ll7jzaUa10BDpl1iOHtLEkTJ0pssENm0g+PvJcsyzGhBRfGSLxEDhBRw1hPRT1avOwIeJQ== lrytz\n"
+
 case node["platform_family"]
 when "windows"
   # configure windows-specific recipes (attributes not node-specific!)
@@ -48,6 +52,7 @@ when "windows"
 
   default["jenkinsHomes"][jenkinsHome]["executors"]   = 2
   default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
+  default["jenkinsHomes"][jenkinsHome]["authorized_keys"] = workerAuthorizedKeys
   default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
   default["jenkinsHomes"][jenkinsHome]["jvm_options"] = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp.gsub(/\\/,'/')}" # jenkins doesn't quote properly
   default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
@@ -95,6 +100,7 @@ else
   default['ebs']['volumes']['/home/jenkins']['mountopts'] = 'noatime'
 
   default["jenkinsHomes"]["/home/jenkins"]["workerName"]      = node.name
+  default["jenkinsHomes"]["/home/jenkins"]["authorized_keys"] = workerAuthorizedKeys
   default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"]     = "jenkins"
   default["jenkinsHomes"]["/home/jenkins"]["publish"]         = publisher
   default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 0  # launch worker immediately

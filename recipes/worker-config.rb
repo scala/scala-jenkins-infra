@@ -42,7 +42,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   file "#{jenkinsHome}/.ssh/authorized_keys" do
     owner workerConfig["jenkinsUser"]
     mode  '644'
-    content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] # TODO: distinct keypair for each jenkins user
+    content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] + "\n#{workerConfig['authorized_keys']}" # TODO: distinct keypair for each jenkins user
   end
 
   git_user workerConfig["jenkinsUser"] do
