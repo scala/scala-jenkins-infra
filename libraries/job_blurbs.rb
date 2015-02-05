@@ -102,8 +102,7 @@ module ScalaJenkinsInfra
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
           #{groovySysScript(buildNameScript)}
-          #{jvmSelectScript}
-          #{scriptBuild}
+          #{scriptBuild(jvmSelectScript)}
         </builders>
         <buildWrappers>
           <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
@@ -153,19 +152,16 @@ module ScalaJenkinsInfra
 
     def jvmSelect
       <<-EOH.gsub(/^      /, '')
-      <hudson.tasks.Shell>
-        <command>#!/bin/bash -e
       source /usr/local/share/jvm/jvm-select
       jvmSelect $jvmFlavor $jvmVersion
-        </command>
-      </hudson.tasks.Shell>
       EOH
     end
 
-    def scriptBuild
+    def scriptBuild(setup)
       <<-EOH.gsub(/^      /, '')
       <hudson.tasks.Shell>
         <command>#!/bin/bash -ex
+      #{setup}
       source scripts/#{@scriptName}
         </command>
       </hudson.tasks.Shell>

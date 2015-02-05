@@ -81,6 +81,8 @@ else
   override['java']['jdk_version']    = '6'
   override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
   override['java']['oracle']['accept_oracle_download_terms'] = true
+  # must specify java_home explicitly, or java_ark thinks it's installed even if some other version is...
+  override['java']['java_home'] = platform_family?('debian') ? '/usr/lib/jvm/java-6-oracle-amd64' : '/usr/lib/jvm/java-1.6.0-oracle.x86_64'
 
   default['graphviz']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/graphviz_2.28.0-1_amd64.deb'
   default['graphviz']['checksum'] = '76236edc36d5906b93f35e83f8f19a2045318852d3f826e920f189431967c081'
