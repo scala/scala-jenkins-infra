@@ -45,3 +45,9 @@ template "#{node['jenkins']['master']['home']}/jenkins.model.JenkinsLocationConf
     :jenkinsUrl   => node['master']['jenkinsUrl']
   })
 end
+
+# https://github.com/scala/scala-jenkins-infra/issues/26
+# workaround from https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1317811/comments/22 (until we can upgrade to kernel with fix -- >3.16.1)
+execute 'turn off scatter-gatter' do
+  command "ethtool -K eth0 sg off"
+end
