@@ -25,13 +25,4 @@
     {:name => "sbtDistVersionOverride", :desc => "may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)"}
   ])
 %>
-  <publishers>
-    <hudson.tasks.ArtifactArchiver>
-      <artifacts>target/*.msi</artifacts>
-      <allowEmptyArchive>false</allowEmptyArchive>
-      <onlyIfSuccessful>false</onlyIfSuccessful>
-      <fingerprint>false</fingerprint>
-      <defaultExcludes>true</defaultExcludes>
-    </hudson.tasks.ArtifactArchiver>
-  </publishers>
 </project>
