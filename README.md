@@ -6,7 +6,8 @@ This is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-yo
 
 # Get some tools
 ```
-brew cask install awscli cord
+brew cask install cord
+brew install awscli
 ```
 
 # One-time EC2/IAM setup
