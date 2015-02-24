@@ -59,11 +59,14 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       "#{jenkinsHome}/.credentials"              => "credentials-sonatype.erb", # TODO: remove after replacing references to it in scripts by `.credentials-sonatype`
       "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
       "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
+      "#{jenkinsHome}/.s3curl"                   => "s3curl.erb",
       "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb" # TODO: remove pr-scala stuff, use different credentials for private-repo for PR validation and temp release artifacts
     }.each do |target, templ|
       template target do
-        source templ
-        user jenkinsUser
+        source    templ
+        user      jenkinsUser
+        owner     jenkinsUser
+        mode      '600'
         sensitive true
 
         variables({
