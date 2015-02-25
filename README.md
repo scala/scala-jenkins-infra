@@ -449,16 +449,8 @@ Workaround: make sure EC2 instance names are unique.
 
 http://blog.gravitystorm.co.uk/2013/09/13/using-vagrant-to-test-chef-cookbooks/:
 
-```
-Vagrant.configure("2") do |config|
-  config.vm.box = "precise64"
-  config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = "/home/andy/src/toolkit-chef/cookbooks"
-    chef.add_recipe("toolkit")
-  end
-  config.vm.network :forwarded_port, guest: 80, host: 11180
-end
-```
+See `.chef/Vagrantfile` -- make sure you first populated `.chef/cookbooks/` using knife,
+as [documented above](#get-cookbooks)
 
 ## If connections hang
 Make sure security group allows access, winrm was enabled using --user-data...
