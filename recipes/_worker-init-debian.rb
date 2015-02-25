@@ -9,7 +9,7 @@
 
 include_recipe "apt" # do apt-get update
 
-%w{openjdk-7-jdk openjdk-8-jdk ant ant-contrib ant-optional maven s3curl}.each do |pkg|
+%w{openjdk-7-jdk openjdk-8-jdk ant ant-contrib ant-optional maven s3curl tofrodos}.each do |pkg|
   package pkg
 end
 
