@@ -1,0 +1,12 @@
+# TODO: this kind of works, but the cookbook won't run in virtual box:
+#  - (scatter-gather workaround)
+#  - chef-solo can't access the vault on the chef server (passwords etc)
+# to make this work, you need to populate a cookbooks/ directory next to this file,
+# as documented in the README.md (use knife)
+Vagrant.configure("2") do |config|
+  config.vm.box = "hashicorp/precise64"
+  config.vm.provision :chef_solo do |chef|
+    chef.add_recipe("scala-jenkins-infra::master-init")
+  end
+  config.vm.network :forwarded_port, guest: 80, host: 11180
+end
