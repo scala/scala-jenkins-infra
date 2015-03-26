@@ -11,7 +11,7 @@ override['jenkins']['master']['jvm_options']    = '-server -Xmx4G -XX:MaxPermSiz
 
 default['master']['github']['webUri']                               = 'https://github.com/'
 default['master']['github']['apiUri']                               = 'https://api.github.com'
-default['master']['github']['adminUserNames']                       = 'adriaanm,chef,scala-jenkins'
+default['master']['github']['adminUserNames']                       = 'adriaanm,retronym,lrytz,chef,scala-jenkins'
 default['master']['github']['organizationNames']                    = 'scala'
 default['master']['github']['useRepositoryPermissions']             = 'true'
 default['master']['github']['allowAnonymousReadPermission']         = 'true'
