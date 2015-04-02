@@ -143,13 +143,16 @@ gem install knife-ec2 knife-windows knife-github-cookbooks chef-vault
 ```
 
 ## Get credentials for the typesafe-scala chef.io organization
+Join chef.io, and ask to be invited to the typesafe-scala org on slack.
+
+For the CLI to work, you need:
 ```
 export CHEF_ORG="typesafe-scala"
 ```
 
-download from https://manage.chef.io/organizations/typesafe-scala:
-  - user key (to `.chef/config/#{ENV['USER']}.pem` -- name it like this to use the `.chef/knife.rb` in this repo)
-  - org validation key (to `.chef/config/#{ENV['CHEF_ORG']}-validator.pem`)
+Then, you can download your credentials from https://manage.chef.io/organizations/typesafe-scala. Put them in the right spot so you can use knife without further config (see `.chef/knife.rb` in this repo):
+  - user key (to `.chef/config/$USER.pem`)
+  - org validation key (to `.chef/config/$CHEF_ORG-validator.pem`)
 
 ## Get cookbooks
 
