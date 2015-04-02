@@ -323,11 +323,11 @@ Host jenkins-worker-windows-publish
 # Launch instance on EC2
 ## Create (ssh) key pair
 ```
-echo $(aws ec2 create-key-pair --key-name chef | jq .KeyMaterial) | perl -pe 's/"//g' > ~/git/scala-jenkins-infra/.chef/config/chef.pem
-chmod 0600 ~/git/scala-jenkins-infra/.chef/config/chef.pem
+echo $(aws ec2 create-key-pair --key-name <YOUR_NAME> | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/typesafe-scala-aws-$USER.pem
+chmod 0600 ~/.ssh/typesafe-scala-aws-$USER.pem
 ```
 
-make sure `knife[:aws_ssh_key_id] = 'chef'` matches `--identity-file ~/git/scala-jenkins-infra/.chef/config/chef.pem`
+In `knife.rb`, make sure `knife[:aws_ssh_key_id]` the pem file.
 
 
 ## Selected AMIs
