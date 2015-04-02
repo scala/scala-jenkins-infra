@@ -145,7 +145,7 @@ gem install knife-ec2 knife-windows knife-github-cookbooks chef-vault
 ```
 
 ## Get credentials for the typesafe-scala chef.io organization
-Join chef.io, and ask to be invited to the typesafe-scala org on slack.
+Join chef.io (https://manage.chef.io/signup), and ask to be invited to the typesafe-scala org on slack.
 
 For the CLI to work, you need:
 ```
