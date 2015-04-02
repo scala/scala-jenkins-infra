@@ -14,6 +14,8 @@ brew install awscli
 ## Adding users
 Create two users: one for admin ([aws console](https://typesafe-scala.signin.aws.amazon.com/console)) access (generate a password), one for CLI access (using the access key). The `awscli` package provides the `aws` cli, which is used by knife for ec2 provisioning. Add the script user to the `jenkins-knife` group, the console user to the `admin` group.
 
+Once you have your usernames, run `aws configure`. Enter the access key for your `user-scripts` username, set the default region to `us-west-1`. Test by running `aws ec2 describe-instances`.
+
 ## Create a script user for use with knife
 Never run scripts as root. Best to have a completely separate user.
 
