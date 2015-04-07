@@ -152,7 +152,14 @@ For the CLI to work, you need:
 export CHEF_ORG="typesafe-scala"
 ```
 
-You can then generate and download your private key on https://www.chef.io/account/password. Put it to `.chef/config/$USER.pem`, then you can use knife without further config. See `.chef/knife.rb` for key locations.
+If your username on chef.io does not match the local username on your machine, you also need
+```
+export CHEF_USER="[username]"
+```
+
+You can then generate and download your private key on https://www.chef.io/account/password. Put it to `.chef/config/$CHEF_USER.pem`, then you can use knife without further config. See `.chef/knife.rb` for key locations.
+
+Test if knife works correctly by running `knife cookbook list`.
 
 Obtain the organization validation key from Adriaan and put it to `.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
 
@@ -322,12 +329,18 @@ Host jenkins-worker-windows-publish
 
 # Launch instance on EC2
 ## Create (ssh) key pair
+
+If your username on AWS does not match the local username on your machine, define
 ```
-echo $(aws ec2 create-key-pair --key-name <YOUR_NAME> | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/typesafe-scala-aws-$USER.pem
-chmod 0600 ~/.ssh/typesafe-scala-aws-$USER.pem
+export AWS_USER="[username]"
 ```
 
-In `knife.rb`, make sure `knife[:aws_ssh_key_id]` the pem file.
+```
+echo $(aws ec2 create-key-pair --key-name $AWS_USER | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
+chmod 0600 ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
+```
+
+In `knife.rb`, make sure `knife[:aws_ssh_key_id]` points to the pem file.
 
 
 ## Selected AMIs
