@@ -152,9 +152,9 @@ For the CLI to work, you need:
 export CHEF_ORG="typesafe-scala"
 ```
 
-Then, you can download your credentials from https://manage.chef.io/organizations/typesafe-scala. Put them in the right spot so you can use knife without further config (see `.chef/knife.rb` in this repo):
-  - user key (to `.chef/config/$USER.pem`)
-  - org validation key (to `.chef/config/$CHEF_ORG-validator.pem`)
+You can then generate and download your private key on https://www.chef.io/account/password. Put it to `.chef/config/$USER.pem`, then you can use knife without further config. See `.chef/knife.rb` for key locations.
+
+Obtain the organization validation key from Adriaan and put it to `.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
 
 ## Get cookbooks
 
