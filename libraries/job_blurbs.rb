@@ -63,16 +63,16 @@ module ScalaJenkinsInfra
 
     def githubProject(options = {})
       # chef's still stuck on ruby 1.9 (on our amazon linux)
-      repoUser        = options[:repoUser]
-      repoName        = options.fetch(:repoName, nil)
-      repoRef         = options[:repoRef]
-      description     = options.fetch(:description, '')
-      nodeRestriction = options.fetch(:nodeRestriction, nil)
-      params          = options.fetch(:params, [])
-      refspec         = options.fetch(:refspec, stdRefSpec)
-      concurrent      = options.fetch(:concurrent, true)
-      timeoutMinutesElasticDefault = options.fetch(:timeoutMinutesElasticDefault, 150)
-      buildNameScript = options.fetch(:buildNameScript, setBuildNameScript)
+      repoUser            = options[:repoUser]
+      repoName            = options.fetch(:repoName, nil)
+      repoRef             = options[:repoRef]
+      description         = options.fetch(:description, '')
+      nodeRestriction     = options.fetch(:nodeRestriction, nil)
+      params              = options.fetch(:params, [])
+      refspec             = options.fetch(:refspec, stdRefSpec)
+      concurrent          = options.fetch(:concurrent, true)
+      buildTimeoutMinutes = options.fetch(:buildTimeoutMinutes, 150)
+      buildNameScript     = options.fetch(:buildNameScript, setBuildNameScript)
 
       jvmFlavor  = options[:jvmFlavor]
       jvmVersion = options[:jvmVersion]
@@ -106,12 +106,10 @@ module ScalaJenkinsInfra
         </builders>
         <buildWrappers>
           <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
-            <strategy class="hudson.plugins.build_timeout.impl.ElasticTimeOutStrategy">
-              <timeoutPercentage>300</timeoutPercentage>
-              <numberOfBuilds>100</numberOfBuilds>
-              <timeoutMinutesElasticDefault>#{timeoutMinutesElasticDefault}</timeoutMinutesElasticDefault>
-            </strategy>
-            <operationList/>
+             <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+               <timeoutMinutes>#{buildTimeoutMinutes}</timeoutMinutes>
+             </strategy>
+             <operationList/>
           </hudson.plugins.build__timeout.BuildTimeoutWrapper>
         </buildWrappers>
       EOX
