@@ -27,7 +27,7 @@ default['master']['jenkins']['notifyUrl'] = "http://scala-ci.typesafe.com:8888/j
 
 default['repos']['private']['realm']        = "Artifactory Realm"
 default['repos']['private']['host']         = "private-repo.typesafe.com"
-default['repos']['private']['pr-snap']      = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/",
+default['repos']['private']['pr-snap']      = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
 default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/typesafe/scala-release-temp/"
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
