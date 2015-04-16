@@ -32,12 +32,22 @@ default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
+# see below (note that default['master']['env'] can only indirect through node -- workerJavaOpts is not in scope)
+workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4"
+default['jenkinsEnv']['JAVA_OPTS']  = workerJavaOpts
+default['jenkinsEnv']['ANT_OPTS']   = workerJavaOpts
+default['jenkinsEnv']['MAVEN_OPTS'] = workerJavaOpts # doesn't technically need the -Dpartest one, but oh well
+
+# NOTE: This is a string that represents a closure that closes over the worker node for which it computes the environment.
+# (by convention -- see `environment((eval node["master"]["env"])...` in _master-config-workers
+# Since we can't marshall closures, while attributes need to be sent from master to workers, we must encode them as something that can be shipped...
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   lambda{| node | Chef::Node::ImmutableMash.new({
-    "JAVA_OPTS"  => "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4",
-    "ANT_OPTS"   => "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4",
-    "MAVEN_OPTS" => "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M",
-    "prRepoUrl"  => "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
+    "JAVA_HOME"  => node['java']['java_home'], # we get the jre if we don't do this
+    "JAVA_OPTS"  => node['jenkinsEnv']['JAVA_OPTS'],
+    "ANT_OPTS"   => node['jenkinsEnv']['ANT_OPTS'],
+    "MAVEN_OPTS" => node['jenkinsEnv']['MAVEN_OPTS'],
+    "prRepoUrl"  => node['repos']['private']['pr-snap']
   })}
   EOH
 
