@@ -43,11 +43,12 @@ default['jenkinsEnv']['MAVEN_OPTS'] = workerJavaOpts # doesn't technically need 
 # Since we can't marshall closures, while attributes need to be sent from master to workers, we must encode them as something that can be shipped...
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   lambda{| node | Chef::Node::ImmutableMash.new({
-    "JAVA_HOME"  => node['java']['java_home'], # we get the jre if we don't do this
-    "JAVA_OPTS"  => node['jenkinsEnv']['JAVA_OPTS'],
-    "ANT_OPTS"   => node['jenkinsEnv']['ANT_OPTS'],
-    "MAVEN_OPTS" => node['jenkinsEnv']['MAVEN_OPTS'],
-    "prRepoUrl"  => node['repos']['private']['pr-snap']
+    "JAVA_HOME"          => node['java']['java_home'], # we get the jre if we don't do this
+    "JAVA_OPTS"          => node['jenkinsEnv']['JAVA_OPTS'],
+    "ANT_OPTS"           => node['jenkinsEnv']['ANT_OPTS'],
+    "MAVEN_OPTS"         => node['jenkinsEnv']['MAVEN_OPTS'],
+    "prRepoUrl"          => node['repos']['private']['pr-snap'],
+    "releaseTempRepoUrl" => node['repos']['private']['release-temp']
   })}
   EOH
 
