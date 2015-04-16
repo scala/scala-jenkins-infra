@@ -21,8 +21,16 @@ default['master']['github']['allowCcTrayPermission']                = 'false'
 default['master']['github']['authenticatedUserCreateJobPermission'] = 'false'
 
 default['master']['adminAddress'] = "adriaan@typesafe.com"
+default['master']['jenkinsHost']  = "scala-ci.typesafe.com" # duplicated because attributes can't refer to each other...
 default['master']['jenkinsUrl']   = "https://scala-ci.typesafe.com/"
 default['master']['jenkins']['notifyUrl'] = "http://scala-ci.typesafe.com:8888/jenkins"
+
+default['repos']['private']['realm']        = "Artifactory Realm"
+default['repos']['private']['host']         = "private-repo.typesafe.com"
+default['repos']['private']['pr-snap']      = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/",
+default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/typesafe/scala-release-temp/"
+
+default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
 default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
   lambda{| node | Chef::Node::ImmutableMash.new({
