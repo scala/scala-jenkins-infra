@@ -30,8 +30,12 @@ credentialsMap.each do |userName, uniqId|
 end
 
 
+masterEnvLambda = eval node["master"]["env"]
+
 search(:node, 'name:jenkins-worker*').each do |worker|
   worker["jenkinsHomes"].each do |jenkinsHome, workerConfig|
+    workerEnvLambda = eval workerConfig["env"]
+
     jenkins_ssh_slave workerConfig["workerName"] do
       host        worker.ipaddress
       credentials credentialsMap[workerConfig["jenkinsUser"]]  # must use id (groovy script fails otherwise)
@@ -54,7 +58,7 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       in_demand_delay workerConfig["in_demand_delay"]
       idle_delay      workerConfig["idle_delay"]
 
-      environment((eval node["master"]["env"]).call(worker).merge((eval workerConfig["env"]).call(worker)))
+      environment(masterEnvLambda.call(worker).merge(workerEnvLambda.call(worker)))
 
       action [:create] # we don't need to :connect, :online since the ec2 start/stop plugin will do that. Also, if connect fails, it may be that chef-client hasn't yet run on the client to initialize jenkins home with .ssh/authorized_keys
     end
