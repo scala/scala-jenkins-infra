@@ -38,7 +38,7 @@ search(:node, 'name:jenkins-worker*').each do |worker|
 
       # TODO: make retrying more robust
       max_num_retries  10  # how often to retry when the SSH connection is refused during initial connect
-      retry_wait_time  60 # seconds between retries
+      retry_wait_time  60  # seconds between retries
 
       remote_fs   jenkinsHome.dup
       jvm_options workerConfig["jvm_options"]
@@ -54,7 +54,7 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       in_demand_delay workerConfig["in_demand_delay"]
       idle_delay      workerConfig["idle_delay"]
 
-      environment((eval node["master"]["env"]).call(node).merge((eval workerConfig["env"]).call(worker)))
+      environment((eval node["master"]["env"]).call(worker).merge((eval workerConfig["env"]).call(worker)))
 
       action [:create] # we don't need to :connect, :online since the ec2 start/stop plugin will do that. Also, if connect fails, it may be that chef-client hasn't yet run on the client to initialize jenkins home with .ssh/authorized_keys
     end

@@ -63,15 +63,17 @@ when "windows"
   default["jenkinsHomes"][jenkinsHome]["in_demand_delay"] = 1  # if builds are in queue for even one minute, launch this worker
   default["jenkinsHomes"][jenkinsHome]["idle_delay"]      = 15 # take worker off-line after 15 min of idling (we're charged by the hour, so no rush)
 
-  # can't marshall closures, but they sometimes need to be shipped, so encode as string, closing over `node`
   default["_jenkinsHome"] = jenkinsHome
   default["_jenkinsTmp"]  = jenkinsTmp
+
+  # Worker-specific env, the rest is defined in master's attribs.
+  # This needs to be a closure to get laziness so that we can refer to other attributes, but can't marshall closures,
+  # and they sometimes need to be shipped, so encode as string, closing over `node`...
   default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
     lambda{| node | Chef::Node::ImmutableMash.new({
       "PATH"          => "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git/Cmd", # TODO express in terms of attributes
       "sbtLauncher"   => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
       "WIX"           => node['wix']['home'],
-      "JAVA_HOME"     => node['java']['java_home'],
       "TMP"           => "#{node['_jenkinsTmp']}",
       "_JAVA_OPTIONS" => "-Duser.home=#{node['_jenkinsHome']}", # no other way to do this... sbt boot will fail pretty weirdly if it can't write to $HOME/.sbt and $TMP/...
       "SHELLOPTS"     => "igncr" # ignore line-ending issues in shell scripts
@@ -110,13 +112,15 @@ else
   default["jenkinsHomes"]["/home/jenkins"]["usage_mode"] = publisher ? "exclusive" : "normal"
   default["jenkinsHomes"]["/home/jenkins"]["labels"]     = ["linux", publisher ? "publish": "public"]
 
-  # can't marshall closures, and this one needs to be shipped from worker to master (note: sshCharaArgs only use on publisher, but doesn't contain any private date, so not bothering)
+  # Worker-specific env, the rest is defined in master's attribs.
+  # (note: sshCharaArgs only used on publisher, but doesn't contain any private date, so not bothering to split it out)
+  # This needs to be a closure to get laziness so that we can refer to other attributes, but can't marshall closures,
+  # and they sometimes need to be shipped, so encode as string, closing over `node`...
   default["jenkinsHomes"]["/home/jenkins"]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
     lambda{| node | Chef::Node::ImmutableMash.new({
       "sshCharaArgs" => '("scalatest@chara.epfl.ch" "-i" "/home/jenkins/.ssh/for_chara")',
       "sbtLauncher"  => File.join(node['sbt']['launcher_path'], "sbt-launch.jar"), # from chef-sbt cookbook
-      "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']), # sbt-extras
-      "JAVA_HOME"    => node['java']['java_home'] # we get the jre if we don't do this
+      "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
     })}
     EOH
 

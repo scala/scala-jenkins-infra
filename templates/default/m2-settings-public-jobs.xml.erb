@@ -21,12 +21,12 @@
         <repository>
           <id>pr-scala</id>
           <name>Scala PR validation snapshots</name>
-          <url>http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots</url>
+          <url><%=node['repos']['private']['pr-snap']%></url>
         </repository>
         <repository>
           <id>scala-release-temp</id>
           <name>Scala Relese snapshots</name>
-          <url>http://private-repo.typesafe.com/typesafe/scala-release-temp/</url>
+          <url><%=node['repos']['private']['release-temp']%></url>
         </repository>
       </repositories>
     </profile>
