@@ -1,0 +1,5 @@
+source /usr/local/share/jvm/jvm-select-common
+
+#TODO: windows?
+echo "Unsupported platform for jvm-select"
+exit 1
