@@ -13,7 +13,7 @@
 
 require 'chef-vault'
 
-include_recipe "scala-jenkins-infra::_worker-config-ebs"
+include_recipe "scala-jenkins-infra::_config-ebs"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   case node["platform_family"]

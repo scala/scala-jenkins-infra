@@ -15,6 +15,7 @@ depends 'chef-client'
 depends 'cron'
 
 depends 'aws'
+
 depends 'ebs'
 
 depends 'windows'

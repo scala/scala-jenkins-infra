@@ -9,6 +9,13 @@ default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
 if node.name == "jenkins-master"
+  # EBS
+  default['ebs']['volumes']['/var/lib/jenkins']['size']      = 100 # size of the volume correlates to speed (in IOPS)
+  default['ebs']['volumes']['/var/lib/jenkins']['dev']       = "/dev/sdj"
+  default['ebs']['volumes']['/var/lib/jenkins']['fstype']    = "ext4"
+  default['ebs']['volumes']['/var/lib/jenkins']['user']      = "jenkins"
+  default['ebs']['volumes']['/var/lib/jenkins']['mountopts'] = 'noatime'
+
   # JAVA
   default['java']['jdk_version']    = '7'
   default['java']['install_flavor'] = 'openjdk'
