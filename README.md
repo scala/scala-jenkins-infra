@@ -163,29 +163,64 @@ Test if knife works correctly by running `knife cookbook list`.
 
 Obtain the organization validation key from Adriaan and put it to `.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
 
-## Get cookbooks
+## Clone scala-jenkins-infra cookbook and its dependencies
+
+I think you can safely ignore `ERROR: IOError: Cannot open or read **/metadata.rb!` in the below
 
 ```
-git init .chef/cookbooks
-cd .chef/cookbooks
+cd ~/git/cookbooks
+git init .
 g commit --allow-empty -m"Initial" 
+
+hub clone scala/scala-jenkins-infra
+cd scala-jenkins-infra
+ln -sh ~/git/cookbooks .chef/
+
+knife site install cron
+knife site install logrotate
+knife site install chef_handler
+knife site install windows
+knife site install chef-client
+knife site install aws
+knife site install delayed_evaluator
+knife site install ebs
+knife site install java
+knife site install apt
+knife site install packagecloud
+knife site install runit
+knife site install yum
+knife site install jenkins
+knife site install 7-zip
+knife site install ark
+knife site install artifactory
+knife site install build-essential
+knife site install dmg
+knife site install yum-epel
+knife site install git
+knife site install user
+knife site install partial_search
+knife site install ssh_known_hosts
+knife site install git_user
+knife site install chef-sbt
+knife site install sbt-extras
 ```
 
-- knife cookbook site install wix 1.0.2 # newer versions don't work for me; also installs windows
-- knife cookbook site install aws
-- knife cookbook site install git
-- knife cookbook site install git_user
-  - knife cookbook site install partial_search
- 
-- move to unreleased versions on github:
-  - knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)
-  - knife cookbook github install adriaanm/java/windows-jdk1.6 # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
-  - knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows
-  - knife cookbook github install adriaanm/scala-jenkins-infra
-  - knife cookbook github install adriaanm/chef-sbt
-  - knife cookbook github install gildegoma/chef-sbt-extras
+### Switch to unreleased versions from github
+```
+//fixed: knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)
+//knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows -- fix pending: https://github.com/opscode-cookbooks/jenkins/pull/313
+knife cookbook github install b-dean/jenkins/http_ca_fixes  # pending fix for above ^^^
 
-- knife cookbook upload --all
+knife cookbook github install adriaanm/java/windows-jdk1.6 # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
+knife cookbook github install adriaanm/chef-sbt
+knife cookbook github install gildegoma/chef-sbt-extras
+knife cookbook github install adriaanm/artifactory
+```
+
+### Upload cookbooks to chef server
+```
+knife cookbook upload --all
+```
 
 ## Cache installers locally
 - they are tricky to access, might disappear,...
