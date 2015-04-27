@@ -33,8 +33,4 @@ template "#{node['jenkins']['master']['home']}/jenkins.model.JenkinsLocationConf
   source 'jenkins.model.JenkinsLocationConfiguration.xml.erb'
   user node['jenkins']['master']['user']
   group node['jenkins']['master']['group']
-  variables({
-    :adminAddress => node['master']['adminAddress'],
-    :jenkinsUrl   => node['master']['jenkinsUrl']
-  })
 end
