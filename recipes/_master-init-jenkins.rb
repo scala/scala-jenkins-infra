@@ -7,10 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-# The jenkins cookbook comes with a very simple java installer. If you need more
-#  complex java installs you are on your own.
-#  https://github.com/opscode-cookbooks/jenkins#java
-include_recipe 'jenkins::java'
 include_recipe 'jenkins::master'
 
 # recursive doesn't set owner correctly??

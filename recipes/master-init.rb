@@ -10,6 +10,8 @@ include_recipe 'chef-client::service'
 
 chef_gem "chef-vault"
 
+include_recipe "java"
+
 include_recipe "scala-jenkins-infra::_master-init-jenkins"
 
 

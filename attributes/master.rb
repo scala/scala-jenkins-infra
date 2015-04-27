@@ -9,6 +9,10 @@ default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
 if node.name == "jenkins-master"
+  # JAVA
+  default['java']['jdk_version']    = '7'
+  default['java']['install_flavor'] = 'openjdk'
+
   # JENKINS
   override['jenkins']['master']['install_method'] = 'war'
   override['jenkins']['master']['listen_address'] = '127.0.0.1' # external traffic must go through nginx
