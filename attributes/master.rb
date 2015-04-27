@@ -16,9 +16,29 @@ if node.name == "jenkins-master"
   default['ebs']['volumes']['/var/lib/jenkins']['user']      = "jenkins"
   default['ebs']['volumes']['/var/lib/jenkins']['mountopts'] = 'noatime'
 
+  default['ebs']['volumes']['/var/lib/artifactory']['size']      = 200 # size of the volume correlates to speed (in IOPS)
+  default['ebs']['volumes']['/var/lib/artifactory']['dev']       = "/dev/sdk"
+  default['ebs']['volumes']['/var/lib/artifactory']['fstype']    = "ext4"
+  default['ebs']['volumes']['/var/lib/artifactory']['user']      = "artifactory"
+  default['ebs']['volumes']['/var/lib/artifactory']['mountopts'] = 'noatime'
+
   # JAVA
   default['java']['jdk_version']    = '7'
   default['java']['install_flavor'] = 'openjdk'
+
+  # ARTIFACTORY
+  default['artifactory']['zip_url']            = 'http://dl.bintray.com/content/jfrog/artifactory/artifactory-3.6.0.zip?direct'
+  default['artifactory']['zip_checksum']       = '72c375ab659d302da0b196349e152f3d799c3cada2f4d09f9399281a06d880e8'
+  default['artifactory']['home']               = '/var/lib/artifactory'
+  default['artifactory']['log_dir']            = '/var/lib/artifactory/logs'
+  default['artifactory']['java']['xmx']        = '2g'
+  default['artifactory']['java']['extra_opts'] = '-server'
+  default['artifactory']['user']               = 'artifactory'
+  default['artifactory']['proxyName']          = scalaCiHost
+  default['artifactory']['proxyPort']          = scalaCiPort
+  default['artifactory']['address']            = "localhost"
+  default['artifactory']['port']               = 8282 # internal use over http
+  default['artifactory']['install_java']       = false
 
   # JENKINS
   override['jenkins']['master']['install_method'] = 'war'

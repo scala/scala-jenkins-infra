@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: _master-init-proxy
+# Recipe:: _master-config-proxy
 #
 # Copyright 2014, Typesafe, Inc.
 #

@@ -15,6 +15,7 @@ include_recipe "scala-jenkins-infra::_config-ebs"
 
 include_recipe "scala-jenkins-infra::_master-init-jenkins"
 
+include_recipe "scala-jenkins-infra::_master-init-artifactory"
 
 case node["platform"]
 when "amazon"

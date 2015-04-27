@@ -23,6 +23,8 @@ depends 'windows'
 depends 'java'
 depends 'jenkins'
 
+depends 'artifactory'
+
 depends 'git'
 depends 'git_user'
 
