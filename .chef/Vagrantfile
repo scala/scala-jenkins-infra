@@ -1,12 +1,20 @@
 # TODO: this kind of works, but the cookbook won't run in virtual box:
-#  - (scatter-gather workaround)
 #  - chef-solo can't access the vault on the chef server (passwords etc)
-# to make this work, you need to populate a cookbooks/ directory next to this file,
-# as documented in the README.md (use knife)
+# vagrant box add utopic-daily https://cloud-images.ubuntu.com/vagrant/utopic/current/utopic-server-cloudimg-amd64-vagrant-disk1.box
+# vagrant init utopic-daily
+# vagrant up
+# centos: vagrant box add chef/centos-7.0
 Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise64"
+  config.vm.box = "utopic-daily"
   config.vm.provision :chef_solo do |chef|
+    chef.cookbooks_path = ["~/git/cookbooks"]
+    chef.node_name = "jenkins-master"
     chef.add_recipe("scala-jenkins-infra::master-init")
+    chef.add_recipe("scala-jenkins-infra::_master-config-proxy")
   end
-  config.vm.network :forwarded_port, guest: 80, host: 11180
+  config.vm.network "public_network"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 4096
+    v.cpus = 2
+  end
 end
