@@ -18,7 +18,27 @@ if node.name == "jenkins-master"
   override['jenkins']['master']['listen_address'] = '127.0.0.1' # external traffic must go through nginx
   override['jenkins']['master']['user']           = 'jenkins'
   override['jenkins']['master']['group']          = 'jenkins'
-  override['jenkins']['master']['jvm_options']    = '-server -Xmx4G -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError' # -Dfile.encoding=UTF-8
+
+  # NOTES on override['jenkins']['master']['jvm_options']:
+  #  - org.eclipse.jetty.server.Request.maxFormContentSize is to fix:
+  #     WARNING: Caught exception evaluating: request.getParameter('q') in /updateCenter/byId/default/postBack. Reason: java.lang.IllegalStateException: Form too large 870330>500000
+
+  #  - hudson.model.User.allowNonExistentUserToLogin resolves issue with installing plugins
+  #    on bootstrapping jenkins (https://github.com/jenkinsci/jenkins/commit/80e9f3f50c3425c9b9b2bfdb58b03a1f1bd10aa3)
+  #   more of the stacktrace:
+  #      java.io.EOFException
+  #      	at java.io.DataInputStream.readBoolean(DataInputStream.java:244)
+  #      before that:   #  ================================================================================
+  #      Error executing action `install` on resource 'jenkins_plugin[notification]'
+  #      ================================================================================
+  #
+  #      Mixlib::ShellOut::ShellCommandFailed
+  #      ------------------------------------
+  #      Expected process to exit with [0], but received '255'
+  #      ---- Begin output of "/usr/lib/jvm/java-7-openjdk-amd64/bin/java" -jar "/var/chef/cache/jenkins-cli.jar" -s http://localhost:8080 -i "/var/chef/cache/jenkins-key" install-plugin /var/chef/cache/notification-latest.plugin -name notification  ----
+
+  override['jenkins']['master']['jvm_options']    = '-server -Xmx4G -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError -Dhudson.model.User.allowNonExistentUserToLogin=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000' #
+  # -Dfile.encoding=UTF-8
 
   # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
   # override['jenkins']['master']['version']  = '1.555'

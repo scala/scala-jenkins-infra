@@ -34,3 +34,12 @@ template "#{node['jenkins']['master']['home']}/jenkins.model.JenkinsLocationConf
   user node['jenkins']['master']['user']
   group node['jenkins']['master']['group']
 end
+
+# this is to allow plugin installation using jenkins-cli (needs to use REST to download update center json)
+cookbook_file "jenkins.model.DownloadSettings.xml" do
+  path "#{node['jenkins']['master']['home']}/jenkins.model.DownloadSettings.xml"
+  user  node['jenkins']['master']['user']
+  group node['jenkins']['master']['group']
+end
+
+

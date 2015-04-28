@@ -8,8 +8,6 @@
 #
 include_recipe 'chef-client::service'  # TODO: it seems chef's not run on boot on windows?
 
-chef_gem "chef-vault"
-
 include_recipe "aws"
 
 include_recipe "git"

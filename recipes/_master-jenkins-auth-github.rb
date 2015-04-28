@@ -7,9 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-require "chef-vault"
-
-apiVault = ChefVault::Item.load("master", "github-api")
+apiVault = chef_vault_item("master", "github-api")
 
 # This adds Github oAuth security. (login with your github id.)
 jenkins_script 'add_gh_authentication' do

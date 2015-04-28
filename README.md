@@ -178,42 +178,64 @@ hub clone scala/scala-jenkins-infra
 cd scala-jenkins-infra
 ln -sh ~/git/cookbooks $PWD/.chef/
 
-knife site install cron
-knife site install logrotate
-knife site install chef_handler
-knife site install windows
-knife site install chef-client
-knife site install aws
-knife site install delayed_evaluator
-knife site install ebs
-knife site install java
-knife site install apt
-knife site install packagecloud
-knife site install runit
-knife site install yum
-knife site install jenkins
-knife site install 7-zip
-knife site install ark
-knife site install artifactory
-knife site install build-essential
-knife site install dmg
-knife site install yum-epel
-knife site install git
-knife site install user
-knife site install partial_search
-knife site install ssh_known_hosts
-knife site install git_user
-knife site install chef-sbt
-knife site install sbt-extras
+knife cookbook site install cron
+knife cookbook site install logrotate
+knife cookbook site install chef_handler
+knife cookbook site install windows
+knife cookbook site install chef-client
+knife cookbook site install aws
+knife cookbook site install delayed_evaluator
+knife cookbook site install ebs
+knife cookbook site install apt
+knife cookbook site install packagecloud
+knife cookbook site install runit
+knife cookbook site install yum
+knife cookbook site install 7-zip
+knife cookbook site install ark
+knife cookbook site install artifactory
+knife cookbook site install build-essential
+knife cookbook site install dmg
+knife cookbook site install yum-epel
+knife cookbook site install git
+knife cookbook site install user
+knife cookbook site install partial_search
+knife cookbook site install ssh_known_hosts
+knife cookbook site install git_user
+
+knife cookbook site install chef-vault
 ```
+
+### Current cookbooks
+ - 7-zip               ==  1.0.2
+ - apt                 ==  2.7.0
+ - ark                 ==  0.9.0
+ - artifactory         ==  0.1.1
+ - aws                 ==  2.7.0
+ - build-essential     ==  2.2.3
+ - chef-client         ==  4.3.0
+ - chef_handler        ==  1.1.6
+ - cron                ==  1.6.1
+ - delayed_evaluator   ==  0.2.0
+ - dmg                 ==  2.2.2
+ - ebs                 ==  0.3.6
+ - git                 ==  4.2.2
+ - git_user            ==  0.3.1
+ - logrotate           ==  1.9.1
+ - packagecloud        ==  0.0.17
+ - partial_search      ==  1.0.8
+ - runit               ==  1.6.0
+ - sbt                 ==  0.1.0
+ - sbt-extras          ==  0.4.0
+ - ssh_known_hosts     ==  2.0.0
+ - user                ==  0.4.2
+ - windows             ==  1.36.6
+ - yum                 ==  3.6.0
+ - yum-epel            ==  0.6.0
 
 ### Switch to unreleased versions from github
 ```
-//fixed: knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)
-//knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows -- fix pending: https://github.com/opscode-cookbooks/jenkins/pull/313
-knife cookbook github install b-dean/jenkins/http_ca_fixes  # pending fix for above ^^^
-
-knife cookbook github install adriaanm/java/windows-jdk1.6 # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
+knife cookbook github install adriaanm/jenkins/fix305  # custom fixes + https://github.com/opscode-cookbooks/jenkins/pull/313 (b-dean/jenkins/http_ca_fixes)
+knife cookbook github install adriaanm/java/windows-jdk1.6  # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
 knife cookbook github install adriaanm/chef-sbt
 knife cookbook github install gildegoma/chef-sbt-extras
 knife cookbook github install adriaanm/artifactory

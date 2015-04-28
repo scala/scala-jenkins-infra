@@ -31,14 +31,14 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       owner jenkinsUser
       mode '600'
       sensitive true
-      content ChefVault::Item.load("worker-publish", "chara-keypair")['private_key']
+      content chef_vault_item("worker-publish", "chara-keypair")['private_key']
     end
 
     execute 'accept chara host key' do
       command "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"#{jenkinsHome}/.ssh/for_chara\" true"
       user jenkinsUser
       #
-      # not_if "grep -qs \"#{ChefVault::Item.load("worker-publish", "chara-keypair")['public_key']}\" #{jenkinsHome}/.ssh/known_hosts"
+      # not_if "grep -qs \"#{chef_vault_item("worker-publish", "chara-keypair")['public_key']}\" #{jenkinsHome}/.ssh/known_hosts"
     end
 
     directory "#{jenkinsHome}/.gnupg" do
@@ -50,7 +50,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         owner jenkinsUser
         mode '600'
         sensitive true
-        content Base64.decode64(ChefVault::Item.load("worker-publish", "gnupg")["#{kind}ring-base64"])
+        content Base64.decode64(chef_vault_item("worker-publish", "gnupg")["#{kind}ring-base64"])
       end
     end
 
@@ -70,12 +70,12 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         sensitive true
 
         variables({
-          :sonatypePass    => ChefVault::Item.load("worker-publish", "sonatype")['pass'],
-          :sonatypeUser    => ChefVault::Item.load("worker-publish", "sonatype")['user'],
-          :privateRepoPass => ChefVault::Item.load("worker-publish", "private-repo")['pass'],
-          :privateRepoUser => ChefVault::Item.load("worker-publish", "private-repo")['user'],
-          :s3DownloadsPass => ChefVault::Item.load("worker-publish", "s3-downloads")['pass'],
-          :s3DownloadsUser => ChefVault::Item.load("worker-publish", "s3-downloads")['user']
+          :sonatypePass    => chef_vault_item("worker-publish", "sonatype")['pass'],
+          :sonatypeUser    => chef_vault_item("worker-publish", "sonatype")['user'],
+          :privateRepoPass => chef_vault_item("worker-publish", "private-repo")['pass'],
+          :privateRepoUser => chef_vault_item("worker-publish", "private-repo")['user'],
+          :s3DownloadsPass => chef_vault_item("worker-publish", "s3-downloads")['pass'],
+          :s3DownloadsUser => chef_vault_item("worker-publish", "s3-downloads")['user']
         })
       end
     end

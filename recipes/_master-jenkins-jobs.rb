@@ -7,11 +7,10 @@
 # All rights reserved - Do Not Redistribute
 #
 
-require "chef-vault"
 
 ruby_block 'set private key' do
   block do
-    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
+    node.run_state[:jenkins_private_key] = chef_vault_item("master", "scala-jenkins-keypair")['private_key']
   end
 end
 

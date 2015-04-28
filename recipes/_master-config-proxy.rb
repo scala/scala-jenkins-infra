@@ -35,10 +35,11 @@ cookbook_file "dhparam.pem" do
   path "/etc/nginx/ssl/dhparam.pem"
 end
 
+
 file "/etc/nginx/ssl/scala-ci.key" do
   owner 'root'
   mode  '600'
-  content ChefVault::Item.load("master", "scala-ci-key")['private_key']
+  content chef_vault_item("master", "scala-ci-key")['private_key']
   sensitive true
 end
 

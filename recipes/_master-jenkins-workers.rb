@@ -7,11 +7,10 @@
 # All rights reserved - Do Not Redistribute
 #
 
-require "chef-vault"
 
 ruby_block 'set private key' do
   block do
-    node.run_state[:jenkins_private_key] = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
+    node.run_state[:jenkins_private_key] = chef_vault_item("master", "scala-jenkins-keypair")['private_key']
   end
 end
 
@@ -19,7 +18,7 @@ credentialsMap = {
   'jenkins'  => '954dd564-ce8c-43d1-bcc5-97abffc81c57'
 }
 
-privKey = ChefVault::Item.load("master", "scala-jenkins-keypair")['private_key']
+privKey = chef_vault_item("master", "scala-jenkins-keypair")['private_key']
 
 # TODO: different keypairs to sandbox different workers better, just in case?
 credentialsMap.each do |userName, uniqId|

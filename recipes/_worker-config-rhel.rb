@@ -7,6 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
+
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   jenkinsUser=workerConfig["jenkinsUser"]
 
@@ -24,8 +25,8 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       sensitive true
 
       variables({
-        :privateRepoPass => ChefVault::Item.load("worker", "private-repo-public-jobs")['pass'],
-        :privateRepoUser => ChefVault::Item.load("worker", "private-repo-public-jobs")['user']
+        :privateRepoPass => chef_vault_item("worker", "private-repo-public-jobs")['pass'],
+        :privateRepoUser => chef_vault_item("worker", "private-repo-public-jobs")['user']
       })
     end
   end

@@ -7,7 +7,6 @@
 # All rights reserved - Do Not Redistribute
 #
 
-require "chef-vault"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   if workerConfig["publish"]
@@ -21,8 +20,8 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         user      workerConfig["jenkinsUser"]
 
         variables({
-          :s3DownloadsPass => ChefVault::Item.load("worker-publish", "s3-downloads")['pass'],
-          :s3DownloadsUser => ChefVault::Item.load("worker-publish", "s3-downloads")['user']
+          :s3DownloadsPass => chef_vault_item("worker-publish", "s3-downloads")['pass'],
+          :s3DownloadsUser => chef_vault_item("worker-publish", "s3-downloads")['user']
         })
       end
     end
