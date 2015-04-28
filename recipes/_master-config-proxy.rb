@@ -13,6 +13,8 @@
 
 package "nginx"
 
+user "nginx"
+
 template '/etc/nginx/nginx.conf' do
   source 'nginx.conf'
   notifies :reload, "service[nginx]"
