@@ -105,9 +105,9 @@ aws iam create-instance-profile --instance-profile-name JenkinsMaster
 aws iam create-instance-profile --instance-profile-name JenkinsWorkerPublish
 aws iam create-instance-profile --instance-profile-name JenkinsWorker
 
-aws iam create-role --role-name jenkins-master         --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
-aws iam create-role --role-name jenkins-worker         --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
-aws iam create-role --role-name jenkins-worker-publish --assume-role-policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ec2-role-trust-policy.json
+aws iam create-role --role-name jenkins-master         --assume-role-policy-document file://$PWD/chef/ec2-role-trust-policy.json
+aws iam create-role --role-name jenkins-worker         --assume-role-policy-document file://$PWD/chef/ec2-role-trust-policy.json
+aws iam create-role --role-name jenkins-worker-publish --assume-role-policy-document file://$PWD/chef/ec2-role-trust-policy.json
 
 aws iam add-role-to-instance-profile --instance-profile-name JenkinsMaster        --role-name jenkins-master
 aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorker        --role-name jenkins-worker
@@ -115,21 +115,23 @@ aws iam add-role-to-instance-profile --instance-profile-name JenkinsWorkerPublis
 ```
 
 ### Attach policies to roles:
-
-```
-aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-ec2-start-stop.json
-aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-dynamodb --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/dynamodb.json
-
-// TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes and use IAM profile instead
-aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/jenkins-s3-upload.json
-
-aws iam put-role-policy --role-name jenkins-worker --policy-name jenkins-ebs-create-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
-
-aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-ebs-create-vol --policy-document file:///Users/adriaan/git/scala-jenkins-infra/chef/ebs-create-vol.json
-```
-
 NOTE: if you get syntax errors, check the policy doc URL
-pass JenkinsWorker as the iam profile to knife bootstrap
+
+```
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ec2-start-stop        --policy-document file://$PWD/chef/jenkins-ec2-start-stop.json
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-dynamodb              --policy-document file://$PWD/chef/dynamodb.json
+aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ebs-create-vol        --policy-document file://$PWD/chef/ebs-create-vol.json
+```
+
+```
+aws iam put-role-policy --role-name jenkins-worker --policy-name jenkins-ebs-create-vol        --policy-document file://$PWD/chef/ebs-create-vol.json
+```
+
+TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes (use IAM profile below instead)
+```
+aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload      --policy-document file://$PWD/chef/jenkins-s3-upload.json
+aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-ebs-create-vol --policy-document file://$PWD/chef/ebs-create-vol.json
+```
 
 
 ## Create an Elastic IP for each node
@@ -157,35 +159,70 @@ If your username on chef.io does not match the local username on your machine, y
 export CHEF_USER="[username]"
 ```
 
-You can then generate and download your private key on https://www.chef.io/account/password. Put it to `.chef/config/$CHEF_USER.pem`, then you can use knife without further config. See `.chef/knife.rb` for key locations.
+You can then generate and download your private key on https://www.chef.io/account/password. Put it to `$PWD/.chef/config/$CHEF_USER.pem`, then you can use knife without further config. See `$PWD/.chef/knife.rb` for key locations.
 
 Test if knife works correctly by running `knife cookbook list`.
 
-Obtain the organization validation key from Adriaan and put it to `.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
+Obtain the organization validation key from Adriaan and put it to `$PWD/.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
 
-## Get cookbooks
+## Clone scala-jenkins-infra cookbook and its dependencies
+
+I think you can safely ignore `ERROR: IOError: Cannot open or read **/metadata.rb!` in the below
 
 ```
-git init .chef/cookbooks
-cd .chef/cookbooks
+cd ~/git/cookbooks
+git init .
 g commit --allow-empty -m"Initial" 
+
+hub clone scala/scala-jenkins-infra
+cd scala-jenkins-infra
+ln -sh ~/git/cookbooks $PWD/.chef/
+
+knife site install cron
+knife site install logrotate
+knife site install chef_handler
+knife site install windows
+knife site install chef-client
+knife site install aws
+knife site install delayed_evaluator
+knife site install ebs
+knife site install java
+knife site install apt
+knife site install packagecloud
+knife site install runit
+knife site install yum
+knife site install jenkins
+knife site install 7-zip
+knife site install ark
+knife site install artifactory
+knife site install build-essential
+knife site install dmg
+knife site install yum-epel
+knife site install git
+knife site install user
+knife site install partial_search
+knife site install ssh_known_hosts
+knife site install git_user
+knife site install chef-sbt
+knife site install sbt-extras
 ```
 
-- knife cookbook site install wix 1.0.2 # newer versions don't work for me; also installs windows
-- knife cookbook site install aws
-- knife cookbook site install git
-- knife cookbook site install git_user
-  - knife cookbook site install partial_search
- 
-- move to unreleased versions on github:
-  - knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)
-  - knife cookbook github install adriaanm/java/windows-jdk1.6 # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
-  - knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows
-  - knife cookbook github install adriaanm/scala-jenkins-infra
-  - knife cookbook github install adriaanm/chef-sbt
-  - knife cookbook github install gildegoma/chef-sbt-extras
+### Switch to unreleased versions from github
+```
+//fixed: knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)
+//knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows -- fix pending: https://github.com/opscode-cookbooks/jenkins/pull/313
+knife cookbook github install b-dean/jenkins/http_ca_fixes  # pending fix for above ^^^
 
-- knife cookbook upload --all
+knife cookbook github install adriaanm/java/windows-jdk1.6 # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
+knife cookbook github install adriaanm/chef-sbt
+knife cookbook github install gildegoma/chef-sbt-extras
+knife cookbook github install adriaanm/artifactory
+```
+
+### Upload cookbooks to chef server
+```
+knife cookbook upload --all
+```
 
 ## Cache installers locally
 - they are tricky to access, might disappear,...
@@ -205,23 +242,23 @@ NOTE: the JSON must not have a field "id"!!!
 ### Chef user with keypair for jenkins cli access
 ```
 eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
-ruby chef/keypair.rb > ~/Desktop/chef-secrets/config/keypair.json
-ruby chef/keypair.rb > ~/Desktop/chef-secrets/config/scabot-keypair.json
+ruby chef/keypair.rb > $PWD/.chef/keypair.json
+ruby chef/keypair.rb > $PWD/.chef/scabot-keypair.json
 
-# extract private key to ~/Desktop/chef-secrets/config/scabot.pem
+# extract private key to $PWD/.chef/scabot.pem
 
 knife vault create master scala-jenkins-keypair \
-  --json ~/Desktop/chef-secrets/config/keypair.json \
+  --json $PWD/.chef/keypair.json \
   --search 'name:jenkins*' \
   --admins adriaan
 
 knife vault create master scabot-keypair \
-  --json ~/Desktop/chef-secrets/config/scabot-keypair.json \
+  --json $PWD/.chef/scabot-keypair.json \
   --search 'name:jenkins-master' \
   --admins adriaan
 
 knife vault create master scabot \
-  --json ~/Desktop/chef-secrets/config/scabot.json \
+  --json $PWD/.chef/scabot.json \
   --search 'name:jenkins-master' \
   --admins adriaan
 
@@ -267,12 +304,12 @@ knife vault create worker-publish s3-downloads \
   --admins adriaan
 
 knife vault create worker-publish chara-keypair \
-  --json chara-keypair.json \
+  --json $PWD/.chef/config/chara-keypair.json \
   --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 
 knife vault create worker-publish gnupg \
-  --json /Users/adriaan/Desktop/chef-secrets/gnupg.json \
+  --json   $PWD/.chef/config/gnupg.json \
   --search 'name:jenkins-worker-ubuntu-publish' \
   --admins adriaan
 
@@ -301,28 +338,28 @@ Note that the IPs are stable by allocating elastic IPs and associating them to n
 ## ~/.ssh/config
 ```
 Host jenkins-worker-ubuntu-publish
-  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  IdentityFile $PWD/.chef/config/chef.pem
   User ubuntu
 
 Host jenkins-worker-behemoth-1
-  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  IdentityFile $PWD/.chef/config/chef.pem
   User ec2-user
 
 Host jenkins-worker-behemoth-2
-  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  IdentityFile $PWD/.chef/config/chef.pem
   User ec2-user
 
 Host jenkins-master
-  IdentityFile ~/Desktop/chef-secrets/config/chef.pem
+  IdentityFile $PWD/.chef/config/chef.pem
   User ec2-user
 
 Host scabot
   HostName jenkins-master
-  IdentityFile ~/Desktop/chef-secrets/config/scabot.pem
+  IdentityFile $PWD/.chef/scabot.pem
   User scabot
 
 Host jenkins-worker-windows-publish
-  IdentityFile ~/Desktop/chef-secrets/jenkins-chef
+  IdentityFile $PWD/.chef/config/chef.pem
   User jenkins
 ```
 
@@ -363,7 +400,7 @@ knife ec2 server create -N jenkins-master \
    --region us-west-1 --flavor t2.small -I ami-4b6f650e \
    -G Master --ssh-user ec2-user \
    --iam-profile JenkinsMaster \
-   --identity-file .chef/config/chef.pem \
+   --identity-file $PWD/.chef/config/chef.pem \
    --run-list "scala-jenkins-infra::master-init"
 
 knife ec2 server create -N jenkins-worker-windows-publish \
@@ -375,7 +412,7 @@ knife ec2 server create -N jenkins-worker-windows-publish \
    --security-group-ids sg-1dec3d78                       \
    --subnet subnet-4bb3b80d --associate-eip 54.183.156.89 \
    --server-connect-attribute public_ip_address           \
-   --identity-file .chef/config/chef.pem                  \
+   --identity-file $PWD/.chef/config/chef.pem             \
    --run-list "scala-jenkins-infra::worker-init"
 
 
@@ -389,7 +426,7 @@ knife ec2 server create -N jenkins-worker-ubuntu-publish  \
    --security-group-ids sg-ecb06389                       \
    --subnet subnet-4bb3b80d --associate-eip 54.67.33.167  \
    --server-connect-attribute public_ip_address           \
-   --identity-file .chef/config/chef.pem                  \
+   --identity-file $PWD/.chef/config/chef.pem             \
    --run-list "scala-jenkins-infra::worker-init"
 
 echo NOTE: Make sure to first remove the ips in $behemothIp from your ~/.ssh/known_hosts. Also remove the corresponding worker from the chef server (can be only one with the same name).
@@ -404,7 +441,7 @@ do knife ec2 server create -N jenkins-worker-behemoth-$behemoth      \
    --security-group-ids sg-ecb06389                                  \
    --subnet subnet-4bb3b80d --associate-eip ${behemothIp[$behemoth]} \
    --server-connect-attribute public_ip_address                      \
-   --identity-file .chef/config/chef.pem                             \
+   --identity-file $PWD/.chef/config/chef.pem                        \
    --run-list "scala-jenkins-infra::worker-init"
 done
 
@@ -446,7 +483,7 @@ done
 
 - windows:
 ```
-PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key ~/Desktop/chef-secrets/config/chef.pem | jq .PasswordData | xargs echo)
+PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key $PWD/.chef/config/chef.pem | jq .PasswordData | xargs echo)
 knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
 ```
 
@@ -470,7 +507,7 @@ Workaround: make sure EC2 instance names are unique.
 
 http://blog.gravitystorm.co.uk/2013/09/13/using-vagrant-to-test-chef-cookbooks/:
 
-See `.chef/Vagrantfile` -- make sure you first populated `.chef/cookbooks/` using knife,
+See `$PWD/.chef/Vagrantfile` -- make sure you first populated `$PWD/.chef/cookbooks/` using knife,
 as [documented above](#get-cookbooks)
 
 ## If connections hang
@@ -506,7 +543,7 @@ $ openssl req -text -noout -in scala-ci.csr
 
 ## Retry bootstrap
 ```
-knife bootstrap -c .chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user ubuntu --sudo -c .chef/knife.rb -N jenkins-worker-ubuntu-publish -r "scala-jenkins-infra::worker-init"
+knife bootstrap -c $PWD/.chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user ubuntu --sudo -c $PWD/.chef/knife.rb -N jenkins-worker-ubuntu-publish -r "scala-jenkins-infra::worker-init"
 ```
 
 ## WinRM troubles?
@@ -514,7 +551,7 @@ If it appears stuck at "Waiting for remote response before bootstrap.", the user
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
 
 ```
-aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/git/scala-jenkins-infra/.chef/config/chef.pem
+aws ec2 get-password-data --instance-id $INST --priv-launch-key $PWD/.chef/config/chef.pem
 
 cord $IP, log in using password above and open a command line:
 
