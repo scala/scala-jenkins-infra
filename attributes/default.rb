@@ -10,9 +10,9 @@ default['jenkinsEnv']['ANT_OPTS']   = workerJavaOpts
 default['jenkinsEnv']['MAVEN_OPTS'] = workerJavaOpts # doesn't technically need the -Dpartest one, but oh well
 
 default['repos']['private']['realm']        = "Artifactory Realm"
-default['repos']['private']['host']         = "private-repo.typesafe.com"
-default['repos']['private']['pr-snap']      = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
-default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/typesafe/scala-release-temp/"
+default['repos']['private']['host']         = scalaCiHost
+default['repos']['private']['pr-snap']      = "https://#{scalaCiHost}/artifactory/scala-pr-validation-snapshots/"
+default['repos']['private']['release-temp'] = "https://#{scalaCiHost}/artifactory/scala-release-temp/"
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 

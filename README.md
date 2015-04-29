@@ -544,9 +544,24 @@ The jenkins token for scabot has to be configured manually:
  ```
  - do `knife vault update master scabot -J scabot-jenkins.json`
  
-
-
+# Artifactory
+ - Set admin password.
+ - create repos (TODO: automate)
+ - Create scala-ci user that can push to scala-release-temp and scala-pr-validation-snapshots,
+ - coordinate scala-ci credentials with jenkins via
 ```
+knife vault update worker-publish private-repo -J private-repo.json
+```
+
+where `private-repo.json`:
+```
+{
+  "id": "private-repo",
+  "user": "scala-ci",
+  "pass": "???"
+}
+```
+
 
 # Misc
 
