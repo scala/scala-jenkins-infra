@@ -12,7 +12,6 @@
 # Also, it needs to run on every reboot of the worker instance(s),
 # since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
-require 'chef-vault'
 require 'base64'
 
 # debian is only used for publishing jobs (if we add debian nodes for public jobs, must copy stuff from _worker-config-rhel)
