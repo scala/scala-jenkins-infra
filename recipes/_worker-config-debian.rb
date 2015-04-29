@@ -12,6 +12,7 @@
 # Also, it needs to run on every reboot of the worker instance(s),
 # since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
+require 'cgi'
 require 'base64'
 
 # debian is only used for publishing jobs (if we add debian nodes for public jobs, must copy stuff from _worker-config-rhel)
@@ -71,7 +72,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         variables({
           :sonatypePass    => chef_vault_item("worker-publish", "sonatype")['pass'],
           :sonatypeUser    => chef_vault_item("worker-publish", "sonatype")['user'],
-          :privateRepoPass => chef_vault_item("worker-publish", "private-repo")['pass'],
+          :privateRepoPass => CGI.escapeHTML(chef_vault_item("worker-publish", "private-repo")['pass']), # OMG more papercuts
           :privateRepoUser => chef_vault_item("worker-publish", "private-repo")['user'],
           :s3DownloadsPass => chef_vault_item("worker-publish", "s3-downloads")['pass'],
           :s3DownloadsUser => chef_vault_item("worker-publish", "s3-downloads")['user']

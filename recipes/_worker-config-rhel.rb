@@ -7,6 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
+require 'cgi'
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   jenkinsUser=workerConfig["jenkinsUser"]
@@ -25,7 +26,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       sensitive true
 
       variables({
-        :privateRepoPass => chef_vault_item("worker", "private-repo-public-jobs")['pass'],
+        :privateRepoPass => CGI.escapeHTML(chef_vault_item("worker", "private-repo-public-jobs")['pass']),
         :privateRepoUser => chef_vault_item("worker", "private-repo-public-jobs")['user']
       })
     end
