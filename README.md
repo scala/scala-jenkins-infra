@@ -598,8 +598,10 @@ Incorporate the cert into an ssl chain for nginx:
 
 For [forward secrecy](http://axiacore.com/blog/enable-perfect-forward-secrecy-nginx/):
 ```
-openssl dhparam -out files/default/dhparam.pem 2048
+openssl dhparam -out files/default/dhparam.pem 1024
 ```
+
+Using 1024 bits (instead of 2048) for DH to be Java 6 compatible... Bye-bye A+ on https://www.ssllabs.com/ssltest/analyze.html?d=scala-ci.typesafe.com
 
 Confirm values in the csr using:
 
