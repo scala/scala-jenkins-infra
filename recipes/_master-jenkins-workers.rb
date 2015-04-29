@@ -29,11 +29,11 @@ credentialsMap.each do |userName, uniqId|
 end
 
 
-masterEnvLambda = eval node["master"]["env"]
+masterEnvLambda = node["master"]["env"]
 
 search(:node, 'name:jenkins-worker*').each do |worker|
   worker["jenkinsHomes"].each do |jenkinsHome, workerConfig|
-    workerEnvLambda = eval workerConfig["env"]
+    workerEnvLambda = workerConfig["env"]
 
     jenkins_ssh_slave workerConfig["workerName"] do
       host        worker.ipaddress
@@ -57,7 +57,15 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       in_demand_delay workerConfig["in_demand_delay"]
       idle_delay      workerConfig["idle_delay"]
 
-      environment(masterEnvLambda.call(worker).merge(workerEnvLambda.call(worker)))
+      puts "Env for #{worker.name}:"
+      puts "masterEnvLambda: #{masterEnvLambda}"
+      puts "workerEnvLambda: #{workerEnvLambda}"
+      masterEnv = (eval masterEnvLambda).call(worker)
+      puts "masterEnv: #{masterEnv}"
+      workerEnv = (eval workerEnvLambda).call(worker)
+      puts "workerEnv: #{workerEnv}"
+
+      environment(masterEnv.merge(workerEnv))
 
       action [:create] # we don't need to :connect, :online since the ec2 start/stop plugin will do that. Also, if connect fails, it may be that chef-client hasn't yet run on the client to initialize jenkins home with .ssh/authorized_keys
     end

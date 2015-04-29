@@ -2,12 +2,21 @@ scalaCiHost = "scala-ci.typesafe.com"
 scalaCiPort = 443
 
 # JENKINS WORKER CONFIG
+# see below (note that default['master']['env'] can only indirect through node -- workerJavaOpts is not in scope)
+workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4"
+
+default['jenkinsEnv']['JAVA_OPTS']  = workerJavaOpts
+default['jenkinsEnv']['ANT_OPTS']   = workerJavaOpts
+default['jenkinsEnv']['MAVEN_OPTS'] = workerJavaOpts # doesn't technically need the -Dpartest one, but oh well
+
 default['repos']['private']['realm']        = "Artifactory Realm"
 default['repos']['private']['host']         = "private-repo.typesafe.com"
 default['repos']['private']['pr-snap']      = "http://private-repo.typesafe.com/typesafe/scala-pr-validation-snapshots/"
 default['repos']['private']['release-temp'] = "http://private-repo.typesafe.com/typesafe/scala-release-temp/"
+
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
+# attributes only needed on jenkins-master
 if node.name == "jenkins-master"
   # EBS
   default['ebs']['volumes']['/var/lib/jenkins']['size']      = 100 # size of the volume correlates to speed (in IOPS)
@@ -89,12 +98,6 @@ if node.name == "jenkins-master"
   default['master']['jenkinsHost']          = scalaCiHost
   default['master']['jenkinsUrl']           = "https://#{scalaCiHost}/"
   default['master']['jenkins']['notifyUrl'] = "http://#{scalaCiHost}:8888/jenkins" # scabot listens here
-
-  # see below (note that default['master']['env'] can only indirect through node -- workerJavaOpts is not in scope)
-  workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4"
-  default['jenkinsEnv']['JAVA_OPTS']  = workerJavaOpts
-  default['jenkinsEnv']['ANT_OPTS']   = workerJavaOpts
-  default['jenkinsEnv']['MAVEN_OPTS'] = workerJavaOpts # doesn't technically need the -Dpartest one, but oh well
 
   # NOTE: This is a string that represents a closure that closes over the worker node for which it computes the environment.
   # (by convention -- see `environment((eval node["master"]["env"])...` in _master-config-workers
