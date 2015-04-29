@@ -6,7 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
-include_recipe 'chef-client::service'
+include_recipe 'scala-jenkins-infra::_init-chef-client'
 
 include_recipe "java"
 

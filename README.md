@@ -509,8 +509,12 @@ PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key $PWD
 knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
 ```
 
-- ubuntu:  `ssh jenkins-worker-ubuntu-publish sudo chef-client`
-- amazon linux: `ssh jenkins-worker-behemoth-1`, and then `sudo chef-client`
+- linux
+```
+ssh jenkins-worker-ubuntu-publish
+sudo su --login # --login needed on ubuntu to set SSL_CERT_FILE (it's done in /etc/profile.d)
+chef-client
+```
 
 ### Attach eips
 
