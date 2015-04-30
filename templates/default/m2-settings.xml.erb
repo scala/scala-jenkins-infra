@@ -7,6 +7,7 @@
     I don't know how to encode a fall back, but I assume it's not needed as this is ~jenkins/.m2/settings.xml
   -->
   <localRepository>${WORKSPACE}/m2repo</localRepository>
+
   <servers>
     <server>
       <id>sonatype-nexus</id>
@@ -24,12 +25,14 @@
       <password></password>
     </server> -->
   </servers>
-  <!-- <mirrors>
-  <mirror>
-    <id>mirror</id>
-    <mirrorOf>central,sonatype.release,sonatype.snapshot</mirrorOf>
-    <name>Moxie Mirror of External Public repositories</name>
-    <url>https://maven-mirror.typesafe.com:8497/nexus/content/groups/everything</url>
-  </mirror>
-  </mirrors> -->
+
+  <mirrors>
+    <mirror>
+      <id>caching-proxy</id>
+      <name>Scala CI Artifactory</name>
+      <url><%=node['repos']['caching-proxy']['url']%></url>
+      <mirrorOf><%=node['repos']['caching-proxy']['mirrorOf']%></mirrorOf>
+    </mirror>
+  </mirrors>
+
 </settings>

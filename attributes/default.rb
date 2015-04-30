@@ -14,6 +14,9 @@ default['repos']['private']['host']         = scalaCiHost
 default['repos']['private']['pr-snap']      = "https://#{scalaCiHost}/artifactory/scala-pr-validation-snapshots/"
 default['repos']['private']['release-temp'] = "https://#{scalaCiHost}/artifactory/scala-release-temp/"
 
+default['repos']['caching-proxy']['mirrorOf'] = "central" # TODO: add ",sonatype.release,sonatype.snapshot"
+default['repos']['caching-proxy']['url']      = "https://#{scalaCiHost}/artifactory/jcenter/"
+
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
 # attributes only needed on jenkins-master
