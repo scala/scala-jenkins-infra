@@ -11,13 +11,13 @@
   <servers>
     <server>
       <id>sonatype-nexus</id>
-      <username><%= @sonatypeUser %></username>
-      <password><%= @sonatypePass %></password>
+      <username><%= @sonatype['user'] %></username>
+      <password><%= @sonatype['pass'] %></password>
     </server>
     <server>
       <id>private-repo</id>
-      <username><%= @privateRepoUser %></username>
-      <password><%= xmlSafe(@privateRepoPass) %></password>
+      <username><%= @privateRepo['user'] %></username>
+      <password><%= xmlSafe(@privateRepo['pass']) %></password>
     </server>
     <!-- <server>
       <id>mirror</id>

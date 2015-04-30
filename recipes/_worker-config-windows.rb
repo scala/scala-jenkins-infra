@@ -10,6 +10,8 @@
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   if workerConfig["publish"]
+    s3Downloads = chef_vault_item("worker-publish", "s3-downloads")
+
     # TODO: once s3-plugin supports it, use instance profile instead of credentials
     {
       "#{jenkinsHome}/.s3credentials" => "s3credentials.erb"
@@ -20,8 +22,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         user      workerConfig["jenkinsUser"]
 
         variables({
-          :s3DownloadsPass => chef_vault_item("worker-publish", "s3-downloads")['pass'],
-          :s3DownloadsUser => chef_vault_item("worker-publish", "s3-downloads")['user']
+          :s3Downloads => s3Downloads
         })
       end
     end

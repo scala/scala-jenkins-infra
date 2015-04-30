@@ -18,6 +18,8 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     end
   end
 
+  privateRepo = chef_vault_item("worker", "private-repo-public-jobs")
+
   { "#{jenkinsHome}/.m2/settings.xml" => "m2-settings-public-jobs.xml.erb",
     "#{jenkinsHome}/.credentials"     => "credentials-private-repo.erb"
   }.each do |target, templ|
@@ -27,8 +29,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       sensitive true
 
       variables({
-        :privateRepoPass => chef_vault_item("worker", "private-repo-public-jobs")['pass'],
-        :privateRepoUser => chef_vault_item("worker", "private-repo-public-jobs")['user']
+        :privateRepo => privateRepo
       })
       helpers(ScalaJenkinsInfra::JobBlurbs)
     end

@@ -54,6 +54,10 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       end
     end
 
+    privateRepo = chef_vault_item("worker-publish", "private-repo")
+    s3Downloads = chef_vault_item("worker-publish", "s3-downloads")
+    sonatype    = chef_vault_item("worker-publish", "sonatype")
+
     { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
       "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
       "#{jenkinsHome}/.credentials"              => "credentials-private-repo.erb",
@@ -70,12 +74,9 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         sensitive true
 
         variables({
-          :sonatypePass    => chef_vault_item("worker-publish", "sonatype")['pass'],
-          :sonatypeUser    => chef_vault_item("worker-publish", "sonatype")['user'],
-          :privateRepoPass => chef_vault_item("worker-publish", "private-repo")['pass'],
-          :privateRepoUser => chef_vault_item("worker-publish", "private-repo")['user'],
-          :s3DownloadsPass => chef_vault_item("worker-publish", "s3-downloads")['pass'],
-          :s3DownloadsUser => chef_vault_item("worker-publish", "s3-downloads")['user']
+          :privateRepo => privateRepo,
+          :s3Downloads => s3Downloads,
+          :sonatype    => sonatype
         })
         helpers(ScalaJenkinsInfra::JobBlurbs)
       end

@@ -11,8 +11,8 @@
   <servers>
     <server>
       <id>pr-scala</id>
-      <username><%= @privateRepoUser %></username>
-      <password><%= xmlSafe(@privateRepoPass) %></password>
+      <username><%= @privateRepo['user'] %></username>
+      <password><%= xmlSafe(@privateRepo['pass']) %></password>
     </server>
   </servers>
 
