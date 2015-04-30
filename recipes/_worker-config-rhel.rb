@@ -19,7 +19,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   end
 
   { "#{jenkinsHome}/.m2/settings.xml" => "m2-settings-public-jobs.xml.erb",
-    "#{jenkinsHome}/.credentials"     => "credentials-public-jobs.erb"
+    "#{jenkinsHome}/.credentials"     => "credentials-private-repo.erb"
   }.each do |target, templ|
     template target do
       source templ

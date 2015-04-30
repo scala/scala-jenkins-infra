@@ -56,7 +56,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
 
     { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
       "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
-      "#{jenkinsHome}/.credentials"              => "credentials-sonatype.erb", # TODO: remove -- I don't think it's used by the release scripts anymore (and some other tools -- dbuild -- need this file because you can't easily configure where they look)
+      "#{jenkinsHome}/.credentials"              => "credentials-private-repo.erb",
       "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
       "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
       "#{jenkinsHome}/.s3curl"                   => "s3curl.erb",
