@@ -17,7 +17,7 @@
     <server>
       <id>private-repo</id>
       <username><%= @privateRepoUser %></username>
-      <password><%= @privateRepoPass %></password>
+      <password><%= xmlSafe(@privateRepoPass) %></password>
     </server>
     <!-- <server>
       <id>mirror</id>

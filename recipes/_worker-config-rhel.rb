@@ -27,9 +27,10 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       sensitive true
 
       variables({
-        :privateRepoPass => CGI.escapeHTML(chef_vault_item("worker", "private-repo-public-jobs")['pass']),
+        :privateRepoPass => chef_vault_item("worker", "private-repo-public-jobs")['pass'],
         :privateRepoUser => chef_vault_item("worker", "private-repo-public-jobs")['user']
       })
+      helpers(ScalaJenkinsInfra::JobBlurbs)
     end
   end
 end

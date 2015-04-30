@@ -72,11 +72,12 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
         variables({
           :sonatypePass    => chef_vault_item("worker-publish", "sonatype")['pass'],
           :sonatypeUser    => chef_vault_item("worker-publish", "sonatype")['user'],
-          :privateRepoPass => CGI.escapeHTML(chef_vault_item("worker-publish", "private-repo")['pass']), # OMG more papercuts
+          :privateRepoPass => chef_vault_item("worker-publish", "private-repo")['pass'],
           :privateRepoUser => chef_vault_item("worker-publish", "private-repo")['user'],
           :s3DownloadsPass => chef_vault_item("worker-publish", "s3-downloads")['pass'],
           :s3DownloadsUser => chef_vault_item("worker-publish", "s3-downloads")['user']
         })
+        helpers(ScalaJenkinsInfra::JobBlurbs)
       end
     end
 

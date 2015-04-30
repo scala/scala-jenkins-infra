@@ -8,6 +8,10 @@ module ScalaJenkinsInfra
       "+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head"
     end
 
+    def xmlSafe(str)
+      CGI.escapeHTML(str)
+    end
+
     def properties(repoUser, repoName, repoRef, params)
       stringPar =
         """
@@ -52,12 +56,12 @@ module ScalaJenkinsInfra
       buildNameScript = options.fetch(:buildNameScript, setBuildNameScript)
 
       <<-EOX
-      <description>#{CGI.escapeHTML(description)}</description>
+      <description>#{xmlSafe(description)}</description>
       #{properties(repoUser, repoName, repoRef, params)}
       <scm class="hudson.scm.NullSCM"/>
       <canRoam>true</canRoam>
       <concurrentBuild>#{concurrent}</concurrentBuild>
-      <dsl>#{CGI.escapeHTML(buildNameScript+"\n\n"+dsl)}</dsl>
+      <dsl>#{xmlSafe(buildNameScript+"\n\n"+dsl)}</dsl>
       EOX
     end
 
@@ -95,10 +99,10 @@ module ScalaJenkinsInfra
       end
 
       <<-EOX
-        <description>#{CGI.escapeHTML(description)}</description>
+        <description>#{xmlSafe(description)}</description>
         #{properties(repoUser, repoName, repoRef, params)}
         #{scmBlurb(refspec)}
-        #{restriction % {nodes: CGI.escapeHTML(nodeRestriction)} if nodeRestriction}
+        #{restriction % {nodes: xmlSafe(nodeRestriction)} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
           #{groovySysScript(buildNameScript)}
@@ -200,7 +204,7 @@ module ScalaJenkinsInfra
       <<-EOH.gsub(/^      /, '')
       <hudson.plugins.groovy.SystemGroovy plugin="groovy">
         <scriptSource class="hudson.plugins.groovy.StringScriptSource">
-          <command>#{CGI.escapeHTML(script)}</command>
+          <command>#{xmlSafe(script)}</command>
         </scriptSource>
       </hudson.plugins.groovy.SystemGroovy>
       EOH
