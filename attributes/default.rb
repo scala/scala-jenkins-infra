@@ -79,10 +79,11 @@ if node.name == "jenkins-master"
   override['jenkins']['master']['jvm_options']    = '-server -Xmx4G -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError -Dhudson.model.User.allowNonExistentUserToLogin=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000' #
   # -Dfile.encoding=UTF-8
 
+  # PIN to 1.611 because later ones require Java 7 on workers...
   # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
-  # override['jenkins']['master']['version']  = '1.555'
-  # override['jenkins']['master']['source']   = "#{node['jenkins']['master']['mirror']}/war/#{node['jenkins']['master']['version']}/jenkins.war"
-  # override['jenkins']['master']['checksum'] = '31f5c2a3f7e843f7051253d640f07f7c24df5e9ec271de21e92dac0d7ca19431'
+  override['jenkins']['master']['version']  = '1.611'
+  override['jenkins']['master']['source']   = "#{node['jenkins']['master']['mirror']}/war/#{node['jenkins']['master']['version']}/jenkins.war"
+  override['jenkins']['master']['checksum'] = '12157975cd8c5bf54bbafdc16d826fd384d7eea5e3816c2c28f82002ad866e42'
 
   ## GITHUB OAUTH
   default['master']['github']['webUri']                               = 'https://github.com/'
