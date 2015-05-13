@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+<%= githubProject(
+  repoUser:    @user,
+  repoName:    "dotty",
+  repoRef:     @branch,
+  description: "PR validation",
+  nodeRestriction: "public",
+  params: [
+    {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
+  ],
+  jvmVersion: 8,
+  jvmFlavor:  "openjdk",
+  buildNameScript: setValidateBuildNameScript)
+%>
+</project>
