@@ -24,17 +24,17 @@ end
 def templDesc(user, repo, branch, path)
   blurbs = Blurbs.new
 
-  m = path.match(/templates\/default\/jobs\/(.*)\.xml\.erb$/)
+  m = path.match(/templates\/default\/jobs\/#{user}\/(.*)\.xml\.erb$/)
   if m == nil
     []
   else
     relativePath = m.captures.first
 
-    [ { :templatePath => "jobs/#{relativePath}.xml.erb",
+    [ { :templatePath => "jobs/#{user}/#{relativePath}.xml.erb",
         :scriptName   => "jobs/#{relativePath}",
         :jobName      => blurbs.versionedJob(repo, branch, relativePath),
         :user         => user,
-        :repo         => repo,
+        :repo         => repo, # the main repo (we may refer to other repos under the same user in these jobs)
         :branch       => branch,
       }
     ]
@@ -78,6 +78,7 @@ def expandJobTemplates(user, repo, branch)
 end
 
 # TODO: make consistent with scabot.conf.erb by construction
+# (each github user for which we create jobs should have a corresponding top-level section in scabot.conf)
 # create scala-$branch-$jobName for every template under jobs/
 %w{ 2.11.x 2.12.x }.each do | branch |
   expandJobTemplates("scala", "scala", branch)
