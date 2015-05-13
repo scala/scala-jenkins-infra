@@ -6,11 +6,7 @@
 #
 # All rights reserved - Do Not Redistribute
 #
-include_recipe 'chef-client::service'  # TODO: it seems chef's not run on boot on windows?
-
-chef_gem "chef-vault"
-
-include_recipe "aws"
+include_recipe 'scala-jenkins-infra::_init-chef-client'
 
 include_recipe "git"
 

@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: _master-init-proxy
+# Recipe:: _master-config-proxy
 #
 # Copyright 2014, Typesafe, Inc.
 #
@@ -12,6 +12,8 @@
 # Set up a reverse proxy to allow jenkins to run on port 80
 
 package "nginx"
+
+user "nginx"
 
 template '/etc/nginx/nginx.conf' do
   source 'nginx.conf'
@@ -35,10 +37,11 @@ cookbook_file "dhparam.pem" do
   path "/etc/nginx/ssl/dhparam.pem"
 end
 
+
 file "/etc/nginx/ssl/scala-ci.key" do
   owner 'root'
   mode  '600'
-  content ChefVault::Item.load("master", "scala-ci-key")['private_key']
+  content chef_vault_item("master", "scala-ci-key")['private_key']
   sensitive true
 end
 

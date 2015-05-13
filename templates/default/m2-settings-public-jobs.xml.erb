@@ -7,13 +7,15 @@
     I don't know how to encode a fall back, but I assume it's not needed as this is ~jenkins/.m2/settings.xml
   -->
   <localRepository>${WORKSPACE}/m2repo</localRepository>
+
   <servers>
     <server>
       <id>pr-scala</id>
-      <username><%= @privateRepoUser %></username>
-      <password><%= @privateRepoPass %></password>
+      <username><%= @privateRepo['user'] %></username>
+      <password><%= xmlSafe(@privateRepo['pass']) %></password>
     </server>
   </servers>
+
   <profiles>
     <profile>
       <id>pr-scala</id> <!-- for IDE integration, I think -->
@@ -25,10 +27,20 @@
         </repository>
         <repository>
           <id>scala-release-temp</id>
-          <name>Scala Relese snapshots</name>
+          <name>Scala Release snapshots</name>
           <url><%=node['repos']['private']['release-temp']%></url>
         </repository>
       </repositories>
     </profile>
   </profiles>
+
+  <mirrors>
+    <mirror>
+      <id>caching-proxy</id>
+      <name>Scala CI Artifactory</name>
+      <url><%=node['repos']['caching-proxy']['url']%></url>
+      <mirrorOf><%=node['repos']['caching-proxy']['mirrorOf']%></mirrorOf>
+    </mirror>
+  </mirrors>
+
 </settings>

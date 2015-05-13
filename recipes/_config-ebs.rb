@@ -1,11 +1,13 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: _worker-config-ebs
+# Recipe:: _config-ebs
 #
 # Copyright 2014, Typesafe, Inc.
 #
 # All rights reserved - Do Not Redistribute
 #
+
+include_recipe "aws"
 
 node['ebs']['volumes'].each do |mountPoint, ebsConfig|
   aws_ebs_volume ebsConfig['dev'] do

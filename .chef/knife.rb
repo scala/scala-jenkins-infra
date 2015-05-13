@@ -12,6 +12,8 @@ cache_type               'BasicFile'
 cache_options( :path => "#{ENV['HOME']}/.chef/checksums" )
 cookbook_path            ["#{current_dir}/cookbooks"]
 
+#ssl_verify_mode          :verify_peer
+
 knife[:aws_credential_file] = "#{ENV['HOME']}/.aws/credentials"
-knife[:aws_ssh_key_id]      = "typesafe-scala-aws-#{ENV.fetch('AWS_USER', ENV['USER'])}" # the pem file name without the .pem extension and it has to be located in: ~/.ssh/
+knife[:aws_ssh_key_id]      = "#{ENV.fetch('AWS_USER', ENV['USER'])}" # name to use for the key on amazon
 knife[:vault_mode]          = 'client'

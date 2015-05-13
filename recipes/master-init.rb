@@ -6,14 +6,16 @@
 #
 # All rights reserved - Do Not Redistribute
 #
-include_recipe 'chef-client::service'
-
-chef_gem "chef-vault"
+include_recipe 'scala-jenkins-infra::_init-chef-client'
 
 include_recipe "java"
 
+# EBS -- must come before jenkins init since it mounts /var/lib/jenkins
+include_recipe "scala-jenkins-infra::_config-ebs"
+
 include_recipe "scala-jenkins-infra::_master-init-jenkins"
 
+include_recipe "scala-jenkins-infra::_master-init-artifactory"
 
 case node["platform"]
 when "amazon"

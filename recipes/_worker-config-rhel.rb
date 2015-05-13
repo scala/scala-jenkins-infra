@@ -7,6 +7,8 @@
 # All rights reserved - Do Not Redistribute
 #
 
+require 'cgi'
+
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   jenkinsUser=workerConfig["jenkinsUser"]
 
@@ -16,7 +18,10 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     end
   end
 
-  { "#{jenkinsHome}/.m2/settings.xml" => "m2-settings-public-jobs.xml.erb"
+  privateRepo = chef_vault_item("worker", "private-repo-public-jobs")
+
+  { "#{jenkinsHome}/.m2/settings.xml" => "m2-settings-public-jobs.xml.erb",
+    "#{jenkinsHome}/.credentials"     => "credentials-private-repo.erb"
   }.each do |target, templ|
     template target do
       source templ
@@ -24,9 +29,9 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
       sensitive true
 
       variables({
-        :privateRepoPass => ChefVault::Item.load("worker", "private-repo-public-jobs")['pass'],
-        :privateRepoUser => ChefVault::Item.load("worker", "private-repo-public-jobs")['user']
+        :privateRepo => privateRepo
       })
+      helpers(ScalaJenkinsInfra::JobBlurbs)
     end
   end
 end

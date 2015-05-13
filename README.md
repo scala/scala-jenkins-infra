@@ -178,42 +178,64 @@ hub clone scala/scala-jenkins-infra
 cd scala-jenkins-infra
 ln -sh ~/git/cookbooks $PWD/.chef/
 
-knife site install cron
-knife site install logrotate
-knife site install chef_handler
-knife site install windows
-knife site install chef-client
-knife site install aws
-knife site install delayed_evaluator
-knife site install ebs
-knife site install java
-knife site install apt
-knife site install packagecloud
-knife site install runit
-knife site install yum
-knife site install jenkins
-knife site install 7-zip
-knife site install ark
-knife site install artifactory
-knife site install build-essential
-knife site install dmg
-knife site install yum-epel
-knife site install git
-knife site install user
-knife site install partial_search
-knife site install ssh_known_hosts
-knife site install git_user
-knife site install chef-sbt
-knife site install sbt-extras
+knife cookbook site install cron
+knife cookbook site install logrotate
+knife cookbook site install chef_handler
+knife cookbook site install windows
+knife cookbook site install chef-client
+knife cookbook site install aws
+knife cookbook site install delayed_evaluator
+knife cookbook site install ebs
+knife cookbook site install apt
+knife cookbook site install packagecloud
+knife cookbook site install runit
+knife cookbook site install yum
+knife cookbook site install 7-zip
+knife cookbook site install ark
+knife cookbook site install artifactory
+knife cookbook site install build-essential
+knife cookbook site install dmg
+knife cookbook site install yum-epel
+knife cookbook site install git
+knife cookbook site install user
+knife cookbook site install partial_search
+knife cookbook site install ssh_known_hosts
+knife cookbook site install git_user
+
+knife cookbook site install chef-vault
 ```
+
+### Current cookbooks
+ - 7-zip               ==  1.0.2
+ - apt                 ==  2.7.0
+ - ark                 ==  0.9.0
+ - artifactory         ==  0.1.1
+ - aws                 ==  2.7.0
+ - build-essential     ==  2.2.3
+ - chef-client         ==  4.3.0
+ - chef_handler        ==  1.1.6
+ - cron                ==  1.6.1
+ - delayed_evaluator   ==  0.2.0
+ - dmg                 ==  2.2.2
+ - ebs                 ==  0.3.6
+ - git                 ==  4.2.2
+ - git_user            ==  0.3.1
+ - logrotate           ==  1.9.1
+ - packagecloud        ==  0.0.17
+ - partial_search      ==  1.0.8
+ - runit               ==  1.6.0
+ - sbt                 ==  0.1.0
+ - sbt-extras          ==  0.4.0
+ - ssh_known_hosts     ==  2.0.0
+ - user                ==  0.4.2
+ - windows             ==  1.36.6
+ - yum                 ==  3.6.0
+ - yum-epel            ==  0.6.0
 
 ### Switch to unreleased versions from github
 ```
-//fixed: knife cookbook github install opscode-cookbooks/windows    # fix nosuchmethoderror (#150)
-//knife cookbook github install adriaanm/jenkins/fix305      # ssl fail on windows -- fix pending: https://github.com/opscode-cookbooks/jenkins/pull/313
-knife cookbook github install b-dean/jenkins/http_ca_fixes  # pending fix for above ^^^
-
-knife cookbook github install adriaanm/java/windows-jdk1.6 # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
+knife cookbook github install adriaanm/jenkins/fix305  # custom fixes + https://github.com/opscode-cookbooks/jenkins/pull/313 (b-dean/jenkins/http_ca_fixes)
+knife cookbook github install adriaanm/java/windows-jdk1.6  # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
 knife cookbook github install adriaanm/chef-sbt
 knife cookbook github install gildegoma/chef-sbt-extras
 knife cookbook github install adriaanm/artifactory
@@ -338,19 +360,19 @@ Note that the IPs are stable by allocating elastic IPs and associating them to n
 ## ~/.ssh/config
 ```
 Host jenkins-worker-ubuntu-publish
-  IdentityFile $PWD/.chef/config/chef.pem
+  IdentityFile ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
   User ubuntu
 
 Host jenkins-worker-behemoth-1
-  IdentityFile $PWD/.chef/config/chef.pem
+  IdentityFile ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
   User ec2-user
 
 Host jenkins-worker-behemoth-2
-  IdentityFile $PWD/.chef/config/chef.pem
+  IdentityFile ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
   User ec2-user
 
 Host jenkins-master
-  IdentityFile $PWD/.chef/config/chef.pem
+  IdentityFile ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
   User ec2-user
 
 Host scabot
@@ -359,7 +381,7 @@ Host scabot
   User scabot
 
 Host jenkins-worker-windows-publish
-  IdentityFile $PWD/.chef/config/chef.pem
+  IdentityFile ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
   User jenkins
 ```
 
@@ -367,21 +389,22 @@ Host jenkins-worker-windows-publish
 # Launch instance on EC2
 ## Create (ssh) key pair
 
+TODO: I don't think the name matters as long as it's used consistently, ultimately your access key and secret credentials are used by aws-cli to generate the keys etc
+
 If your username on AWS does not match the local username on your machine, define
 ```
 export AWS_USER="[username]"
 ```
 
+Create a keypair and store locally to authenticate with instances over ssh/winrm:
 ```
 echo $(aws ec2 create-key-pair --key-name $AWS_USER | jq .KeyMaterial) | perl -pe 's/"//g' > ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 chmod 0600 ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 ```
 
-In `knife.rb`, make sure `knife[:aws_ssh_key_id]` points to the pem file.
-
-
 ## Selected AMIs
 
+jenkins-master: ami-3b14f27f (Amazon Linux AMI 2015.03 on HVM Instance Store 64-bit for US West N. California)
 amazon linux: ami-4b6f650e (Amazon Linux AMI 2014.09.1 x86_64 HVM EBS)
 windows:      ami-cfa5b68a (Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10)
 ubuntu:       ami-81afbcc4 (Ubuntu utopic 14.10 from https://cloud-images.ubuntu.com/locator/ec2/ for us-west-1/amd64/hvm:ebs-ssd/20141204)
@@ -396,11 +419,17 @@ NOTE:
 
 
 ```
-knife ec2 server create -N jenkins-master \
-   --region us-west-1 --flavor t2.small -I ami-4b6f650e \
-   -G Master --ssh-user ec2-user \
-   --iam-profile JenkinsMaster \
-   --identity-file $PWD/.chef/config/chef.pem \
+   --subnet subnet-4bb3b80d --associate-eip 54.67.111.226 \
+   --server-connect-attribute public_ip_address           \
+
+knife ec2 server create -N jenkins-master                  \
+   --flavor m3.large                                       \
+   --region us-west-1                                      \
+   -I ami-3b14f27f                                         \
+   -G Master --ssh-user ec2-user                           \
+   --iam-profile JenkinsMaster                             \
+   --security-group-ids sg-7afd2d1f                        \
+   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem \
    --run-list "scala-jenkins-infra::master-init"
 
 knife ec2 server create -N jenkins-worker-windows-publish \
@@ -412,7 +441,7 @@ knife ec2 server create -N jenkins-worker-windows-publish \
    --security-group-ids sg-1dec3d78                       \
    --subnet subnet-4bb3b80d --associate-eip 54.183.156.89 \
    --server-connect-attribute public_ip_address           \
-   --identity-file $PWD/.chef/config/chef.pem             \
+   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem             \
    --run-list "scala-jenkins-infra::worker-init"
 
 
@@ -426,7 +455,7 @@ knife ec2 server create -N jenkins-worker-ubuntu-publish  \
    --security-group-ids sg-ecb06389                       \
    --subnet subnet-4bb3b80d --associate-eip 54.67.33.167  \
    --server-connect-attribute public_ip_address           \
-   --identity-file $PWD/.chef/config/chef.pem             \
+   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem             \
    --run-list "scala-jenkins-infra::worker-init"
 
 echo NOTE: Make sure to first remove the ips in $behemothIp from your ~/.ssh/known_hosts. Also remove the corresponding worker from the chef server (can be only one with the same name).
@@ -441,7 +470,7 @@ do knife ec2 server create -N jenkins-worker-behemoth-$behemoth      \
    --security-group-ids sg-ecb06389                                  \
    --subnet subnet-4bb3b80d --associate-eip ${behemothIp[$behemoth]} \
    --server-connect-attribute public_ip_address                      \
-   --identity-file $PWD/.chef/config/chef.pem                        \
+   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem                        \
    --run-list "scala-jenkins-infra::worker-init"
 done
 
@@ -472,10 +501,10 @@ knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ub
 
 ### Add run-list items that need the vault
 ```
-knife node run_list set jenkins-master    "scala-jenkins-infra::master-init,scala-jenkins-infra::master-config"
+knife node run_list set jenkins-master  "recipe[chef-vault],scala-jenkins-infra::master-init,scala-jenkins-infra::master-config,scala-jenkins-infra::master-jenkins" 
 
 for w in jenkins-worker-windows-publish jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
-  do knife node run_list set $w  "scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+  do knife node run_list set $w  "recipe[chef-vault],scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
 done
 ```
 
@@ -483,17 +512,54 @@ done
 
 - windows:
 ```
-PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key $PWD/.chef/config/chef.pem | jq .PasswordData | xargs echo)
+PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem | jq .PasswordData | xargs echo)
 knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
 ```
 
-- ubuntu:  `ssh jenkins-worker-ubuntu-publish sudo chef-client`
-- amazon linux: `ssh jenkins-worker-behemoth-1`, and then `sudo chef-client`
+- linux
+```
+ssh jenkins-worker-ubuntu-publish
+sudo su --login # --login needed on ubuntu to set SSL_CERT_FILE (it's done in /etc/profile.d)
+chef-client
+```
 
 ### Attach eips
 
 ```
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
+```
+
+# MANUAL STEPS
+## Scabot access to jenkins
+The jenkins token for scabot has to be configured manually:
+ - get the API token from https://scala-ci.typesafe.com/user/scala-jenkins/configure
+ - use it create `scabot-jenkins.json` as follows
+ ```
+ {
+   "id": "scabot",
+   "jenkins": {
+     "token": "<TOKEN>"
+   }
+ }
+ ```
+ - do `knife vault update master scabot -J scabot-jenkins.json`
+ 
+# Artifactory
+ - Set admin password.
+ - create repos (TODO: automate)
+ - Create scala-ci user that can push to scala-release-temp and scala-pr-validation-snapshots,
+ - coordinate scala-ci credentials with jenkins via
+```
+knife vault update worker-publish private-repo -J private-repo.json
+```
+
+where `private-repo.json`:
+```
+{
+  "id": "private-repo",
+  "user": "scala-ci",
+  "pass": "???"
+}
 ```
 
 
@@ -532,8 +598,10 @@ Incorporate the cert into an ssl chain for nginx:
 
 For [forward secrecy](http://axiacore.com/blog/enable-perfect-forward-secrecy-nginx/):
 ```
-openssl dhparam -out files/default/dhparam.pem 2048
+openssl dhparam -out files/default/dhparam.pem 1024
 ```
+
+Using 1024 bits (instead of 2048) for DH to be Java 6 compatible... Bye-bye A+ on https://www.ssllabs.com/ssltest/analyze.html?d=scala-ci.typesafe.com
 
 Confirm values in the csr using:
 
@@ -551,7 +619,7 @@ If it appears stuck at "Waiting for remote response before bootstrap.", the user
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
 
 ```
-aws ec2 get-password-data --instance-id $INST --priv-launch-key $PWD/.chef/config/chef.pem
+aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 
 cord $IP, log in using password above and open a command line:
 

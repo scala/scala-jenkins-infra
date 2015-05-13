@@ -4,18 +4,26 @@ maintainer_email 'adriaan@typesafe.com'
 license          'All rights reserved'
 description      'Installs/Configures the Scala Jenkins infrastructure'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.1.0'
+version          '0.2.0'
+
+# for chef_vault_item, which allows loading from plain databags when developing with vagrant
+depends 'chef-vault'
+
+depends 'magic_shell'
 
 depends 'chef-client'
 depends 'cron'
 
 depends 'aws'
+
 depends 'ebs'
 
 depends 'windows'
 
 depends 'java'
 depends 'jenkins'
+
+depends 'artifactory'
 
 depends 'git'
 depends 'git_user'

@@ -8,7 +8,7 @@
 #
 
 include_recipe "git"
-include_recipe "chef-sbt"
+include_recipe "sbt-extras"
 
 scabotHome     = "/home/scabot"
 scabotCheckout = "/home/scabot/scabot"
@@ -38,14 +38,12 @@ directory "#{scabotHome}/.ssh" do
   owner     scabotUser
 end
 
+
 file "#{scabotHome}/.ssh/authorized_keys" do
   owner     scabotUser
   mode      '644'
-  content   ChefVault::Item.load("master", "scabot-keypair")['public_key']
+  content   chef_vault_item("master", "scabot-keypair")['public_key']
 end
-
-node.set['scabot']['github']['token']  = ChefVault::Item.load("master", "scabot")['github']['token']
-node.set['scabot']['jenkins']['token'] = ChefVault::Item.load("master", "scabot")['jenkins']['token']
 
 git_user scabotUser do
   home      scabotHome
@@ -60,6 +58,10 @@ git scabotCheckout do
   repository "https://github.com/scala/scabot.git"
   revision   "master"
 end
+
+# TODO: do not use node.set for sensitive stuff!!
+node.set['scabot']['github']['token']  = chef_vault_item("master", "scabot")['github']['token']
+node.set['scabot']['jenkins']['token'] = chef_vault_item("master", "scabot")['jenkins']['token']
 
 template "#{scabotHome}/scabot.conf" do
   source    'scabot.conf.erb'

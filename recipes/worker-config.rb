@@ -11,9 +11,8 @@
 # Also, it needs to run on every reboot of the worker instance(s),
 # since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
-require 'chef-vault'
 
-include_recipe "scala-jenkins-infra::_worker-config-ebs"
+include_recipe "scala-jenkins-infra::_config-ebs"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   case node["platform_family"]
@@ -42,7 +41,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   file "#{jenkinsHome}/.ssh/authorized_keys" do
     owner workerConfig["jenkinsUser"]
     mode  '644'
-    content ChefVault::Item.load("master", "scala-jenkins-keypair")['public_key'] + "\n#{workerConfig['authorized_keys']}" # TODO: distinct keypair for each jenkins user
+    content chef_vault_item("master", "scala-jenkins-keypair")['public_key'] + "\n#{workerConfig['authorized_keys']}" # TODO: distinct keypair for each jenkins user
   end
 
   git_user workerConfig["jenkinsUser"] do
