@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 <%= githubProject(
-  repoUser:    "scala",
+  repoUser:    @user,
   repoName:    "scala-dist-smoketest",
-  repoRef:     @version,
+  repoRef:     @branch,
   description: "Run as part of the #{job("release/main")} flow." + %{ <br/> It runs the program in
     https://github.com/scala/scala-dist-smoketest/tree/${repo_ref} to make sure all JARs of the distribution
     contain classfiles. <br/> It downloads the archives for a Scala release from

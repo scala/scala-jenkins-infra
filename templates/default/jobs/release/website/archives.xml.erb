@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 <%= githubProject(
-  repoUser:    "scala",
+  repoUser:    @user,
   repoName:    "scala-dist",
-  repoRef:     @version,
+  repoRef:     @branch,
   description: "<H1>Run as part of the #{job("release/main")} flow.</H1>" +
    %{<p>It downloads the archives for a Scala release
        from http://downloads.typesafe.com/scala/$version/index.html and

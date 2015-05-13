@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
 <%= flowProject(
-    repoUser:    "scala",
-    repoRef:     @version,
-    description: "TODO: Better description. Build, package and stage a Scala release. \nNightly downloads go to http://www.scala-lang.org/files/archive/nightly/#{@version}/\nRegular ones to http://www.scala-lang.org/files/archive/.",
+    repoUser:    @user,
+    repoRef:     @branch,
+    description: "TODO: Better description. Build, package and stage a Scala release. \nNightly downloads go to http://www.scala-lang.org/files/archive/nightly/#{@branch}/\nRegular ones to http://www.scala-lang.org/files/archive/.",
     params: [
       {:name => "SCALA_VER_BASE", :desc => "When set, a release with version \"$SCALA_VER_BASE$SCALA_VER_SUFFIX\" will be built. Same effect as for tagging $repo_ref as \"v$SCALA_VER_BASE$SCALA_VER_SUFFIX\"."},
       {:name => "SCALA_VER_SUFFIX", :desc => ""}

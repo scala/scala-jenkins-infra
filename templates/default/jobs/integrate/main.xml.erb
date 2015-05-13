@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
 <%= flowProject(
-    repoUser:    "scala",
+    repoUser:    @user,
     repoName:    "scala",
-    repoRef:     @version,
+    repoRef:     @branch,
     description: "PR integration -- verify mergeability of PR",
     params: [
       {:name => "prDryRun", :desc => ""},

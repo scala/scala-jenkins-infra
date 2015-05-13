@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 <%= githubProject(
-  repoUser:    "scala",
+  repoUser:    @user,
   repoName:    "scala-dist",
-  repoRef:     @version,
+  repoRef:     @branch,
   description: "Run as part of the #{job("release/main")} flow.<p>" + %{Builds and uploads the universal and unix-specific artifacts for a
     Scala release.<br>
 

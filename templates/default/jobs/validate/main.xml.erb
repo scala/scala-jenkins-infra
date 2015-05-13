@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
 <%= flowProject(
-    repoUser:    "scala",
+    repoUser:    @user,
     repoName:    "scala",
-    repoRef:     @version,
+    repoRef:     @branch,
     description: "PR validation -- called for every commit in every PR",
     params: [
       {:name => "prDryRun", :desc => ""},
