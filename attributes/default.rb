@@ -121,6 +121,5 @@ if node.name == "jenkins-master"
   default['master']['ec2-start-stop']['url'] = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
 
   # SCABOT
-  default['scabot']['jenkins']['user']     = "scala-jenkins"
-  default['scabot']['github']['repo_user'] = "scala"
+  default['scabot']['jenkins']['user'] = "scala-jenkins"
 end
