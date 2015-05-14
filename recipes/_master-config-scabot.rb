@@ -59,14 +59,15 @@ git scabotCheckout do
   revision   "master"
 end
 
-# TODO: do not use node.set for sensitive stuff!!
-node.set['scabot']['github']['token']  = chef_vault_item("master", "scabot")['github']['token']
-node.set['scabot']['jenkins']['token'] = chef_vault_item("master", "scabot")['jenkins']['token']
-
 template "#{scabotHome}/scabot.conf" do
   source    'scabot.conf.erb'
   user      scabotUser
   sensitive true
+
+  variables({
+    :scabotVault => chef_vault_item("master", "scabot")
+  })
+
 end
 
 bash 'build scabot' do

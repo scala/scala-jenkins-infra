@@ -280,7 +280,15 @@ knife vault create master scabot-keypair \
   --admins adriaan
 
 knife vault create master scabot \
-  --json $PWD/.chef/scabot.json \
+  {
+    "jenkins": {
+      "token": "..."
+    },
+    "github": {
+      "scala":    {"token": "..."}
+      "lampepfl": {"token": "..."}
+    }
+  }
   --search 'name:jenkins-master' \
   --admins adriaan
 

@@ -10,8 +10,11 @@ include_recipe 'scala-jenkins-infra::_init-chef-client'
 
 include_recipe "java"
 
-# EBS -- must come before jenkins init since it mounts /var/lib/jenkins
-include_recipe "scala-jenkins-infra::_config-ebs"
+case node["platform"]
+when "amazon"
+  # EBS -- must come before jenkins init since it mounts /var/lib/jenkins
+  include_recipe "scala-jenkins-infra::_config-ebs"
+end
 
 include_recipe "scala-jenkins-infra::_master-init-jenkins"
 

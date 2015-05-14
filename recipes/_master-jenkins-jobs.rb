@@ -21,19 +21,21 @@ class Blurbs
 end
 
 # turn template path into jenkins job name
-def templDesc(version, path)
+def templDesc(user, repo, branch, path)
   blurbs = Blurbs.new
 
-  m = path.match(/templates\/default\/jobs\/(.*)\.xml\.erb$/)
+  m = path.match(/templates\/default\/jobs\/#{user}\/(.*)\.xml\.erb$/)
   if m == nil
     []
   else
     relativePath = m.captures.first
 
-    [ { :templatePath => "jobs/#{relativePath}.xml.erb",
+    [ { :templatePath => "jobs/#{user}/#{relativePath}.xml.erb",
         :scriptName   => "jobs/#{relativePath}",
-        :jobName      => blurbs.versionedJob(version, relativePath),
-        :version      => version
+        :jobName      => blurbs.versionedJob(repo, branch, relativePath),
+        :user         => user,
+        :repo         => repo, # the main repo (we may refer to other repos under the same user in these jobs)
+        :branch       => branch,
       }
     ]
   end
@@ -55,11 +57,9 @@ end
 #     - 9
 # core-community: sbt, ensime, modules, ide,...
 
-# create scala-$version-$jobName for every template under jobs/
-# TODO #16: add 2.12.x jobs
-%w{ 2.11.x }.each do | version |
+def expandJobTemplates(user, repo, branch)
   node.run_context.cookbook_collection["scala-jenkins-infra"].manifest[:templates]
-    .flat_map { |mani| templDesc(version, mani['path']) }
+    .flat_map { |mani| templDesc(user, repo, branch, mani['path']) }
     .each do | desc |
 
     xml = File.join(Chef::Config[:file_cache_path], "#{desc[:jobName]}.xml")
@@ -76,6 +76,14 @@ end
     end
   end
 end
+
+# TODO: make consistent with scabot.conf.erb by construction
+# (each github user for which we create jobs should have a corresponding top-level section in scabot.conf)
+# create scala-$branch-$jobName for every template under jobs/
+%w{ 2.11.x 2.12.x }.each do | branch |
+  expandJobTemplates("scala", "scala", branch)
+end
+
 
 # TODO #10: make a view for each top-level directory under jobs/ that lists all jobs under it (scala-2.11.x-integrate, scala-2.11.x-release, scala-2.11.x-validate)
 # https://issues.jenkins-ci.org/browse/JENKINS-8927

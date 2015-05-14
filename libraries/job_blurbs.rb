@@ -144,12 +144,12 @@ module ScalaJenkinsInfra
       EOH
     end
 
-    def versionedJob(version, name)
-      "scala-#{version}-#{name.gsub(/\//, '-')}"
+    def versionedJob(repo, branch, name)
+      "#{repo}-#{branch}-#{name.gsub(/\//, '-')}"
     end
 
     def job(name)
-      versionedJob(@version, name)
+      versionedJob(@repo, @branch, name)
     end
 
     def jvmSelect

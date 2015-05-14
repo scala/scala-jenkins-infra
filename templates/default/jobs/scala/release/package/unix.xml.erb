@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 <%= githubProject(
-  repoUser:    "scala",
+  repoUser:    @user,
   repoName:    "scala-dist",
-  repoRef:     @version,
-  description: "Run as part of the #{job("release/main")} flow.<p>" + %{Builds and uploads the windows-specific artifacts for a Scala
-    release.<br>
+  repoRef:     @branch,
+  description: "Run as part of the #{job("release/main")} flow.<p>" + %{Builds and uploads the universal and unix-specific artifacts for a
+    Scala release.<br>
 
     Specify a tag that exists on <a href="https://github.com/scala/scala-dist">scala/scala-dist</a>,<br> and that points to a
     version of scala-dist that&apos;s available in one of the repositories listed in repositories-scala-release (see
@@ -19,7 +19,7 @@
 
     The downloads will be available at http://downloads.typesafe.com/scala/$ver/scala-$ver*
    }.gsub(/^ {4}/, ''),
-  nodeRestriction: "windows && publish",
+  nodeRestriction: "linux && publish",
   params: [
     {:name => "sbtDistTarget", :default => "s3-upload", :desc => "To upload to S3, use s3-upload. A dry run (everything but uploading to S3): s3Upload::mappings"},
     {:name => "sbtDistVersionOverride", :desc => "may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)"}

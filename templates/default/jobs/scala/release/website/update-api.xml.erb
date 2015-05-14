@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 <%= githubProject(
-  repoUser:    "scala",
+  repoUser:    @user,
   repoName:    "scala-dist",
-  repoRef:     @version,
-  description: "Update scala-lang's api/#{@version} symlink to point to api/$version",
+  repoRef:     @branch,
+  description: "Update scala-lang's api/#{@branch} symlink to point to api/$version",
   nodeRestriction: "linux && publish",
   concurrent: false,
   params: [

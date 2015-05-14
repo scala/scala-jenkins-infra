@@ -1,15 +1,15 @@
 scala: {
   jenkins: {
-    job:   "scala-2.11.x-validate-main"
-    jobPrefix: "scala-2.11.x-" // this will be stripped when reporting to github TODO: remove once it's computed as s"${github.repo}-${pull.base.ref}-"
+    jobSuffix: "validate-main"
     host:  "<%=node['master']['jenkinsHost']%>"
     user:  "<%=node['scabot']['jenkins']['user']%>"
-    token: "<%=node['scabot']['jenkins']['token']%>"
+    token: "<%=@scabotVault['jenkins']['token']%>"
   }
   github: {
-    user:  "<%=node['scabot']['github']['repo_user']%>"
     repo:  "scala"
+    branches: ["2.11.x", "2.12.x"]
     host:  "api.github.com"
-    token: "<%=node['scabot']['github']['token']%>"
+    user:  "scala"
+    token: "<%=@scabotVault['github']['scala']['token']%>"
   }
 }

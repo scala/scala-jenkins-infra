@@ -1,35 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
 <%= flowProject(
-    repoUser:    "scala",
+    repoUser:    @user,
     repoName:    "scala",
-    repoRef:     @version,
-    description: "PR integration -- verify mergeability of PR",
+    repoRef:     @branch,
+    description: "PR validation -- called for every commit in every PR",
     params: [
       {:name => "prDryRun", :desc => ""},
-      {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
+      {:name => "_scabot_pr", :desc => "For internal use by Scabot."},
+      {:name => "_scabot_last", :desc => "For internal use by Scabot."}
     ],
-    concurrent: false, # one merge at a time!!
+    buildNameScript: setValidateBuildNameScript,
     dsl: <<-EOX
-upstreamBuild = build(params, "#{job("integrate/bootstrap")}").build
+upstreamBuild = build(params, "#{job("validate/publish-core")}").build
+
+// for testing, to avoid re-running the main build:
+//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "#{job("validate/publish-core")}"}.builds[0]
 
 // defines maven.version.number
-upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "versions.properties"}
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
 
 buildVersionProps = new java.util.Properties()
 buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
 testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number"] ]
 
-build(testParams, "#{job("integrate/ide")}")
+parallel (
+   { build(testParams, "#{job("validate/test")}") },
+   { retry(2, { build(testParams, "#{job("integrate/ide")}") }) }
+)
 
-// for testing, to avoid re-running the main build:
-//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "#{job("validate/publish-core")}"}.builds[0]
-
-//parallel (
-//    { build(testParams, "#{job("validate/test")}") },
-//    { build(testParams, "#{job("validate/test-bla")}") }
-//)
 EOX
 ) %>
   <publishers>
