@@ -8,8 +8,26 @@ scala: {
   github: {
     repo:  "scala"
     branches: ["2.11.x", "2.12.x"]
+    lastCommitOnly: false
     host:  "api.github.com"
     user:  "scala"
     token: "<%=@scabotVault['github']['scala']['token']%>"
+  }
+}
+
+dotty: {
+  jenkins: {
+    jobSuffix: "validate-main"
+    host:  "<%=node['master']['jenkinsHost']%>"
+    user:  "<%=node['scabot']['jenkins']['user']%>"
+    token: "<%=@scabotVault['jenkins']['token']%>"
+  }
+  github: {
+    user:  "lampepfl"
+    repo:  "dotty"
+    branches: ["master"]
+    lastCommitOnly: true
+    host:  "api.github.com"
+    token: "<%=@scabotVault['github']['lampepfl']['token']%>"
   }
 }
