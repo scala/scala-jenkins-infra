@@ -115,6 +115,9 @@ module ScalaJenkinsInfra
              </strategy>
              <operationList/>
           </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+          <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
+            <colorMapName>xterm</colorMapName>
+          </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
         </buildWrappers>
       EOX
     end
