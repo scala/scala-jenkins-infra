@@ -20,7 +20,7 @@ directory "/usr/local/share/jvm/" do
   recursive true
 end
 
-%w{jvm-select jvm-select-common}.each do |f|
+%w{jvm-select}.each do |f|
   cookbook_file f do
     mode '755'
     path "/usr/local/share/jvm/#{f}"
