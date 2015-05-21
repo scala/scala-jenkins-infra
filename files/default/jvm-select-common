@@ -1,6 +1,0 @@
-function jvmSelectCommon(){
-  javaHome="/usr/lib/jvm/java-$versionPrefix$version$versionSuffix-$flavor$archSuffix"
-  $javaHome/bin/java -version 2>&1 | grep "version.*1.$version.0" || (echo "Failed to locate $flavor Java $version. Available JVMs:"; find /usr/lib/jvm/ -name "java-*$archSuffix" ; exit 1)
-  export JAVA_HOME=$javaHome
-  export PATH="$JAVA_HOME/bin:$PATH"
-}

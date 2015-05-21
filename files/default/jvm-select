@@ -1,5 +1,23 @@
-source /usr/local/share/jvm/jvm-select-common
+function jvmSelect(){
+  jvmFlavor="$1"
+  jvmMajorVersion="$2" # currently supporting 6/7/8 on (YUM/debian)-y distros
 
-#TODO: windows?
-echo "Unsupported platform for jvm-select"
-exit 1
+  jvmRoot="/usr/lib/jvm/"
+
+  # all javac binaries installed on this machine, pruned to be in directory with expected version/flavor
+  eligibleCmds=$(find $jvmRoot -name "javac" -type f -path "*$jvmMajorVersion*$jvmFlavor*" 2> /dev/null)
+
+  # jdk home is one dir up from where javac is
+  jdkHome=$(for javacCmd in  $eligibleCmds; do if ($javacCmd -version 2>&1 | grep "javac 1\.$jvmMajorVersion" &> /dev/null); then cd $(dirname $javacCmd)/.. && pwd; fi; done)
+
+  if [ -d "$jdkHome" ]; then
+    echo "Java home: $jdkHome"
+  else
+    echo "Failed to locate $jvmFlavor Java $jvmMajorVersion in $jvmRoot, containing:"
+    find $jvmRoot -name "java"
+    exit 1
+  fi
+
+  export JAVA_HOME="$jdkHome"
+  export PATH="$JAVA_HOME/bin:$PATH"
+}
