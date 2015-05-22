@@ -14,8 +14,10 @@ default['repos']['private']['host']         = scalaCiHost
 default['repos']['private']['pr-snap']      = "https://#{scalaCiHost}/artifactory/scala-pr-validation-snapshots/"
 default['repos']['private']['release-temp'] = "https://#{scalaCiHost}/artifactory/scala-release-temp/"
 
-default['repos']['caching-proxy']['mirrorOf'] = "central" # TODO: add ",sonatype.release,sonatype.snapshot"
-default['repos']['caching-proxy']['url']      = "https://#{scalaCiHost}/artifactory/jcenter/"
+default['repos']['caching-proxy']['central']['mirrorOf'] = "central" # TODO: add ",sonatype.release,sonatype.snapshot"
+default['repos']['caching-proxy']['central']['url']      = "https://#{scalaCiHost}/artifactory/central/"
+default['repos']['caching-proxy']['jcenter']['mirrorOf'] = "jcenter" # TODO: add ",sonatype.release,sonatype.snapshot"
+default['repos']['caching-proxy']['jcenter']['url']      = "https://#{scalaCiHost}/artifactory/jcenter/"
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
