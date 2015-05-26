@@ -413,7 +413,6 @@ chmod 0600 ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 ## Selected AMIs
 
 jenkins-master: ami-3b14f27f (Amazon Linux AMI 2015.03 on HVM Instance Store 64-bit for US West N. California)
-amazon linux: ami-4b6f650e (Amazon Linux AMI 2014.09.1 x86_64 HVM EBS)
 windows:      ami-cfa5b68a (Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10)
 ubuntu:       ami-81afbcc4 (Ubuntu utopic 14.10 from https://cloud-images.ubuntu.com/locator/ec2/ for us-west-1/amd64/hvm:ebs-ssd/20141204)
 
@@ -454,38 +453,36 @@ knife ec2 server create -N jenkins-worker-windows-publish \
 
 
 // NOTE: c3.large is much slower than c3.xlarge (scala-release-2.11.x-build takes 2h53min vs 1h40min )
-knife ec2 server create -N jenkins-worker-ubuntu-publish  \
-   --flavor c4.xlarge                                     \
-   --region us-west-1                                     \
-   -I ami-81afbcc4 --ssh-user ubuntu                      \
-   --iam-profile JenkinsWorker                            \
-   --ebs-optimized --ebs-volume-type gp2                  \
-   --security-group-ids sg-ecb06389                       \
-   --subnet subnet-4bb3b80d --associate-eip 54.67.33.167  \
-   --server-connect-attribute public_ip_address           \
-   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem             \
-   --run-list "scala-jenkins-infra::worker-init"
 
-echo NOTE: Make sure to first remove the ips in $behemothIp from your ~/.ssh/known_hosts. Also remove the corresponding worker from the chef server (can be only one with the same name).
-behemothIp=(54.153.2.9 54.153.1.99)
-for behemoth in 1 2
-do knife ec2 server create -N jenkins-worker-behemoth-$behemoth      \
-   --flavor c4.2xlarge                                               \
-   --region us-west-1                                                \
-   -I ami-4b6f650e --ssh-user ec2-user                               \
-   --iam-profile JenkinsWorker                                       \
-   --ebs-optimized --ebs-volume-type gp2                             \
-   --security-group-ids sg-ecb06389                                  \
-   --subnet subnet-4bb3b80d --associate-eip ${behemothIp[$behemoth]} \
-   --server-connect-attribute public_ip_address                      \
-   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem                        \
+# NOTE: Make sure to first remove the ips in $workerIp from your ~/.ssh/known_hosts.
+# Also remove the corresponding worker from the chef server (can be only one with the same name).
+
+workerName=(jenkins-worker-behemoth-1 jenkins-worker-behemoth-2 jenkins-worker-ubuntu-publish)
+workerIp=(54.153.2.9 54.153.1.99 54.67.33.167)
+workerFlavor=(c4.2xlarge c4.2xlarge c4.xlarge)
+
+for worker in 1 2 3
+do knife ec2 server create -N ${workerName[$worker]}             \
+   --flavor ${workerFlavor[$worker]}                             \
+   --region us-west-1                                            \
+   -I ami-81afbcc4 --ssh-user ubuntu                             \
+   --hint ec2                                                    \
+   --iam-profile JenkinsWorker                                   \
+   --ebs-optimized --ebs-volume-type gp2                         \
+   --security-group-ids sg-ecb06389                              \
+   --subnet subnet-4bb3b80d --associate-eip ${workerIp[$worker]} \
+   --server-connect-attribute public_ip_address                  \
+   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem       \
    --run-list "scala-jenkins-infra::worker-init"
 done
-
 ```
 
-NOTE: userdata.txt must be one line, no line endings (mac/windows issues?)
-`<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
+### NOTES
+- `--hint ec2` should enable ec2 detection (so that `node[:ec2]` gets populated by ohai);
+  It does the equivalent of `ssh ${workerIp[$worker]} sudo mkdir -p /etc/chef/ohai/hints/ && sudo touch /etc/chef/ohai/hints/ec2.json`
+
+- userdata.txt must be one line, no line endings (mac/windows issues?)
+  `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
 
 
 
@@ -536,6 +533,47 @@ chef-client
 ```
 aws ec2 associate-address --allocation-id eipalloc-df0b13bd --instance-id i-94adaa5e  # jenkins-master
 ```
+
+# Example of bringing up a new version of our beloved behemoths
+- delete slave in jenkins: https://scala-ci.typesafe.com/computer/jenkins-worker-behemoth-1/delete
+- rename EC2 instance in EC2 console (suffix with -old)
+- disassociate its EIP (54.153.2.9)
+- delete node from manage.chef.io (we only have 5 max)
+- remove jenkins-worker-behemoth-1 entry from ~/.ssh/known_hosts
+- bootstrap:
+```
+$ knife ec2 server create -N jenkins-worker-behemoth-1        \
+>    --flavor c4.2xlarge                                      \
+>    --region us-west-1                                       \
+>    -I ami-81afbcc4 --ssh-user ubuntu                        \
+>    --iam-profile JenkinsWorker                              \
+>    --ebs-optimized --ebs-volume-type gp2                    \
+>    --security-group-ids sg-ecb06389                         \
+>    --subnet subnet-4bb3b80d --associate-eip 54.153.2.9     \
+>    --server-connect-attribute public_ip_address             \
+>    --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem  \
+>    --run-list "scala-jenkins-infra::worker-init"
+```
+
+- knife vault update master scala-jenkins-keypair --search 'name:jenkins-worker-behemoth-1'
+- knife vault update worker private-repo-public-jobs --search 'name:jenkins-worker-behemoth-1'
+- knife node run_list set jenkins-worker-behemoth-1  "recipe[chef-vault],scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
+
+- mate ~/.ssh/config
+```
+Host jenkins-worker-behemoth-1
+  IdentityFile /Users/adriaan/.ssh/typesafe-scala-aws-adriaan-scripts.pem
+  User ubuntu
+```
+
+- ssh jenkins-worker-behemoth-1 and sudo su
+```
+$ mkdir -p /etc/chef/ohai/hints/
+$ touch /etc/chef/ohai/hints/ec2.json
+$ chef-client
+```
+
+- ssh-jenkins master, sudo and run chef-client to add back the deleted worker
 
 # MANUAL STEPS
 ## Scabot access to jenkins

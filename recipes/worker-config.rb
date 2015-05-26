@@ -12,10 +12,7 @@
 # since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
 
-case node["platform"]
-when "amazon"
-  include_recipe "scala-jenkins-infra::_config-ebs"
-end
+include_recipe "scala-jenkins-infra::_config-ebs"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   case node["platform_family"]
