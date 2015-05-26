@@ -13,7 +13,7 @@
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ],
   jvmVersion: @branch == "2.11.x" ? 6 : 8,
-  jvmFlavor:  "oracle",
+  jvmFlavor:  @branch == "2.11.x" ? "oracle" : "openjdk",
   buildNameScript: setValidateBuildNameScript)
 %>
   <publishers>
