@@ -12,7 +12,7 @@
     {:name => "testTarget", :desc => "TODO"},
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ],
-  jvmVersion: 6,
+  jvmVersion: @branch == "2.11.x" ? 6 : 8,
   jvmFlavor:  "oracle",
   buildNameScript: setValidateBuildNameScript)
 %>
