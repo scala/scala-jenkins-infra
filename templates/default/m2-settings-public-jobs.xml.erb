@@ -36,10 +36,17 @@
 
   <mirrors>
     <mirror>
-      <id>caching-proxy</id>
-      <name>Scala CI Artifactory</name>
-      <url><%=node['repos']['caching-proxy']['url']%></url>
-      <mirrorOf><%=node['repos']['caching-proxy']['mirrorOf']%></mirrorOf>
+      <id>central-cache</id>
+      <name>Central Cache for Scala CI</name>
+      <url>     <%=node['repos']['caching-proxy']['central']['url']%></url>
+      <mirrorOf><%=node['repos']['caching-proxy']['central']['mirrorOf']%></mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>jcenter-cache</id>
+      <name>JCenter Cache for Scala CI</name>
+      <url>     <%=node['repos']['caching-proxy']['jcenter']['url']%></url>
+      <mirrorOf><%=node['repos']['caching-proxy']['jcenter']['mirrorOf']%></mirrorOf>
     </mirror>
   </mirrors>
 
