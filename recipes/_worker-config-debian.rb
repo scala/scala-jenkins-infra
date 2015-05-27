@@ -15,18 +15,17 @@
 require 'cgi'
 require 'base64'
 
-# debian is only used for publishing jobs (if we add debian nodes for public jobs, must copy stuff from _worker-config-rhel)
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
-  if workerConfig["publish"]
-    jenkinsUser=workerConfig["jenkinsUser"]
+  jenkinsUser=workerConfig["jenkinsUser"]
 
-    # TODO: recursive doesn't set owner correctly (???), so list out all dirs explicitly
-    ["#{jenkinsHome}/.ssh", "#{jenkinsHome}/.ivy2", "#{jenkinsHome}/.m2", "#{jenkinsHome}/.sbt", "#{jenkinsHome}/.sbt/0.13", "#{jenkinsHome}/.sbt/0.13/plugins/"].each do |dir|
-      directory dir do
-        user jenkinsUser
-      end
+  # TODO: recursive doesn't set owner correctly (???), so list out all dirs explicitly
+  ["#{jenkinsHome}/.ssh", "#{jenkinsHome}/.ivy2", "#{jenkinsHome}/.m2", "#{jenkinsHome}/.sbt", "#{jenkinsHome}/.sbt/0.13", "#{jenkinsHome}/.sbt/0.13/plugins/"].each do |dir|
+    directory dir do
+      user jenkinsUser
     end
+  end
 
+  if workerConfig["publish"]
     file "#{jenkinsHome}/.ssh/for_chara" do
       owner jenkinsUser
       mode '600'
@@ -111,6 +110,23 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
 
     %w{jq curl zip xz-utils rpm dpkg lintian fakeroot}.each do |pkg|
       package pkg
+    end
+  else
+    privateRepo = chef_vault_item("worker", "private-repo-public-jobs")
+
+    { "#{jenkinsHome}/.m2/settings.xml" => "m2-settings-public-jobs.xml.erb",
+      "#{jenkinsHome}/.credentials"     => "credentials-private-repo.erb"
+    }.each do |target, templ|
+      template target do
+        source templ
+        user jenkinsUser
+        sensitive true
+
+        variables({
+          :privateRepo => privateRepo
+        })
+        helpers(ScalaJenkinsInfra::JobBlurbs)
+      end
     end
   end
 end

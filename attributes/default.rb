@@ -60,6 +60,8 @@ if node.name == "jenkins-master"
   override['jenkins']['master']['user']           = 'jenkins'
   override['jenkins']['master']['group']          = 'jenkins'
 
+  override['jenkins']['java'] = '/usr/bin/java' # to avoid spurious diffs in the jenkins service definition leading to restarts, since there's only one java on master, no need to specify /usr/lib/jvm/java-1.7.0/bin/java
+
   # NOTES on override['jenkins']['master']['jvm_options']:
   #  - org.eclipse.jetty.server.Request.maxFormContentSize is to fix:
   #     WARNING: Caught exception evaluating: request.getParameter('q') in /updateCenter/byId/default/postBack. Reason: java.lang.IllegalStateException: Form too large 870330>500000

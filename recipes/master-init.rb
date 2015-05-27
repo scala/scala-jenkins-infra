@@ -10,19 +10,15 @@ include_recipe 'scala-jenkins-infra::_init-chef-client'
 
 include_recipe "java"
 
-case node["platform"]
-when "amazon"
-  # EBS -- must come before jenkins init since it mounts /var/lib/jenkins
-  include_recipe "scala-jenkins-infra::_config-ebs"
-end
+# EBS -- must come before jenkins init since it mounts /var/lib/jenkins
+include_recipe "scala-jenkins-infra::_config-ebs"
 
 include_recipe "scala-jenkins-infra::_master-init-jenkins"
 
 include_recipe "scala-jenkins-infra::_master-init-artifactory"
 
-case node["platform"]
-when "amazon"
-  # https://github.com/scala/scala-jenkins-infra/issues/26
+# https://github.com/scala/scala-jenkins-infra/issues/26
+if node[:ec2]
   # workaround from https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1317811/comments/22 (until we can upgrade to kernel with fix -- >3.16.1)
   execute 'turn off scatter-gatter' do
     command "ethtool -K eth0 sg off"
