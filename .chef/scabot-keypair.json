@@ -1,0 +1,17 @@
+{
+  "id": "scabot",
+  "jenkins": {
+    "token": "XXX"
+  },
+  "github": {
+    "scala": {
+      "token": "XXX"
+    },
+    "lampepfl": {
+      "token": "XXX"
+    }
+  },
+  "play": { 
+    "cryptoSecret": "XXX" 
+  }
+}
