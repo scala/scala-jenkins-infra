@@ -8,7 +8,14 @@
 #
 include_recipe 'scala-jenkins-infra::_init-chef-client'
 
+%w{java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel}.each do |pkg|
+  package pkg
+end
+
 include_recipe "java"
+
+include_recipe "scala-jenkins-infra::_jvm-select"
+
 
 # EBS -- must come before jenkins init since it mounts /var/lib/jenkins
 include_recipe "scala-jenkins-infra::_config-ebs"
