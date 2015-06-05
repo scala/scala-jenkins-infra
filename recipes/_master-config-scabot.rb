@@ -73,7 +73,7 @@ end
 bash 'build scabot' do
   cwd  scabotCheckout
   user scabotUser
-  code "sbt update && sbt stage"
+  code "scripts/stage"
 end
 
 # Include runit to setup the service
