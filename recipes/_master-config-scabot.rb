@@ -70,6 +70,17 @@ template "#{scabotHome}/scabot.conf" do
 
 end
 
+template "#{scabotHome}/production.conf" do
+  source    'scabot-production.conf.erb'
+  user      scabotUser
+  sensitive true
+
+  variables({
+    :scabotVault => chef_vault_item("master", "scabot")
+  })
+
+end
+
 bash 'build scabot' do
   cwd  scabotCheckout
   user scabotUser
