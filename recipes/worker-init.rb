@@ -15,14 +15,4 @@ include_recipe "sbt-extras" unless platform_family?("windows")
 
 include_recipe "scala-jenkins-infra::_worker-init-#{node["platform_family"]}"
 
-directory "/usr/local/share/jvm/" do
-  mode '755'
-  recursive true
-end
-
-%w{jvm-select}.each do |f|
-  cookbook_file f do
-    mode '755'
-    path "/usr/local/share/jvm/#{f}"
-  end
-end
+include_recipe "scala-jenkins-infra::_jvm-select"
