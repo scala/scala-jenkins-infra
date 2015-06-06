@@ -6,11 +6,11 @@ scala: {
     token: "<%=@scabotVault['jenkins']['token']%>"
   }
   github: {
+    user:  "scala"
     repo:  "scala"
     branches: ["2.11.x", "2.12.x"]
     lastCommitOnly: false
     host:  "api.github.com"
-    user:  "scala"
     token: "<%=@scabotVault['github']['scala']['token']%>"
   }
 }
