@@ -58,7 +58,7 @@ aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --
 |------------------|----------|------------|-----------------------|
 | HTTP             |  TCP     |  80        | 0.0.0.0/0             |
 | HTTPS            |  TCP     |  443       | 0.0.0.0/0             |
-| Custom TCP Rule  |  TCP     |  8888      | 0.0.0.0/0             |
+| Custom TCP Rule  |  TCP     |  node['scabot']['port']      | 0.0.0.0/0             |
 | All traffic      |  All     |  All       | sg-ecb06389 (Workers) |
 | All traffic      |  All     |  All       | sg-1dec3d78 (Windows) |
 | SSH              |  TCP     |  22        | $CONFIGURATOR_IP/32   |

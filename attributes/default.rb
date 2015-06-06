@@ -1,5 +1,6 @@
 scalaCiHost = "scala-ci.typesafe.com"
 scalaCiPort = 443
+scabotPort  = 8888
 
 # JENKINS WORKER CONFIG
 # see below (note that default['master']['env'] can only indirect through node -- workerJavaOpts is not in scope)
@@ -105,7 +106,7 @@ if node.name == "jenkins-master"
   default['master']['adminAddress']         = "adriaan@typesafe.com"
   default['master']['jenkinsHost']          = scalaCiHost
   default['master']['jenkinsUrl']           = "https://#{scalaCiHost}/"
-  default['master']['jenkins']['notifyUrl'] = "http://#{scalaCiHost}:8888/jenkins" # scabot listens here
+  default['master']['jenkins']['notifyUrl'] = "http://#{scalaCiHost}:${scabotPort}/jenkins" # scabot listens here
 
   # NOTE: This is a string that represents a closure that closes over the worker node for which it computes the environment.
   # (by convention -- see `environment((eval node["master"]["env"])...` in _master-config-workers
@@ -126,4 +127,5 @@ if node.name == "jenkins-master"
 
   # SCABOT
   default['scabot']['jenkins']['user'] = "scala-jenkins"
+  default['scabot']['port'] = scabotPort
 end
