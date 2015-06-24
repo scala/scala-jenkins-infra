@@ -611,6 +611,11 @@ where `private-repo.json`:
 
 # Misc
 
+## Worker offline?
+
+If you see "pending -- (worker) is offline", try waiting ~5 minutes;
+it takes time for ec2-start-stop to spin up workers.
+
 ## "ERROR: null" in slave agent launch log
 There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
 Workaround: make sure EC2 instance names are unique.
