@@ -1,4 +1,4 @@
-# Scala's Jenkins Cluster 
+# Scala's Jenkins Cluster
 The idea is to use chef to configure EC2 instances for both the master and the slaves. The jenkins config will be captured in chef recipes. Everything is versioned, with server and workers not allowed to maintain state.
 
 This is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-your-automation-federated-jenkins-with-chef/
@@ -49,7 +49,7 @@ CONFIGURATOR_IP is the ip of the machine running knife to initiate the bootstrap
 
 
 ```
-aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master" 
+aws ec2 create-security-group --group-name "Master" --description "Remote access to the Jenkins master"
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 22 --cidr $CONFIGURATOR_IP/32 # ssh bootstrap
 aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 ```
@@ -65,7 +65,7 @@ aws ec2 authorize-security-group-ingress --group-name "Master" --protocol tcp --
 
 
 ```
-aws ec2 create-security-group --group-name "Windows" --description "Remote access to Windows instances" 
+aws ec2 create-security-group --group-name "Windows" --description "Remote access to Windows instances"
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 5985 --cidr $CONFIGURATOR_IP/32 # allow WinRM from the machine that will execute `knife ec2 server create` below
 aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp --port 0-65535 --source-group Master
 ```
@@ -80,7 +80,7 @@ aws ec2 authorize-security-group-ingress --group-name "Windows" --protocol tcp -
 
 
 ```
-aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes" 
+aws ec2 create-security-group --group-name "Workers" --description "Jenkins workers nodes"
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 22 --cidr $CONFIGURATOR_IP/32 # ssh bootstrap
 aws ec2 authorize-security-group-ingress --group-name "Workers" --protocol tcp --port 0-65535 --source-group Master
 ```
@@ -135,7 +135,7 @@ aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins
 
 
 ## Create an Elastic IP for each node
-TODO: attach to elastic IPs 
+TODO: attach to elastic IPs
 
 
 # Install chef/knife
@@ -172,7 +172,7 @@ I think you can safely ignore `ERROR: IOError: Cannot open or read **/metadata.r
 ```
 cd ~/git/cookbooks
 git init .
-g commit --allow-empty -m"Initial" 
+g commit --allow-empty -m"Initial"
 
 hub clone scala/scala-jenkins-infra
 cd scala-jenkins-infra
@@ -506,7 +506,7 @@ knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ub
 
 ### Add run-list items that need the vault
 ```
-knife node run_list set jenkins-master  "recipe[chef-vault],scala-jenkins-infra::master-init,scala-jenkins-infra::master-config,scala-jenkins-infra::master-jenkins" 
+knife node run_list set jenkins-master  "recipe[chef-vault],scala-jenkins-infra::master-init,scala-jenkins-infra::master-config,scala-jenkins-infra::master-jenkins"
 
 for w in jenkins-worker-windows-publish jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
   do knife node run_list set $w  "recipe[chef-vault],scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
@@ -589,7 +589,7 @@ The jenkins token for scabot has to be configured manually:
  }
  ```
  - do `knife vault update master scabot -J scabot-jenkins.json`
- 
+
 # Artifactory
  - Set admin password.
  - create repos (TODO: automate)
@@ -610,6 +610,11 @@ where `private-repo.json`:
 
 
 # Misc
+
+## Worker offline?
+
+If you see "pending -- (worker) is offline", try waiting ~5 minutes;
+it takes time for ec2-start-stop to spin up workers.
 
 ## "ERROR: null" in slave agent launch log
 There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
@@ -661,7 +666,7 @@ knife bootstrap -c $PWD/.chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user 
 ```
 
 ## WinRM troubles?
-If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across 
+If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across
 (check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
 
 ```
