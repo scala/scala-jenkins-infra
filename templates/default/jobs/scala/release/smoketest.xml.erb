@@ -13,6 +13,8 @@
   params: [
     {:name => "version", :desc => "The version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2"},
     {:name => "sbtDistVersionOverride", :desc => "Passed to sbt, use instead of version (for experimentation only)."}
-  ])
+  ],
+  jvmVersion: @branch == "2.11.x" ? 6 : 8,
+  jvmFlavor:  @branch == "2.11.x" ? "oracle" : "openjdk")
 %>
 </project>
