@@ -1,4 +1,20 @@
-# Scala's Jenkins Cluster
+# Why Jenkins?
+
+Many of the smaller repos under the scala organization
+(for example, [scala-xml](https://github.com/scala/scala-xml))
+use [Travis-CI](http://travis-ci.org) for continuous integration.
+Travis requires the least setup or administration, so it's the easiest
+way for maintainers from the open-source community to participate.
+
+But for the [main Scala repository](https://github.com/scala/scala)
+itself, we have found that we want the full power of Jenkins: for
+capacity, for performance, and for full control over every aspect of
+the builds.  Also, we want to build every commit, not just every push.
+
+(We do, however, try to design our Jenkins configurations to be
+consistent, within reason, with a possible eventual move to Travis.)
+
+# How it works
 The idea is to use chef to configure EC2 instances for both the master and the slaves. The jenkins config will be captured in chef recipes. Everything is versioned, with server and workers not allowed to maintain state.
 
 This is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-your-automation-federated-jenkins-with-chef/
