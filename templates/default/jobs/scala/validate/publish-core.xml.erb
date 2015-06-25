@@ -11,8 +11,8 @@
     {:name => "antBuildArgs", :desc => "TODO"},
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ],
-  jvmVersion: @branch == "2.11.x" ? 6 : 8,
-  jvmFlavor:  @branch == "2.11.x" ? "oracle" : "openjdk",
+  jvmVersion: @jvmVersionForBranch,
+  jvmFlavor:  @jvmFlavorForBranch,
   buildNameScript: setValidateBuildNameScript)
 %>
   <publishers>

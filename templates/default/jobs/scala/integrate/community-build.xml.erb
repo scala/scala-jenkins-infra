@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <project>
 <%= githubProject(
-  repoUser:    @user,
-  repoName:    "community-builds",
-  repoRef:     @branch,
-  description: "Community Build",
-  nodeRestriction: "public",
+  repoUser:            @user,
+  repoName:            "community-builds",
+  repoRef:             @branch,
+  description:         "Community Build",
+  nodeRestriction:     "public",
   buildTimeoutMinutes: 400,
-  jvmVersion: 6,
-  jvmFlavor:  "oracle")
-%>
+  jvmVersion:          @jvmVersionForBranch,
+  jvmFlavor:           @jvmFlavorForBranch
+) %>
 </project>

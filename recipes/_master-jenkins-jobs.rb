@@ -30,12 +30,14 @@ def templDesc(user, repo, branch, path)
   else
     relativePath = m.captures.first
 
-    [ { :templatePath => "jobs/#{user}/#{relativePath}.xml.erb",
-        :scriptName   => "jobs/#{relativePath}",
-        :jobName      => blurbs.versionedJob(repo, branch, relativePath),
-        :user         => user,
-        :repo         => repo, # the main repo (we may refer to other repos under the same user in these jobs)
-        :branch       => branch,
+    [ { :templatePath        => "jobs/#{user}/#{relativePath}.xml.erb",
+        :scriptName          => "jobs/#{relativePath}",
+        :jobName             => blurbs.versionedJob(repo, branch, relativePath),
+        :user                => user,
+        :repo                => repo, # the main repo (we may refer to other repos under the same user in these jobs)
+        :branch              => branch,
+        :jvmFlavorForBranch  => branch == "2.12.x" ? "openjdk" : "oracle",
+        :jvmVersionForBranch => branch == "2.12.x" ? 8         : 6
       }
     ]
   end
