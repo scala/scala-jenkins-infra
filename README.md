@@ -412,9 +412,9 @@ chmod 0600 ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 
 ## Selected AMIs
 
-jenkins-master: ami-3b14f27f (Amazon Linux AMI 2015.03 on HVM Instance Store 64-bit for US West N. California)
-windows:      ami-cfa5b68a (Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10)
-ubuntu:       ami-81afbcc4 (Ubuntu utopic 14.10 from https://cloud-images.ubuntu.com/locator/ec2/ for us-west-1/amd64/hvm:ebs-ssd/20141204)
+  - jenkins-master: ami-3b14f27f (Amazon Linux AMI 2015.03 on HVM Instance Store 64-bit for US West N. California)
+  - windows:        ami-cfa5b68a (Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10)
+  - ubuntu:         ami-2915e16d (search for "vivid hvm:ebs-ssd us-west-1" on https://cloud-images.ubuntu.com/locator/ec2/)
 
 
 ## Bootstrap
