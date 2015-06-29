@@ -97,9 +97,14 @@ build live in https://github.com/scala/community-builds.
 
 ### Nightly releases
 
-(TODO: I see `-nightly-` jobs running on the old infrastructure,
-but there are also `-release-` jobs running nightly on scala-ci,
-are they both still relevant?)
+A suite of Jenkins configs with `-release-` in the name uses
+the scala/scala and scala/scala-idst repos to make nightly
+releases, including installers and Scaladoc, and makes them available
+from http://www.scala-lang.org/files/archive/nightly/
+and http://www.scala-lang.org/api/nightly/.
+
+(In the scripts that handle this, `chara` refers to the server that
+hosts scala-lang.org.)
 
 ### "Real" releases
 
