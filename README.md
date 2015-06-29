@@ -1,10 +1,25 @@
-# Why Jenkins?
+# Scala CI overview
+
+Our Jenkins-based CI infrastructure serves multiple purposes.  We
+use it to:
+
+* (automatically) validate pull requests
+* (automatically) run the community build
+* (automatically) build nightly releases
+* (manually) run scripts at release time (to build installers,
+  update scala-lang.org, and so on)
+
+All of these are described in greater detail below.
+
+## A note on Travis-CI
 
 Many of the smaller repos under the scala organization
 (for example, [scala-xml](https://github.com/scala/scala-xml))
 use [Travis-CI](http://travis-ci.org) for continuous integration.
 Travis requires the least setup or administration, so it's the easiest
 way for maintainers from the open-source community to participate.
+The Travis configs (in `.travis.yml` files in each
+repository root) are generally self-contained and straightforward.
 
 But for the [main Scala repository](https://github.com/scala/scala)
 itself, we have found that we want the full power of Jenkins: for
@@ -14,7 +29,89 @@ the builds.  Also, we want to build every commit, not just every push.
 (We do, however, try to design our Jenkins configurations to be
 consistent, within reason, with a possible eventual move to Travis.)
 
-# How it works
+The rest of this document describes Jenkins only.
+
+## Old vs. new infrastructure
+
+There is an old Jenkins setup at EPFL, running on physical servers in
+the basement in Lausanne and administered by Antonio Cunei.  We would
+like to retire the old setup eventually, but not everything has been
+migrated to the new infrastructure yet.
+
+The old stuff lives at:
+
+ * https://jenkins-dbuild.typesafe.com:8499 (dbuild-based community build)
+ * https://scala-webapps.epfl.ch/jenkins/ (other jobs)
+
+And associated GitHub repos include:
+
+ * https://github.com/scala/jenkins-config
+ * https://github.com/scala/jenkins-scripts
+
+If you want an admin login to the old Jenkins, ask Antonio to add
+you to the LDAP user database on http://moxie.typesafe.com
+(another server in the same basement).  It's normally sufficient
+to interact with Jenkins using its web UI; you shouldn't normally
+need actual ssh access to the servers, but that's available
+from Antonio as well if needed.
+
+The old stuff is not documented in detail here, on the assumption that
+its continued existence is temporary.  Adriaan's rough plan for
+migration is here: https://gist.github.com/adriaanm/407b451ebcd1f3b698e4
+
+The remainder of this document covers the new infrastructure only.
+
+## New infrastructure
+
+The new Jenkins infrastructure runs on virtual servers hosted by
+Amazon.  The virtual servers are created and configured automatically
+via Chef.  Everything is scripted and the scripts version-controlled
+so the servers can automatically be rebuilt at anytime.  It's all
+described and documented in the
+[scala-jenkins-infra repo](https://github.com/scala/scala-jenkins-infra).
+
+### Pull requestion validation
+
+A pull request must pass a series of checks before its "build status"
+becomes green.
+
+This is handled by Scabot, documented in the
+[scabot repo](https://github.com/scala/scabot).  In short, Scabot
+listens to GitHub and Jenkins, initiates Jenkins builds when
+appropriate, and updates PRs' build statuses.
+
+Scabot does not talk to our old Jenkins infrastructure, only the
+new stuff.
+
+In the Jenkins job names, `validate` means the job operates only one
+repo; `integrate` means it brings multiple projects/repos together.
+
+### Community build
+
+The community build uses a tool we developed called
+[dbuild](https://github.com/typesafehub/dbuild).  It is open-source,
+but may not actually have any users outside Typesafe/EPFL.
+
+The dbuild configuration files that specify the Scala community
+build live in https://github.com/scala/community-builds.
+
+### Nightly releases
+
+(TODO: I see `-nightly-` jobs running on the old infrastructure,
+but there are also `-release-` jobs running nightly on scala-ci,
+are they both still relevant?)
+
+### "Real" releases
+
+Some of the Jenkins configs relate to building "real" (non-nightly)
+Scala releases and are manually, not automatically, triggered,
+using Jenkins' "Build with parameters" feature:
+
+ * scala-2.11.x-release-website-update-current
+ * scala-2.11.x-release-website-update-api
+
+# Technical details
+
 The idea is to use chef to configure EC2 instances for both the master and the slaves. The jenkins config will be captured in chef recipes. Everything is versioned, with server and workers not allowed to maintain state.
 
 This is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-your-automation-federated-jenkins-with-chef/
