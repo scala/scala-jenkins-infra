@@ -74,6 +74,7 @@ module ScalaJenkinsInfra
       nodeRestriction     = options.fetch(:nodeRestriction, nil)
       params              = options.fetch(:params, [])
       refspec             = options.fetch(:refspec, stdRefSpec)
+      cleanWorkspace      = options.fetch(:cleanWorkspace, true)
       concurrent          = options.fetch(:concurrent, true)
       buildTimeoutMinutes = options.fetch(:buildTimeoutMinutes, 150)
       buildNameScript     = options.fetch(:buildNameScript, setBuildNameScript)
@@ -101,7 +102,7 @@ module ScalaJenkinsInfra
       <<-EOX
         <description>#{xmlSafe(description)}</description>
         #{properties(repoUser, repoName, repoRef, params)}
-        #{scmBlurb(refspec)}
+        #{scmBlurb(refspec, cleanWorkspace)}
         #{restriction % {nodes: xmlSafe(nodeRestriction)} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
@@ -122,7 +123,7 @@ module ScalaJenkinsInfra
       EOX
     end
 
-    def scmBlurb(refspec)
+    def scmBlurb(refspec, cleanWorkspace)
       <<-EOH.gsub(/^ {8}/, '')
         <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
           <configVersion>2</configVersion>
@@ -141,7 +142,7 @@ module ScalaJenkinsInfra
           <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
           <submoduleCfg class="list"/>
           <extensions>
-            <hudson.plugins.git.extensions.impl.CleanCheckout/>
+          #{ cleanWorkspace ? "<hudson.plugins.git.extensions.impl.CleanCheckout/>" : "" }
           </extensions>
         </scm>
       EOH
