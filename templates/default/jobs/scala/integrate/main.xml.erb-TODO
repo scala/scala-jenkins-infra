@@ -4,7 +4,7 @@
     repoUser:    @user,
     repoName:    "scala",
     repoRef:     @branch,
-    description: "PR integration -- verify mergeability of PR",
+    description: "TODO: PR integration -- verify mergeability of PR. Think of it as the mergely equivalent of the nightly build.",
     params: [
       {:name => "prDryRun", :desc => ""},
       {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
