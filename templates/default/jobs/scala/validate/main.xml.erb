@@ -7,6 +7,9 @@
     description: "PR validation -- called for every commit in every PR",
     params: [
       {:name => "prDryRun", :desc => ""},
+      {:name => "antBuildArgs", :desc => "Extra arguments for the ant build. For example, `-Dscalac.args=\"-Xcheckinit\"`."},
+      {:name => "testExtraArgs", :desc => "Extra arguments for partest. For example, `-Dpartest.scalac_opts=\"-Xcheckinit\"`."},
+      {:name => "testTarget", :desc => "Ant test targets to call. The default is 'test.core docs.done'."},
       {:name => "_scabot_pr", :desc => "For internal use by Scabot."},
       {:name => "_scabot_last", :desc => "For internal use by Scabot."}
     ],
