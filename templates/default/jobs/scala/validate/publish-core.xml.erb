@@ -8,7 +8,7 @@
   nodeRestriction: "public",
   params: [
     {:name => "prDryRun", :desc => "Set to 'yep' to try out the jenkins flow."},
-    {:name => "antBuildArgs", :desc => "TODO"},
+    {:name => "antBuildArgs", :desc => "Extra arguments for the ant build. For example, `-Dscalac.args=\"-Xcheckinit\"`."},
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ],
   jvmVersion: @jvmVersionForBranch,
