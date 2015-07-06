@@ -72,19 +72,54 @@ described and documented in the
 
 ### Pull requestion validation
 
-A pull request must pass a series of checks before its "build status"
-becomes green.
+Every commit in a pull request (not just the last!) must pass a series
+of checks before the PR's "build status" becomes green:
 
-This is handled by Scabot, documented in the
+* `cla` -- verify that the submitter of the PR has digitally signed
+  the Scala CLA using their GitHub identity.  (Handled by Scabot,
+  not Jenkins.)
+* `validate-main` -- top-level Jenkins job.
+  Does no work of its own, just orchestrates the other jobs
+  as follows: runs `validate-publish-core` first, and if it succeeds,
+  then runs `validate-test` and `integrate-ide` in parallel.
+* `validate-publish-core` -- build Scala and publish artifacts via
+  Artifactory on scala-ci. The resulting artifacts are used during the
+  remaining stages of validation.  The artifacts can also be used for
+  manual testing; instructions for adding the right resolver and
+  setting `scalaVersion` appropriately are in the
+  [Scala repo README](https://github.com/scala/scala/blob/2.11.x/README.md).
+* `validate-test` -- run the Scala test suite
+* `integrate-ide` -- run the ScalaIDE test suite
+
+In the future, we plan to make the [Scala community build]
+(https://github.com/scala/community-builds) part of PR validation
+as well.
+
+PR validation is orchestrated by Scabot, as documented in the
 [scabot repo](https://github.com/scala/scabot).  In short, Scabot
-listens to GitHub and Jenkins, initiates Jenkins builds when
-appropriate, and updates PRs' build statuses.
+listens to GitHub and Jenkins, starts `validate-main` jobs on Jenkins
+when appropriate, and updates PRs' build statuses.
 
 Scabot does not talk to our old Jenkins infrastructure, only the
 new stuff.
 
-In the Jenkins job names, `validate` means the job operates only one
-repo; `integrate` means it brings multiple projects/repos together.
+### Naming
+
+The Jenkins job names always correspond exactly with the names of the
+scripts in the repo, uniformly across orgs (e.g. scala vs. lampepfl)
+and branches.  So for example, validate-test is the name of a job conceptually,
+scala-2.11.x-validate-test is the Jenkins name for the job running on
+2.11.x in the scala org (since we can't make "virtual" jobs in jenkins
+that group by parameter, otherwise we wouldn't need this name
+mangling), and the actual script that is run is
+https://github.com/scala/scala/blob/2.11.x/scripts/jobs/validate/test.
+
+Exception: "main" jobs are always
+[Flow DSL](https://wiki.jenkins-ci.org/display/JENKINS/Build+Flow+Plugin)
+meta-jobs with no associated script.
+
+In the job names, `validate` means the job operates on only one repo;
+`integrate` means it brings multiple projects/repos together.
 
 ### Community build
 
