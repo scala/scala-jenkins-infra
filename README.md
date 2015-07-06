@@ -91,9 +91,6 @@ of checks before the PR's "build status" becomes green:
 * `validate-test` -- run the Scala test suite
 * `integrate-ide` -- run the ScalaIDE test suite
 
-In the Jenkins job names, `validate` means the job operates on only one
-repo; `integrate` means it brings multiple projects/repos together.
-
 In the future, we plan to make the [Scala community build]
 (https://github.com/scala/community-builds) part of PR validation
 as well.
@@ -105,6 +102,24 @@ when appropriate, and updates PRs' build statuses.
 
 Scabot does not talk to our old Jenkins infrastructure, only the
 new stuff.
+
+### Naming
+
+The Jenkins job names always correspond exactly with the names of the
+scripts in the repo, uniformly across orgs (e.g. scala vs. lampepfl)
+and branches.  So for example, validate-test is the name of a job conceptually,
+scala-2.11.x-validate-test is the Jenkins name for the job running on
+2.11.x in the scala org (since we can't make "virtual" jobs in jenkins
+that group by parameter, otherwise we wouldn't need this name
+mangling), and the actual script that is run is
+https://github.com/scala/scala/blob/2.11.x/scripts/jobs/validate/test.
+
+Exception: "main" jobs are always
+[Flow DSL](https://wiki.jenkins-ci.org/display/JENKINS/Build+Flow+Plugin)
+meta-jobs with no associated script.
+
+In the job names, `validate` means the job operates on only one repo;
+`integrate` means it brings multiple projects/repos together.
 
 ### Community build
 
