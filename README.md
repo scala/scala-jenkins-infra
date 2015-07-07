@@ -659,7 +659,7 @@ knife vault update worker-publish gnupg         --search 'name:jenkins-worker-ub
 
 ### Add run-list items that need the vault
 ```
-knife node run_list set jenkins-master  "recipe[chef-vault],scala-jenkins-infra::master-init,scala-jenkins-infra::master-config,scala-jenkins-infra::master-jenkins"
+knife node run_list set jenkins-master  "recipe[chef-vault],scala-jenkins-infra::master-init,scala-jenkins-infra::master-config,scala-jenkins-infra::master-jenkins,scala-jenkins-infra::master-scabot"
 
 for w in jenkins-worker-windows-publish jenkins-worker-ubuntu-publish jenkins-worker-behemoth-1 jenkins-worker-behemoth-2
   do knife node run_list set $w  "recipe[chef-vault],scala-jenkins-infra::worker-init,scala-jenkins-infra::worker-config"
