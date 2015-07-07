@@ -8,9 +8,7 @@
 #
 include_recipe 'scala-jenkins-infra::_init-chef-client'
 
-%w{java-1.7.0-openjdk-devel java-1.8.0-openjdk-devel}.each do |pkg|
-  package pkg
-end
+include_recipe "scala-jenkins-infra::_java_packages"
 
 include_recipe "java"
 
