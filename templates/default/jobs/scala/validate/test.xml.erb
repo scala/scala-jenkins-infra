@@ -6,6 +6,7 @@
   repoRef:     @branch,
   description: "PR validation: test suite",
   nodeRestriction: "public",
+  maxConcurrentPerNode: 2,
   params: [
     {:name => "scalaVersion", :desc => "Version of Scala to test. Set by main build flow."},
     {:name => "testExtraArgs", :desc => "Extra arguments for partest. For example, `-Dpartest.scalac_opts=\"-Xcheckinit\"`."},

@@ -8,6 +8,7 @@
   description:         "Community Build",
   nodeRestriction:     "public",
   buildTimeoutMinutes: 400,
+  maxConcurrentPerNode: 1,
   jvmVersion:          @jvmVersionForBranch,
   jvmFlavor:           @jvmFlavorForBranch
 ) %>
