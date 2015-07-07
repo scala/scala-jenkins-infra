@@ -764,24 +764,12 @@ where `private-repo.json`:
 
 # Misc
 
-## Worker offline?
-
-If you see "pending -- (worker) is offline", try waiting ~5 minutes;
-it takes time for ec2-start-stop to spin up workers.
-
-## "ERROR: null" in slave agent launch log
-There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
-Workaround: make sure EC2 instance names are unique.
-
 ## Testing locally using vagrant
 
 http://blog.gravitystorm.co.uk/2013/09/13/using-vagrant-to-test-chef-cookbooks/:
 
 See `$PWD/.chef/Vagrantfile` -- make sure you first populated `$PWD/.chef/cookbooks/` using knife,
 as [documented above](#get-cookbooks)
-
-## If connections hang
-Make sure security group allows access, winrm was enabled using --user-data...
 
 ## SSL cert
 ```
@@ -813,6 +801,31 @@ Confirm values in the csr using:
 $ openssl req -text -noout -in scala-ci.csr
 ```
 
+## Alternative windows AMIs
+too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
+userdata.txt: `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
+
+older: ami-e9a4b7ac amazon/Windows_Server-2008-SP2-English-64Bit-Base-2014.12.10
+userdata.txt: '<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}</script>'
+
+older: ami-6b34252e Windows_Server-2008-R2_SP1-English-64Bit-Base-2014.11.19
+doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12.10
+
+
+# Troubleshooting
+
+## Worker offline?
+
+If you see "pending -- (worker) is offline", try waiting ~5 minutes;
+it takes time for ec2-start-stop to spin up workers.
+
+## "ERROR: null" in slave agent launch log
+There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
+Workaround: make sure EC2 instance names are unique.
+
+## If connections hang
+Make sure security group allows access, winrm was enabled using --user-data...
+
 ## Retry bootstrap
 ```
 knife bootstrap -c $PWD/.chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user ubuntu --sudo -c $PWD/.chef/knife.rb -N jenkins-worker-ubuntu-publish -r "scala-jenkins-infra::worker-init"
@@ -832,15 +845,3 @@ cord $IP, log in using password above and open a command line:
 
 knife bootstrap -V windows winrm $IP
 ```
-
-
-
-## Alternative windows AMIs
-too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
-userdata.txt: `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
-
-older: ami-e9a4b7ac amazon/Windows_Server-2008-SP2-English-64Bit-Base-2014.12.10
-userdata.txt: '<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}</script>'
-
-older: ami-6b34252e Windows_Server-2008-R2_SP1-English-64Bit-Base-2014.11.19
-doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12.10
