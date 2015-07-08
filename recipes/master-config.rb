@@ -16,6 +16,4 @@ include_recipe 'scala-jenkins-infra::_master-config-proxy'
 # Jenkins base config
 include_recipe 'scala-jenkins-infra::_master-config-jenkins'
 
-# SCABOT
-include_recipe 'scala-jenkins-infra::_master-config-scabot'
 

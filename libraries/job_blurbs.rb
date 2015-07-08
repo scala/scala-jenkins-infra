@@ -12,7 +12,19 @@ module ScalaJenkinsInfra
       CGI.escapeHTML(str)
     end
 
-    def properties(repoUser, repoName, repoRef, params)
+    @@concurrentDefaults = {
+      :maxConcurrentPerNode => 3,
+      :maxConcurrentTotal   => 0,
+      :throttleEnabled      => "true",
+      :throttleOption       => "project"
+    }
+
+    def selectConcurrentOptions(options)
+      # plain ruby does not have a subset/intersect/slice on map??? http://stackoverflow.com/questions/9025277/how-do-i-extract-a-sub-hash-from-a-hash
+      options.select{|k, v| @@concurrentDefaults.key?(k)}
+    end
+
+    def properties(repoUser, repoName, repoRef, params, concurrentOptions)
       stringPar =
         """
         <hudson.model.StringParameterDefinition>
@@ -22,6 +34,16 @@ module ScalaJenkinsInfra
         </hudson.model.StringParameterDefinition>""".gsub(/        /, '')
 
       paramDefaults = {:default => nil}
+
+      concurr = @@concurrentDefaults.merge(concurrentOptions)
+
+      concurrProps = concurrentOptions.empty? ? '' : """<hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin=\"throttle-concurrents@1.8.4\">
+          <maxConcurrentPerNode>#{ concurr[:maxConcurrentPerNode] }</maxConcurrentPerNode>
+          <maxConcurrentTotal>#{   concurr[:maxConcurrentTotal]   }</maxConcurrentTotal>
+          <throttleEnabled>#{      concurr[:throttleEnabled]      }</throttleEnabled>
+          <throttleOption>#{       concurr[:throttleOption]       }</throttleOption>
+        </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+      """
 
       """<properties>
         <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin=\"notification@1.7\">
@@ -41,6 +63,7 @@ module ScalaJenkinsInfra
             #{params.map { |param| stringPar % paramDefaults.merge(param) }.join("\n")}
           </parameterDefinitions>
         </hudson.model.ParametersDefinitionProperty>
+        #{concurrProps}
       </properties>"""
     end
 
@@ -57,7 +80,7 @@ module ScalaJenkinsInfra
 
       <<-EOX
       <description>#{xmlSafe(description)}</description>
-      #{properties(repoUser, repoName, repoRef, params)}
+      #{properties(repoUser, repoName, repoRef, params, selectConcurrentOptions(options))}
       <scm class="hudson.scm.NullSCM"/>
       <canRoam>true</canRoam>
       <concurrentBuild>#{concurrent}</concurrentBuild>
@@ -101,7 +124,7 @@ module ScalaJenkinsInfra
 
       <<-EOX
         <description>#{xmlSafe(description)}</description>
-        #{properties(repoUser, repoName, repoRef, params)}
+        #{properties(repoUser, repoName, repoRef, params, selectConcurrentOptions(options))}
         #{scmBlurb(refspec, cleanWorkspace)}
         #{restriction % {nodes: xmlSafe(nodeRestriction)} if nodeRestriction}
         <concurrentBuild>#{concurrent}</concurrentBuild>

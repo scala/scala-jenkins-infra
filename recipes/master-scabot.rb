@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: _master-init-scabot
+# Recipe:: master-scabot
 #
 # Copyright 2014, Typesafe, Inc.
 #

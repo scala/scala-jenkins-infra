@@ -6,6 +6,7 @@
   repoRef:     @branch,
   description: "PR integration testing: IDE",
   nodeRestriction: "public",
+  maxConcurrentPerNode: 2,
   params: [
     {:name => "scalaVersion", :desc => "Version of Scala to test. Set by main build flow."},
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."},

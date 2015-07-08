@@ -6,14 +6,15 @@
   repoRef:     @branch,
   description: "PR validation: test suite",
   nodeRestriction: "public",
+  maxConcurrentPerNode: 2,
   params: [
     {:name => "scalaVersion", :desc => "Version of Scala to test. Set by main build flow."},
     {:name => "testExtraArgs", :desc => "Extra arguments for partest. For example, `-Dpartest.scalac_opts=\"-Xcheckinit\"`."},
     {:name => "testTarget", :desc => "Ant test targets to call. The default is 'test.core docs.done'."},
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ],
-  jvmVersion: @branch == "2.11.x" ? 6 : 8,
-  jvmFlavor:  @branch == "2.11.x" ? "oracle" : "openjdk",
+  jvmVersion: @jvmVersionForBranch,
+  jvmFlavor:  @jvmFlavorForBranch,
   buildNameScript: setValidateBuildNameScript)
 %>
   <publishers>

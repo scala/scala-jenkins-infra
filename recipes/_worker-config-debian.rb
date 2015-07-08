@@ -15,6 +15,10 @@
 require 'cgi'
 require 'base64'
 
+%w{ant ant-contrib ant-optional maven s3curl tofrodos}.each do |pkg|
+  package pkg
+end
+
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   jenkinsUser=workerConfig["jenkinsUser"]
 
