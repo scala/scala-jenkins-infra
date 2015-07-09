@@ -4,7 +4,7 @@
     repoUser:    @user,
     repoName:    "scala",
     repoRef:     @branch,
-    description: "PR validation -- called for every commit in every PR",
+    description: "PR validation -- called for every commit in every PR and every push",
     params: [
       {:name => "prDryRun", :desc => ""},
       {:name => "antBuildArgs", :desc => "Extra arguments for the ant build. For example, `-Dscalac.args=\"-Xcheckinit\"`."},

@@ -3,7 +3,8 @@
 Our Jenkins-based CI infrastructure serves multiple purposes.  We
 use it to:
 
-* (automatically) validate pull requests
+* (automatically) validate all commits, including commits in
+  pull requests
 * (automatically) run the community build
 * (automatically) build nightly releases
 * (manually) run scripts at release time (to build installers,
@@ -70,7 +71,7 @@ so the servers can automatically be rebuilt at anytime.  It's all
 described and documented in the
 [scala-jenkins-infra repo](https://github.com/scala/scala-jenkins-infra).
 
-### Pull requestion validation
+### Pull request validation
 
 Every commit in a pull request (not just the last!) must pass a series
 of checks before the PR's "build status" becomes green:
@@ -102,6 +103,21 @@ when appropriate, and updates PRs' build statuses.
 
 Scabot does not talk to our old Jenkins infrastructure, only the
 new stuff.
+
+### Pushed commit validation
+
+Besides commits in pull requests, what other commits require validation?
+
+* Scabot ensures that every commit in a pull request gets validated.
+  But when the pull request is merged, a new merge commit is created,
+  and that commit must be validated, too.
+* The Scala team has a policy of always using pull requests, never
+  pushing directly to mainline branches.  But if such a direct push
+  somehow happens anyway, we want to validate those commits, too.
+
+So in addition to watching pull requests, Scabot also watches
+for other pushes, including merges, and starts jobs for and updates
+statuses on the pushed commits, too.
 
 ### Naming
 
