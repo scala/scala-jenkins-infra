@@ -759,7 +759,7 @@ The jenkins token for scabot has to be configured manually:
  ```
  - do `knife vault update master scabot -J scabot-jenkins.json`
 
-# Artifactory
+## Artifactory
  - Set admin password.
  - create repos (TODO: automate)
  - Create scala-ci user that can push to scala-release-temp and scala-pr-validation-snapshots,
@@ -776,6 +776,19 @@ where `private-repo.json`:
   "pass": "???"
 }
 ```
+
+## Github webhook
+
+Add a webhook via https://github.com/scala/scala/settings/hooks/new:
+
+ - Payload URL: https://scala-ci.typesafe.com/githoob
+ - Content type: application/json
+ - Individual events:
+   - Issues
+   - Pull Request
+   - Push
+   - Issue comment
+   - Pull Request review comment
 
 
 # Misc
