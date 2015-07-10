@@ -99,7 +99,7 @@ module ScalaJenkinsInfra
       refspec             = options.fetch(:refspec, stdRefSpec)
       cleanWorkspace      = options.fetch(:cleanWorkspace, true)
       concurrent          = options.fetch(:concurrent, true)
-      buildTimeoutMinutes = options.fetch(:buildTimeoutMinutes, 210)
+      buildTimeoutMinutes = options.fetch(:buildTimeoutMinutes, 150)
       buildNameScript     = options.fetch(:buildNameScript, setBuildNameScript)
 
       jvmFlavor  = options[:jvmFlavor]
