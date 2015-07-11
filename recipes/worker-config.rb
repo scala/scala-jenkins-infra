@@ -13,6 +13,7 @@
 
 
 include_recipe "scala-jenkins-infra::_config-ebs"
+include_recipe "scala-jenkins-infra::_config-adminKeys"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   case node["platform_family"]
@@ -40,8 +41,8 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
 
   file "#{jenkinsHome}/.ssh/authorized_keys" do
     owner workerConfig["jenkinsUser"]
-    mode  '644'
-    content chef_vault_item("master", "scala-jenkins-keypair")['public_key'] + "\n#{workerConfig['authorized_keys']}" # TODO: distinct keypair for each jenkins user
+    mode  '600'
+    content chef_vault_item("master", "scala-jenkins-keypair")['public_key'] + "\n#{node['authorized_keys']['jenkins']}"
   end
 
   git_user workerConfig["jenkinsUser"] do

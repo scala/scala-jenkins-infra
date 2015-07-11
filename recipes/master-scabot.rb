@@ -41,7 +41,7 @@ end
 
 file "#{scabotHome}/.ssh/authorized_keys" do
   owner     scabotUser
-  mode      '644'
+  mode      '600'
   content   chef_vault_item("master", "scabot-keypair")['public_key']
 end
 
