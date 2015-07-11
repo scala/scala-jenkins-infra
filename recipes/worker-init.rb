@@ -6,6 +6,8 @@
 #
 # All rights reserved - Do Not Redistribute
 #
+include_recipe "scala-jenkins-infra::_config-ebs"
+
 include_recipe 'scala-jenkins-infra::_init-chef-client'
 
 include_recipe "git"

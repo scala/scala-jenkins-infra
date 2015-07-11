@@ -8,11 +8,7 @@
 #
 
 # This can only be run *after* bootstrap due to vault dependency.
-# Also, it needs to run on every reboot of the worker instance(s),
-# since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
-
-include_recipe "scala-jenkins-infra::_config-ebs"
 include_recipe "scala-jenkins-infra::_config-adminKeys"
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
