@@ -1,8 +1,3 @@
-# ssh public keys for users with access to workers
-workerAuthorizedKeys =
-  "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAva5WQeMGZxgQ1adlJQoYZCJZYTkVYSSKWu9O3EDJD+2jncUFfUdd4AsYbpYs/N2FyeoT2Gja7c03dFI6gQP3d+ZNaiO3CBYC6LvbgmCaQrffymiYw8jgD0NQqRan0nwXblmQlkxktgU0oSI/NmkpsNsMx67Pgrd+UsCchuFl7LR0CD6q+URt6Y38TY8F2x4k8P7Y2aWoQOuPk8bvEMALaOetSH0Y8zNEP5YPf7k30Z8ZUyhkt0x166gKoO/2PlzTjy5cAi+sDdCIxd74Ll7jzaUa10BDpl1iOHtLEkTJ0pssENm0g+PvJcsyzGhBRfGSLxEDhBRw1hPRT1avOwIeJQ== lrytz\n"+
-  "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVEPiQw/dw1d3YNZJ9xEoBmFGjCSIX6KSNA53PgrSTN3A1pv7bYYjlAyi4RDyrs7NyhboNm8JvDYB/MStJeFAMAsvSFcNNP1UdCZtom0+JrbdYid3MBN25PefShkjob8MgoTL+6VUYgYoip58MPGrHyGY0dH82QJHh1gyN9yGAgiKFrMpvD6h4m8FZrU1boLuMFty5FSBN7WEyC7p4+208MbH85iGzAGEeuW50CXqo21u/EFi+ZADCMaeyT81SKS25UXPKBWzrhsgk6vIH3EnmCiv1PtFmijaUhNCQrd6vAhyj6j6O4pjFZSWqvovD3WICGoCmUT/zlEajZllnnf0b darkdimius"
-
 if (node.name =~ /.*-worker-.*/) != nil
   case node["platform_family"]
   when "windows"
@@ -54,7 +49,6 @@ if (node.name =~ /.*-worker-.*/) != nil
 
     default["jenkinsHomes"][jenkinsHome]["executors"]   = 2
     default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
-    default["jenkinsHomes"][jenkinsHome]["authorized_keys"] = workerAuthorizedKeys
     default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
     default["jenkinsHomes"][jenkinsHome]["jvm_options"] = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp.gsub(/\\/,'/')}" # jenkins doesn't quote properly
     default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
@@ -104,7 +98,6 @@ if (node.name =~ /.*-worker-.*/) != nil
     default['ebs']['volumes']['/home/jenkins']['mountopts'] = 'noatime'
 
     default["jenkinsHomes"]["/home/jenkins"]["workerName"]      = node.name
-    default["jenkinsHomes"]["/home/jenkins"]["authorized_keys"] = workerAuthorizedKeys
     default["jenkinsHomes"]["/home/jenkins"]["jenkinsUser"]     = "jenkins"
     default["jenkinsHomes"]["/home/jenkins"]["publish"]         = publisher
     default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 0  # launch worker immediately
