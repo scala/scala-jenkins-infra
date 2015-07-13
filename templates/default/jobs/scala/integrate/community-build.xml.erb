@@ -10,6 +10,9 @@
   maxConcurrentPerNode: 1,
   buildTimeoutMinutes: 400,
   jvmVersion:          @jvmVersionForBranch,
-  jvmFlavor:           @jvmFlavorForBranch
+  jvmFlavor:           @jvmFlavorForBranch,
+  params: [
+    {:name => "scala_ref", :desc => "Ref of scala to build against. To verify PR NNNN on scala/scala, use scala/scala.git\#pull/NNNN/head", :default => "#{@user}/scala.git\##{@branch}"}
+  ]
 ) %>
 </project>
