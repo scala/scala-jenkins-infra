@@ -12,7 +12,8 @@
   jvmVersion:          @jvmVersionForBranch,
   jvmFlavor:           @jvmFlavorForBranch,
   params: [
-    {:name => "scala_ref", :desc => "Ref of scala to build against. To verify PR NNNN on scala/scala, use scala/scala.git\#pull/NNNN/head", :default => "#{@user}/scala.git\##{@branch}"}
+    {:name => "scala_ref", :desc => "Ref of scala to build against. To verify PR NNNN on scala/scala, use scala/scala.git\#pull/NNNN/head", :default => "#{@user}/scala.git\##{@branch}"},
+    {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath"}
   ]
 ) %>
 </project>
