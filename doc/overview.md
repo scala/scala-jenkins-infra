@@ -70,8 +70,8 @@ described in more detail below.
 
 ### Pull request validation
 
-Every commit in a pull request (not just the last!) must pass a series
-of checks before the PR's "build status" becomes green:
+Every commit must pass a series of checks before the PR's "build
+status" becomes green:
 
 * `cla` -- verify that the submitter of the PR has digitally signed
   the Scala CLA using their GitHub identity.  (Handled by Scabot,
@@ -88,6 +88,10 @@ of checks before the PR's "build status" becomes green:
   [Scala repo README](https://github.com/scala/scala/blob/2.11.x/README.md).
 * `validate-test` -- run the Scala test suite
 * `integrate-ide` -- run the ScalaIDE test suite
+
+Normally, every commit in the PR (not just the last commit) must pass
+all checks.  Putting `[ci: last-only]` in the PR title tells Scabot to
+validate the last commit only.
 
 In the future, we plan to make the [Scala community build]
 (https://github.com/scala/community-builds) part of PR validation

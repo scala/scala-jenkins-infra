@@ -58,6 +58,7 @@ own) to `attributes/pubkeys.rb`, so you can use your key to ssh to the various s
 ## Set up directories
 
 ```
+mkdir -p ~/git/cookbooks
 cd ~/git/cookbooks
 git init .
 git commit --allow-empty -m "Initial"
@@ -65,6 +66,7 @@ git config core.autocrlf false
 hub clone scala/scala-jenkins-infra
 cd scala-jenkins-infra
 ln -sh ~/git/cookbooks $PWD/.chef/
+mkdir .chef/config
 ```
 
 (The `core.autocrlf` thing may be needed to prevent "fatal: CRLF would be replaced by LF" errors when cloning cookbook repos, depending on your global git config.)
@@ -122,4 +124,7 @@ Host scabot
 ```
 
 Verify that you can actually ssh to the various machines.
-(But note that some of them aren't always up.)
+
+But note that only master is always up.  You can bring any node up by
+launching the associated worker on Jenkins, which uses the
+https://github.com/typesafehub/ec2-start-stop Jenkins plugin.
