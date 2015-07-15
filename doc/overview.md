@@ -1,0 +1,194 @@
+# Overview
+
+Things our Jenkins-based CI infrastructure does:
+
+* (automatically) validate all commits, including
+  the ones in pull requests
+* (automatically) run the [community build](https://github.com/scala/community-builds)
+* (automatically) build nightly releases
+* (manually) run scripts at release time
+
+All of these are described in greater detail below.
+
+## A note on Travis-CI
+
+Many of the smaller repos under the scala organization
+(for example, [scala-xml](https://github.com/scala/scala-xml))
+use [Travis-CI](http://travis-ci.org) for continuous integration.
+Travis requires the least setup or administration, so it's the easiest
+way for maintainers from the open-source community to participate.
+The Travis configs (in `.travis.yml` files in each
+repository root) are generally self-contained and straightforward.
+
+But for the [main Scala repository](https://github.com/scala/scala)
+itself, we have found that we want the full power of Jenkins: for
+capacity, for performance, and for full control over every aspect of
+the builds.  Also, we want to build every commit, not just every push.
+
+(We do, however, try to design our Jenkins configurations to be
+consistent, within reason, with a possible eventual move to Travis.)
+
+The rest of this document describes Jenkins only.
+
+## Old vs. new infrastructure
+
+There is an old Jenkins setup at EPFL, running on physical servers in
+the basement in Lausanne and administered by Antonio Cunei.  We would
+like to retire the old setup eventually, but not everything has been
+migrated to the new infrastructure yet.
+
+The old stuff lives at:
+
+ * https://jenkins-dbuild.typesafe.com:8499 (dbuild-based community build)
+ * https://scala-webapps.epfl.ch/jenkins/ (other jobs)
+
+And associated GitHub repos include:
+
+ * https://github.com/scala/jenkins-config
+ * https://github.com/scala/jenkins-scripts
+
+If you want an admin login to the old Jenkins, ask Antonio to add
+you to the LDAP user database on http://moxie.typesafe.com
+(another server in the same basement).  It's normally sufficient
+to interact with Jenkins using its web UI; you shouldn't normally
+need actual ssh access to the servers, but that's available
+from Antonio as well if needed.
+
+The old stuff is not documented in detail here, on the assumption that
+its continued existence is temporary.  Adriaan's rough plan for
+migration is here: https://gist.github.com/adriaanm/407b451ebcd1f3b698e4
+
+The rest of this documentation covers the new infrastructure only.
+
+## New infrastructure
+
+The new Jenkins infrastructure runs on virtual servers hosted by
+Amazon.  The virtual servers are created and configured automatically
+via Chef.  Everything is scripted and the scripts version-controlled
+so the servers can automatically be rebuilt at anytime.  This is all
+described in more detail below.
+
+### Pull request validation
+
+Every commit in a pull request (not just the last!) must pass a series
+of checks before the PR's "build status" becomes green:
+
+* `cla` -- verify that the submitter of the PR has digitally signed
+  the Scala CLA using their GitHub identity.  (Handled by Scabot,
+  not Jenkins.)
+* `validate-main` -- top-level Jenkins job.
+  Does no work of its own, just orchestrates the other jobs
+  as follows: runs `validate-publish-core` first, and if it succeeds,
+  then runs `validate-test` and `integrate-ide` in parallel.
+* `validate-publish-core` -- build Scala and publish artifacts via
+  Artifactory on scala-ci. The resulting artifacts are used during the
+  remaining stages of validation.  The artifacts can also be used for
+  manual testing; instructions for adding the right resolver and
+  setting `scalaVersion` appropriately are in the
+  [Scala repo README](https://github.com/scala/scala/blob/2.11.x/README.md).
+* `validate-test` -- run the Scala test suite
+* `integrate-ide` -- run the ScalaIDE test suite
+
+In the future, we plan to make the [Scala community build]
+(https://github.com/scala/community-builds) part of PR validation
+as well.
+
+PR validation is orchestrated by Scabot, as documented in the
+[scabot repo](https://github.com/scala/scabot).  In short, Scabot runs
+on jenkins-master, listens to GitHub and Jenkins, starts
+`validate-main` jobs on Jenkins when appropriate, and updates PRs'
+build statuses.
+
+Scabot does not talk to our old Jenkins infrastructure, only the
+new stuff.
+
+### Pushed commit validation
+
+Besides commits in pull requests, what other commits require validation?
+
+* Scabot ensures that every commit in a pull request gets validated.
+  But when the pull request is merged, a new merge commit is created,
+  and that commit must be validated, too.
+* The Scala team has a policy of always using pull requests, never
+  pushing directly to mainline branches.  But if such a direct push
+  somehow happens anyway, we want to validate those commits, too.
+
+So in addition to watching pull requests, Scabot also watches
+for other pushes, including merges, and starts jobs for and updates
+statuses on the pushed commits, too.
+
+### Naming
+
+The Jenkins job names always correspond exactly with the names of the
+scripts in the repo's `scripts` directory, uniformly across orgs (e.g. scala vs. lampepfl)
+and branches.  So for example, validate-test is the name of a job conceptually,
+scala-2.11.x-validate-test is the Jenkins name for the job running on
+2.11.x in the scala org (since we can't make "virtual" jobs in jenkins
+that group by parameter, otherwise we wouldn't need this name
+mangling), and the actual script that runs is
+https://github.com/scala/scala/blob/2.11.x/scripts/jobs/validate/test.
+
+Exception: "main" jobs are always
+[Flow DSL](https://wiki.jenkins-ci.org/display/JENKINS/Build+Flow+Plugin)
+meta-jobs with no associated script.
+
+In the job names, `validate` means the job operates on only one repo;
+`integrate` means it brings multiple projects/repos together.
+
+### Community build
+
+The community build uses an open-source tool we developed called
+[dbuild](https://github.com/typesafehub/dbuild).
+
+The dbuild configuration files that specify the Scala community
+build live in https://github.com/scala/community-builds.
+
+### Nightly releases
+
+A suite of Jenkins configs with `-release-` in the name uses
+the scala/scala and scala/scala-idst repos to make nightly
+releases, including installers and Scaladoc, and makes them available
+from http://www.scala-lang.org/files/archive/nightly/
+and http://www.scala-lang.org/api/nightly/.
+
+(In the scripts that handle this, `chara` refers to the server that
+hosts scala-lang.org.)
+
+### "Real" releases
+
+Some of the Jenkins configs relate to building "real" (non-nightly)
+Scala releases and are manually, not automatically, triggered,
+using Jenkins' "Build with parameters" feature:
+
+* scala-2.11.x-release-website-update-current
+* scala-2.11.x-release-website-update-api
+
+### User accounts
+
+To isolate it, Scabot runs as the `scabot` user (on jenkins-master),
+confined to its home directory.
+
+To isolate it, Jenkins always runs as the `jenkins` user, confined to
+its home directory, on both master and workers.  (The master doesn't
+run actual jobs; it initiates jobs by ssh'ing to the workers.)
+
+On the master, the admin user is `ec2-user`. On the workers, the admin
+users is `ubuntu`.  These are the standard EC2 accounts for Amazon
+Linux and Ubuntu, respectively.  They can `sudo`.
+
+### How we built it
+
+The idea is to use Chef to configure EC2 instances for both the master and the slaves. The Jenkins configs are generated from Chef recipes. Everything is versioned, with server and workers not allowed to maintain state.
+
+The architecture is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-your-automation-federated-jenkins-with-chef/
+
+### More documentation
+
+* [client-setup.md](client-setup.md): how to set up your local
+  machine to talk to the existing CI infrastructure
+* [maintenance.md](maintenance.md): how to maintain, troubleshoot,
+  and update the CI infrastructure
+* [staging.md](staging.md): how to use Vagrant to test changes
+  locally
+* [genesis.md](genesis.md): how the infrastructure was initially
+  created, and how to re-create it if needed
