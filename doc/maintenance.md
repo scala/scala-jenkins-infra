@@ -1,23 +1,94 @@
 # Maintenance
 
-(this document is in a rather rough state. for now, it is just
-a collection of notes)
+## Checking status
 
-## Notes on cookbooks
+Pointing your browser to https://manage.chef.io and logging in will
+take you to https://manage.chef.io/organizations/typesafe-scala/nodes
+which shows node names, IP addresses, uptimes, etc.
 
-you do need to clone scala-jenkins-infra
-in order to update that one cookbook, even if you never
-install or upload the other cookbooks
+It also shows when each node last checked for updated cookbooks ("Last Check-In").
 
-"Adriaan could also make a tarball of all the other stuff"
+## Updating the scala-jenkins-infra cookbook
 
-## Upload cookbooks to chef server
+Note that the setup instructions don't require you to clone all of the
+cookbooks to your local machine, only the scala-jenkins-infra
+cookbook.  That's because our own cookbook is the one we usually
+update; the rest don't normally need to be touched.
+
+If you change the scala-jenkins-infra cookbook, you don't need
+to push your change anywhere in order to test it in production.
+We often test changes that way, and then after verifying that
+the change is working as desired in production, we push the change
+to scala/scala-jenkins-infra.
+
+To make changes,
+
+### 1. Edit the cookbook
+
+Edit the cookbook.  (For example, a common change is to edit
+one of the `.xml.erb` files for Jenkins.)
+
+### 2. Upload the cookbook
+
+2. `knife cookbook upload scala-jenkins-infra`.  This always uploads
+   the cookbook to the Typesafe account on chef.io, regardless of
+   whether you made changes.
+
+### 3. Run chef-client
+
+Run `chef-client` on the affected nodes (usually jenkins-master),
+which will cause the node to get the updated cookbook from chef.io.
+You can run it automatically or manually.
+
+Running it automatically just involves waiting.  On a regular schedule
+(every 15 minutes, 30 minutes, something like that? it's configured in
+our cookbook for chef-client itself), an already running chef-client
+process will wake up and check chef.io for updates.  (The log for
+the run presumably goes somewhere, but where? See
+https://github.com/scala/scala-jenkins-infra/issues/110.)
+
+But it's usually better to do it manually because you can watch it
+happen and catch mistakes.  Any cookbook changes found will show up as
+light-gray diffs in the `chef-client` output so you can spot and
+sanity-check them.  If diffs are found, the cookbook specifies what
+should happen as a result -- for example, that service might be
+restarted.
+
+The commands to run chef-client depend on whether the node in question
+is Linux or Windows:
+
+#### Linux node
+
+Here hostname might be e.g. `jenkins-master` and username could be omitted
+to accept the default in your `~/.ssh/config`, or might be e.g. `ec2-user`.
+
+```
+ssh username@hostname
+sudo su --login # --login needed on ubuntu to set SSL_CERT_FILE (it's done in /etc/profile.d)
+chef-client
+```
+
+#### Windows node
+
+```
+PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem | jq .PasswordData | xargs echo)
+knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
+```
+
+# Misc
+
+The remainder of this document is just rough notes.
+
+## Upload all cookbooks to chef server
 
 ```
 knife cookbook upload --all
 ```
 
 this has not been done since the initial install!
+
+"Adriaan could also make a tarball" of his all-cookbooks setup
+sometime, maybe.
 
 ## SSL cert
 ```

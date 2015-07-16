@@ -167,6 +167,19 @@ using Jenkins' "Build with parameters" feature:
 * scala-2.11.x-release-website-update-current
 * scala-2.11.x-release-website-update-api
 
+### Artifactory
+
+The master node includes an Artifactory repository that serves
+several purposes:
+
+* during PR validation, artifacts are (as already mentioned above) published to
+  https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/
+* during release-building, artifacts are published along the way for
+  use as part of the build process
+* the community build caches artifacts with Artifactory, so it
+  doesn't have to re-download the internet all the time;
+  this vastly increases the speed of the community build
+
 ### User accounts
 
 To isolate it, Scabot runs as the `scabot` user (on jenkins-master),
