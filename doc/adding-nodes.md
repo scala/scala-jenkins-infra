@@ -33,18 +33,7 @@ done
 
 ### Re-run chef manually
 
-- windows:
-```
-PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem | jq .PasswordData | xargs echo)
-knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
-```
-
-- linux
-```
-ssh jenkins-worker-ubuntu-publish
-sudo su --login # --login needed on ubuntu to set SSL_CERT_FILE (it's done in /etc/profile.d)
-chef-client
-```
+see maintenance.md for instructions
 
 ### Attach eips
 
