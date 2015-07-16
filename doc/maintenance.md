@@ -8,6 +8,16 @@ which shows node names, IP addresses, uptimes, etc.
 
 It also shows when each node last checked for updated cookbooks ("Last Check-In").
 
+## ssh access
+
+For troubleshooting Jenkins in particular it's often to helpful to ssh
+in to the worker nodes and poke around the workspaces, see what
+processes are running, that kind of thing.
+
+You can also delete files if we've run out of disk space, though our
+first line of defense on this is the "Clear Workspace" button in the
+Jenkins UI.
+
 ## Updating the scala-jenkins-infra cookbook
 
 Note that the setup instructions don't require you to clone all of the
