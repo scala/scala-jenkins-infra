@@ -69,11 +69,12 @@ is Linux or Windows:
 
 #### Linux node
 
-Here hostname might be e.g. `jenkins-master` and username could be omitted
-to accept the default in your `~/.ssh/config`, or might be e.g. `ec2-user`.
+Here `hostname` might be e.g. `jenkins-master` and username can be omitted
+to accept the default in your `~/.ssh/config`, or can be explicitly supplied
+e.g. `ec2-user@jenkins-master`.
 
 ```
-ssh username@hostname
+ssh hostname   # or username@hostname to override your ~/.ssh/config default
 sudo su --login # --login needed on ubuntu to set SSL_CERT_FILE (it's done in /etc/profile.d)
 chef-client
 ```
