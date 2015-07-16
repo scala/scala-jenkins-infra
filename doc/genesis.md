@@ -203,6 +203,12 @@ from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-v
 
 NOTE: the JSON must not have a field "id"!!!
 
+## Organization validation key
+
+(not sure where this goes, temporally)
+
+Obtain the organization validation key from Adriaan and put it to `$PWD/.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
+
 ## Chef user with keypair for jenkins cli access
 
 ```

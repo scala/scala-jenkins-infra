@@ -75,8 +75,6 @@ You can then generate and download your private key on https://www.chef.io/accou
 
 Test if knife works correctly by running `knife cookbook list`.
 
-(this step may not be necessary?) Obtain the organization validation key from Adriaan and put it to `$PWD/.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
-
 ## Hosts and SSH config
 
 To make it easier to connect to the EC2 nodes, perform the following
