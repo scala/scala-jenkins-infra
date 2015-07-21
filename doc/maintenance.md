@@ -40,9 +40,10 @@ one of the `.xml.erb` files for Jenkins.)
 
 ### 2. Upload the cookbook
 
-2. `knife cookbook upload scala-jenkins-infra`.  This always uploads
-   the cookbook to the Typesafe account on chef.io, regardless of
-   whether you made changes.
+    knife cookbook upload scala-jenkins-infra
+
+This always uploads the cookbook to the Typesafe account on chef.io,
+regardless of whether you made changes.
 
 ### 3. Run chef-client
 
