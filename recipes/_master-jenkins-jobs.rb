@@ -36,8 +36,8 @@ def templDesc(user, repo, branch, path)
         :user                => user,
         :repo                => repo, # the main repo (we may refer to other repos under the same user in these jobs)
         :branch              => branch,
-        :jvmFlavorForBranch  => branch == "2.12.x" ? "openjdk" : "oracle",
-        :jvmVersionForBranch => branch == "2.12.x" ? 8         : 6
+        :jvmFlavorForBranch  => branch != "2.11.x" ? "openjdk" : "oracle",
+        :jvmVersionForBranch => branch != "2.11.x" ? 8         : 6
       }
     ]
   end
@@ -64,6 +64,9 @@ def expandJobTemplates(user, repo, branch)
     .flat_map { |mani| templDesc(user, repo, branch, mani['path']) }
     .each do | desc |
 
+    # special case: 2.11.x-jdk8 is for the community build only.
+    next if branch == "2.11.x-jdk8" && !desc[:scriptName].end_with?("/community-build")
+
     xml = File.join(Chef::Config[:file_cache_path], "#{desc[:jobName]}.xml")
 
     template xml do
@@ -82,7 +85,7 @@ end
 # TODO: make consistent with scabot.conf.erb by construction
 # (each github user for which we create jobs should have a corresponding top-level section in scabot.conf)
 # create scala-$branch-$jobName for every template under jobs/
-%w{ 2.11.x 2.12.x }.each do | branch |
+%w{ 2.11.x 2.11.x-jdk8 2.12.x }.each do | branch |
   expandJobTemplates("scala", "scala", branch)
 end
 
