@@ -68,6 +68,30 @@ via Chef.  Everything is scripted and the scripts version-controlled
 so the servers can automatically be rebuilt at anytime.  This is all
 described in more detail below.
 
+### Chef
+
+Here's a [Chef 101](https://docs.chef.io/chef_overview.html).
+
+And/or, the basics relevant here are as follows:
+
+* Nodes (on EC2) run chef-client, which pulls config from
+  "cookbooks" puts it into effect.
+* Cookbooks can belong to our organization (typesafe-scala)
+  or be shared (Chef Supermarket).
+* We use a hosted server: http://manage.chef.io/
+* The server holds cookbooks and stores reports uploaded from the nodes.
+* If our organization config needs changes, workstations (i.e. your
+  machine) edit cookbooks and upload them to the server
+* `knife`: tool to interact with nodes or objects on the server
+* `chef`: tool to work with the chef-repo, which holds the cookbooks
+* public-key encryption:
+    * Keypair for each node (private on node, public on server)
+    * Validator keypair for the organization
+    * Private key required for first chef-client connection on a new node
+    * This automatically installs the node’s private key, validator should be removed
+    * Keypair for each user (you!): used by `knife` and `chef` command line tools
+    * Detailed instructions in [client-setup.md](client-setup.md)
+
 ### Pull request validation
 
 Every commit must pass a series of checks before the PR's "build
