@@ -305,6 +305,7 @@ NOTE:
 
   - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
   - can't access the vault on bootstrap (see After bootstrap below)
+  - AWS machines have a persistent root partition.
 
 
 
