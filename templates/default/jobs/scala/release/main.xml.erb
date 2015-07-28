@@ -33,6 +33,8 @@ parallel (
 build(testParams, "#{job("release/smoketest")}")
 
 build(testParams, "#{job("release/website/archives")}")
+
+build(testParams, "#{job("release/website/update-api")}")
 EOX
 ) %>
   <triggers>
