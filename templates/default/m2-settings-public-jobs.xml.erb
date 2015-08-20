@@ -48,6 +48,20 @@
       <url>     <%=node['repos']['caching-proxy']['jcenter']['url']%></url>
       <mirrorOf><%=node['repos']['caching-proxy']['jcenter']['mirrorOf']%></mirrorOf>
     </mirror>
+
+    <!--
+      codehaus doesn't exist anymore. it doesn't 404, but serves up
+      bad POMs, so we disable it globally by overriding with a mirror
+      with an invalid URL.
+      this entry could be removed after the scala-ide/scala-refactoring
+      repo removes their reference to codehaus-snapshots from their pom.xml
+    -->
+    <mirror>
+      <id>codehaus-snapshots-mirror</id>
+      <name>Maven Codehaus snapshot repository</name>
+      <url>file:///codehaus-does-not-exist-anymore</url>
+      <mirrorOf>codehaus-snapshots</mirrorOf>
+    </mirror>
   </mirrors>
 
 </settings>
