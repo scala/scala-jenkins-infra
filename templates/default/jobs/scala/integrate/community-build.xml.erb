@@ -15,4 +15,11 @@
     {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath"}
   ]
 ) %>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>adriaan@typesafe.com seth.tisue@typesafe.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
 </project>
