@@ -36,6 +36,7 @@ def templDesc(user, repo, branch, path)
         :user                => user,
         :repo                => repo, # the main repo (we may refer to other repos under the same user in these jobs)
         :branch              => branch,
+        :scalaBranchForBranch=> branch == "2.11.x-jdk8" ? "2.11.x" : branch,
         :jvmFlavorForBranch  => branch != "2.11.x" ? "openjdk" : "oracle",
         :jvmVersionForBranch => branch != "2.11.x" ? 8         : 6
       }
