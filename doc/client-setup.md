@@ -11,23 +11,17 @@ are in a separate document, [genesis.md](genesis.md).
 
 ## Prerequisites
 
-You'll need to install these tools locally:
+To talk to AWS instances, you'll need to:
 
 ```
 brew install awscli
-brew cask install cord
 ```
 
 [awscli](https://aws.amazon.com/cli/) is the command-line interface
 for AWS, consisting of a single command called `aws`, used throughout
 these instructions.
 
-[CoRD](http://cord.sourceforge.net) "is a Mac OS X remote desktop client for Microsoft Windows computers".
-This is relevant because `jenkins-worker-windows-publish` builds
-Windows release bundles on Windows, so we need virtual Windows
-machines to do that on.
-
-plus for Chef and Knife, additionally install:
+for Chef and Knife, additionally install:
 
 ```
 brew cask install chefdk
@@ -126,3 +120,68 @@ Verify that you can actually ssh to the various machines.
 But note that only master is always up.  You can bring any node up by
 launching the associated worker on Jenkins, which uses the
 https://github.com/typesafehub/ec2-start-stop Jenkins plugin.
+
+## Windows setup
+
+For most infrastructure work, you'll be dealing primarily with our
+Linux instances, but Windows is also part of our infrastructure.  For
+example, we build our Windows release bundles on a virtual Windows box
+(`jenkins-worker-windows-publish`).  It can also be helpful to have
+access to a virtual Windows instance to test Windows-specific changes
+to Scala.
+
+Normally, access to the Windows machines is via ssh, just like the
+Linux ones, but you can also use the graphical desktop if you need to.
+Details follow.
+
+### Remote access (command line)
+
+Instead of using a key of your own to ssh in like on the Linux nodes,
+access is via a shared keypair.  ("Windows sshd is harder to
+configure" than on Linux, comments Adriaan.)
+
+If you want to be able to ssh to a Windows node, you need to get the
+keypair onto your own machine.  (Footnote: You might think to ssh to
+jenkins-master and then to Windows from there, but that won't work
+because jenkins-master doesn't have the key on disk; rather, it's
+passed directly to Jenkins via `node.run_state`.)
+
+The keypair is stored in our Chef vault (as provided by the chef-vault
+cookbook) as `scala-jenkins-keypair`.  To get it into your `~/.ssh`
+directory, do:
+
+    knife vault show --format json master scala-jenkins-keypair \
+      | jq -r .private_key > ~/.ssh/jenkins_id_rsa
+    knife vault show --format json master scala-jenkins-keypair \
+      | jq -r .public_key  > ~/.ssh/jenkins_id_rsa.pub
+
+(If you get "master/scala-jenkins-keypair is not encrypted with your
+public key", that means you must ask one of the existing vault admins
+to do e.g.
+
+    knife vault update master scala-jenkins-keypair \
+      -A adriaan,tisue,lrytz \
+      --search 'name:jenkins-master
+
+with your own Chef name alongside the other scoundrels on the second line.)
+
+Now you can:
+
+    ssh -i ~/.ssh/jenkins_id_rsa jenkins-worker-windows-publish
+
+and get to a Cygwin prompt.
+
+### Remote access (graphical)
+
+If something is so broken you can't get in that way, use
+WinRM (Windows Remote Management) to drop down to graphical access.
+[CoRD](http://cord.sourceforge.net) "is a Mac OS X remote desktop
+client for Microsoft Windows computers" that speaks WinRM.  You can
+install it with [Homebrew Cask](http://caskroom.io):
+
+```
+brew cask install cord
+```
+
+There is some advice on setting up and troubleshooting Windows
+connections in the "Maintenance" section of this documentation.

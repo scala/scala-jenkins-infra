@@ -152,19 +152,25 @@ knife bootstrap -c $PWD/.chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user 
 
 ## WinRM troubles?
 
-Normally access to the Windows machines is via ssh, just like
-the Linux ones.  If something is so broken you can't get
-in that way, use winrm to drop down to graphical access.
+To verify that you have Windows connectivity:
 
-If connections hang, Make sure security group allows access, winrm was enabled using --user-data...
+* make sure `jenkins-worker-windows-publish` is online; you can bring it
+  online by logging into Jenkins and pressing the "Launch slave agent"
+  button at https://scala-ci.typesafe.com/computer/jenkins-worker-windows-publish/
+
+If connections hang, make sure:
+
+* security group allows access
+* WinRM was enabled using `--user-data`
+* ...?
 
 If it appears stuck at "Waiting for remote response before bootstrap.", the userdata didn't make it across
-(check C:\Program Files\Amazon\Ec2ConfigService\Logs) we need to enable unencrypted authentication:
+(check `C:\Program Files\Amazon\Ec2ConfigService\Logs`), so we need to enable unencrypted authentication:
 
 ```
 aws ec2 get-password-data --instance-id $INST --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 
-cord $IP, log in using password above and open a command line:
+cord $IP  # log in using password above, open a command line, and do:
 
   winrm set winrm/config/service @{AllowUnencrypted="true"}
   winrm set winrm/config/service/auth @{Basic="true"}
