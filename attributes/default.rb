@@ -128,4 +128,8 @@ if node.name == "jenkins-master"
   # SCABOT
   default['scabot']['jenkins']['user'] = "scala-jenkins"
   default['scabot']['port'] = scabotPort
+  # work around https://github.com/gildegoma/chef-sbt-extras/issues/33 by overriding the URL we get
+  # the sbt launch script from. latest version as of 9 Sep 2015
+  default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/968cd027dabf894bae63efd2a671aae74390d81f/sbt"
+
 end
