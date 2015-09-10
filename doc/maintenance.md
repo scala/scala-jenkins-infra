@@ -150,6 +150,18 @@ Workaround: make sure EC2 instance names are unique.
 knife bootstrap -c $PWD/.chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user ubuntu --sudo -c $PWD/.chef/knife.rb -N jenkins-worker-ubuntu-publish -r "scala-jenkins-infra::worker-init"
 ```
 
+## Need chara access?
+
+If something in the publishing process that talks to chara.epfl.ch is
+failing, you might want to ssh to chara to troubleshoot.  The Linux
+publisher node has the necessary ssh private key, so you can do first
+ssh to jenkins-worker-ubuntu-publish, then from there do:
+
+     ssh -i /home/jenkins/.ssh/for_chara scalatest@chara.epfl.ch
+
+If you need more access to chara than that, contact Fabien Salvi
+at EPFL.
+
 ## WinRM troubles?
 
 To verify that you have Windows connectivity:
