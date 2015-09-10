@@ -37,12 +37,11 @@ the basement in Lausanne and administered by Antonio Cunei.  We would
 like to retire the old setup eventually, but not everything has been
 migrated to the new infrastructure yet.
 
-The old stuff lives at:
+The web UI for the old Jenkins is at:
 
- * https://jenkins-dbuild.typesafe.com:8499 (dbuild-based community build)
- * https://scala-webapps.epfl.ch/jenkins/ (other jobs)
+ * https://scala-webapps.epfl.ch/jenkins/
 
-And associated GitHub repos include:
+and associated GitHub repos include:
 
  * https://github.com/scala/jenkins-config
  * https://github.com/scala/jenkins-scripts
