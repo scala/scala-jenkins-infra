@@ -62,6 +62,8 @@ The rest of this documentation covers the new infrastructure only.
 
 ## New infrastructure
 
+The web UI for the new Jenkins is at https://scala-ci.typesafe.com.
+
 The new Jenkins infrastructure runs on virtual servers hosted by
 Amazon.  The virtual servers are created and configured automatically
 via Chef.  Everything is scripted and the scripts version-controlled
