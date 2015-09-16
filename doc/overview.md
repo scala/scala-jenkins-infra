@@ -33,9 +33,9 @@ The rest of this document describes Jenkins only.
 ## Old vs. new infrastructure
 
 There is an old Jenkins setup at EPFL, running on physical servers in
-the basement in Lausanne and administered by Antonio Cunei.  We would
-like to retire the old setup eventually, but not everything has been
-migrated to the new infrastructure yet.
+the basement in Lausanne.  We would like to retire the old setup
+eventually, but not everything has been migrated to the new
+infrastructure yet.
 
 The web UI for the old Jenkins is at:
 
@@ -46,12 +46,10 @@ and associated GitHub repos include:
  * https://github.com/scala/jenkins-config
  * https://github.com/scala/jenkins-scripts
 
-If you want an admin login to the old Jenkins, ask Antonio to add
-you to the LDAP user database on http://moxie.typesafe.com
-(another server in the same basement).  It's normally sufficient
-to interact with Jenkins using its web UI; you shouldn't normally
-need actual ssh access to the servers, but that's available
-from Antonio as well if needed.
+The old Jenkins is adminstered by Fabien Salvi.  If you have an
+account on [the Scala JIRA instance](http://issues.scala-lang.org),
+the same credentials can be used to log in to Jenkins.  If you need
+those credentials upgraded to admin-level access, write Fabien.
 
 The old stuff is not documented in detail here, on the assumption that
 its continued existence is temporary.  Adriaan's rough plan for
