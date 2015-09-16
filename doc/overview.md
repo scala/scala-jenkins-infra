@@ -46,7 +46,7 @@ and associated GitHub repos include:
  * https://github.com/scala/jenkins-config
  * https://github.com/scala/jenkins-scripts
 
-The old Jenkins is adminstered by Fabien Salvi.  If you have an
+Accounts on the old Jenkins are administered by Fabien Salvi.  If you have an
 account on [the Scala JIRA instance](http://issues.scala-lang.org),
 the same credentials can be used to log in to Jenkins.  If you need
 those credentials upgraded to admin-level access, write Fabien.
