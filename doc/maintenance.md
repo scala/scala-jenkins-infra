@@ -137,8 +137,27 @@ $ openssl req -text -noout -in scala-ci.csr
 
 ## Worker offline?
 
-If you see "pending -- (worker) is offline", try waiting ~5 minutes;
-it takes time for ec2-start-stop to spin up workers.
+From the [list of nodes](https://scala-ci.typesafe.com/computer/),
+you can click the entry for the node you're interested in and
+from there, use the "Log" action on the left to see if the node
+is in the process of coming online, and if so, watch it happen.
+
+It takes a few minutes for ec2-start-stop to spin up a worker.
+
+You can manually bring a node online by pressing the "Launch slave
+agent" button.
+
+## Worker goes offline during manual testing?
+
+If you ssh in to a worker to poke around, that won't prevent Jenkins
+from taking the worker offline if it is otherwise idle.  This can get
+annoying.
+
+The only we way know of to force the node to stay up is, ironically,
+to use the node's "Mark this node temporarily offline" button.  This
+tells Jenkins not to start any jobs on the node, but it also prevents
+the node from being idled.  Don't forget to press "Bring this node
+back online" when you're done.
 
 ## "ERROR: null" in slave agent launch log
 There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
@@ -189,3 +208,19 @@ cord $IP  # log in using password above, open a command line, and do:
 
 knife bootstrap -V windows winrm $IP
 ```
+
+## Cygwin troubles?
+
+**symptom:** `'\r': command not found`
+
+**solution:**: you're running a shell script that has Windows line endings.
+check the script out from version control with `eol=lf`.  (you could
+also do `export SHELLOPTS; set -o igncr` to tell bash to ignore
+the extra carriage return characters, but it's better to address
+the cause.)
+
+**symptom:** stuff is broken
+
+**solution:** it may be worth consulting the various notes in the
+comments in [issue #36](https://github.com/scala/scala-jenkins-infra/issues/36),
+some of which will probably end up in this doc
