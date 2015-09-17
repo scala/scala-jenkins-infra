@@ -9,19 +9,7 @@ instructions would work on Linux as well, with minor changes.)
 One-time setup instructions for the CI infrastructure _as a whole_
 are in a separate document, [genesis.md](genesis.md).
 
-## Prerequisites
-
-To talk to AWS instances, you'll need to:
-
-```
-brew install awscli
-```
-
-[awscli](https://aws.amazon.com/cli/) is the command-line interface
-for AWS, consisting of a single command called `aws`, used throughout
-these instructions.
-
-for Chef and Knife, additionally install:
+## Install chef and knife clients
 
 ```
 brew cask install chefdk
@@ -120,6 +108,43 @@ Verify that you can actually ssh to the various machines.
 But note that only master is always up.  You can bring any node up by
 launching the associated worker on Jenkins, which uses the
 https://github.com/typesafehub/ec2-start-stop Jenkins plugin.
+
+## AWS setup
+
+For many tasks, it's sufficient to have access to Jenkins and Chef
+and ssh access to the nodes.
+
+To do some kinds of administration, or to remotely control the
+desktop of a Windows node (see "Windows setup" below), you'll
+need an AWS account.
+
+### Install AWS client
+
+To talk to AWS instances, you'll need to:
+
+```
+brew install awscli
+```
+
+[awscli](https://aws.amazon.com/cli/) is the command-line interface
+for AWS, consisting of a single command called `aws`.
+
+Next, you'll need a PGP public key.  If you want, an easy way to get
+one is to use keybase.io to create it.  (Have an existing member (such
+as Adriaan) send you a keybase invite, so you don't have to wait in
+the queue for an account.)
+
+Send Adriaan your public key (e.g. by sending him a URL such as
+https://keybase.io/sethtisue, or by sending him the actual key
+which normally begins: `-----BEGIN PGP PUBLIC KEY BLOCK-----`).
+He will use it to encrypt your credentials.
+
+### Get an AWS account
+
+Ask Adriaan to make an account for you, under the typesafe-scala
+account.  (Another person who can help with this is Ed Callahan.)
+Verify that you are able to
+[log in to the AWS Console](https://typesafe-scala.signin.aws.amazon.com/console).
 
 ## Windows setup
 
