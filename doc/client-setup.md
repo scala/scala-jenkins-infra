@@ -21,12 +21,9 @@ tips/troubleshooting:
 
 * you might choose to `gem install --user-install` instead so only your
   own `~/.gem` directory is affected (and so you don't need `sudo`)
-* on El Capitan, ChefDK 0.7.0 fails to install fully, as per
-  https://github.com/chef/chef-dk/issues/419. by the time you read
-  this, the problem may already be fixed in a newer ChefDK release,
-  in which case please remove this bullet from the doc. the problem
-  is easily worked around by adding `/opt/chefdk/bin` to your
-  `$PATH`.
+* if you're on Mac OS X 10.11, make sure you are using ChefDK 0.8.0
+  or higher, so as not to run afoul of
+  https://github.com/chef/chef-dk/issues/419
 * if `gem install` gives an error message about unsatisfiable
   constraints on the version of the chef-config gem, add `-f`
   to force-ignore the problem `¯\_(ツ)_/¯` and cross your fingers
