@@ -183,6 +183,8 @@ at EPFL.
 
 ## WinRM troubles?
 
+You may wish to consult [Amazon's doc on WinRM+EC2](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/connecting_to_windows_instance.html).
+
 To verify that you have Windows connectivity:
 
 * make sure `jenkins-worker-windows-publish` is online; you can bring it
