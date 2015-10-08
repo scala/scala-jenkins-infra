@@ -80,6 +80,15 @@ bash 'config lsa' do
   notifies :request, 'windows_reboot[7]', :delayed
 end
 
+bash 'git config' do
+  interpreter cygbash
+  # without longpaths enabled we have:
+  # - known problems with `git clean -fdx` failing
+  # - suspected problems with intermittent build failures due to
+  #   very long paths to some classfiles
+  code "git config --global core.longpaths true"
+end
+
 windows_reboot 7 do
   timeout 7
   reason 'Restarting computer in 7 seconds!'
