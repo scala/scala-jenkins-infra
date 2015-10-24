@@ -183,6 +183,8 @@ at EPFL.
 
 ## WinRM troubles?
 
+You may wish to consult [Amazon's doc on WinRM+EC2](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/connecting_to_windows_instance.html).
+
 To verify that you have Windows connectivity:
 
 * make sure `jenkins-worker-windows-publish` is online; you can bring it
@@ -191,7 +193,8 @@ To verify that you have Windows connectivity:
 
 If connections hang, make sure:
 
-* security group allows access
+* security group allows access to your IP
+    * unless you happen to be at an already-whitelisted location (the Typesafe office in SF, perhaps?) you must specifically whitelist your IP address or a range of IP addresses, in the "Windows" security group in the AWS Console, for incoming access to port 3389 (RDP))
 * WinRM was enabled using `--user-data`
 * ...?
 
@@ -208,6 +211,10 @@ cord $IP  # log in using password above, open a command line, and do:
 
 knife bootstrap -V windows winrm $IP
 ```
+
+random CoRD tips:
+
+* right-click is shift-control-click
 
 ## Cygwin troubles?
 

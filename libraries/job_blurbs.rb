@@ -181,8 +181,12 @@ module ScalaJenkinsInfra
 
     def jvmSelect
       <<-EOH.gsub(/^      /, '')
-      source /usr/local/share/jvm/jvm-select
-      jvmSelect $jvmFlavor $jvmVersion
+      if [ -f /usr/local/share/jvm/jvm-select ]; then
+        source /usr/local/share/jvm/jvm-select
+        jvmSelect $jvmFlavor $jvmVersion
+      else
+        echo "WARNING: jvm-select not present. using system default Java"
+      fi
       EOH
     end
 
@@ -256,7 +260,7 @@ module ScalaJenkinsInfra
        </hudson.model.StringParameterDefinition>
       EOH
     end
-           
+
     def scmRefParam(ref)
       <<-EOH.gsub(/^ {8}/, '')
         <hudson.model.StringParameterDefinition>
