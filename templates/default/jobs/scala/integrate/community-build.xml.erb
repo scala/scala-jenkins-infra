@@ -5,7 +5,7 @@
   repoName:            "community-builds",
   repoRef:             @branch,
   description:         "Community Build",
-  nodeRestriction:     "public",
+  nodeRestriction:     "jenkins-worker-behemoth-#{@behemothForBranch}",
   maxConcurrentPerNode: 1,
   buildTimeoutMinutes: 600,
   jvmVersion:          @jvmVersionForBranch,
