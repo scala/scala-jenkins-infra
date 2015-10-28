@@ -15,6 +15,11 @@
     {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath"}
   ]
 ) %>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>@weekly</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.8">
       <recipients>adriaan@typesafe.com seth.tisue@typesafe.com</recipients>
