@@ -22,6 +22,11 @@ default['repos']['caching-proxy']['jcenter']['url']      = "https://#{scalaCiHos
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
+# work around https://github.com/gildegoma/chef-sbt-extras/issues/33 by overriding the URL we get
+# the sbt launch script from. latest version as of 9 Sep 2015
+# sbt is used by Scabot and by the dotty build, and in some glorious future, the scala build too
+default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/968cd027dabf894bae63efd2a671aae74390d81f/sbt"
+
 # attributes only needed on jenkins-master
 if node.name == "jenkins-master"
   # EBS
@@ -128,8 +133,5 @@ if node.name == "jenkins-master"
   # SCABOT
   default['scabot']['jenkins']['user'] = "scala-jenkins"
   default['scabot']['port'] = scabotPort
-  # work around https://github.com/gildegoma/chef-sbt-extras/issues/33 by overriding the URL we get
-  # the sbt launch script from. latest version as of 9 Sep 2015
-  default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/968cd027dabf894bae63efd2a671aae74390d81f/sbt"
 
 end
