@@ -6,7 +6,7 @@
   repoRef:     @branch,
   description: %{ Build Scala and run tests on Windows, using Cygwin.
 
-    <p>EXPERIMENTAL. (Eventually, we intend to run this job on every merge.)
+    <p>EXPERIMENTAL. (Eventually we intend to run this job on every merge. For now, it's nightly.)
    }.gsub(/^    /, ''),
   nodeRestriction: "windows && publish",
   maxConcurrentPerNode: 1,
@@ -15,6 +15,11 @@
   jvmFlavor:  @jvmFlavorForBranch,
   params: [])
 %>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>@midnight</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
       <artifacts>versions.properties,jenkins.properties,logs/**</artifacts>
