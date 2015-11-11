@@ -30,38 +30,11 @@ consistent, within reason, with a possible eventual move to Travis.)
 
 The rest of this document describes Jenkins only.
 
-## Old vs. new infrastructure
+## Infrastructure
 
-There is an old Jenkins setup at EPFL, running on physical servers in
-the basement in Lausanne.  We would like to retire the old setup
-eventually, but not everything has been migrated to the new
-infrastructure yet.
+The web UI for Jenkins is at https://scala-ci.typesafe.com.
 
-The web UI for the old Jenkins is at:
-
- * https://scala-webapps.epfl.ch/jenkins/
-
-and associated GitHub repos include:
-
- * https://github.com/scala/jenkins-config
- * https://github.com/scala/jenkins-scripts
-
-Accounts on the old Jenkins are administered by Fabien Salvi.  If you have an
-account on [the Scala JIRA instance](http://issues.scala-lang.org),
-the same credentials can be used to log in to Jenkins.  If you need
-those credentials upgraded to admin-level access, write Fabien.
-
-The old stuff is not documented in detail here, on the assumption that
-its continued existence is temporary.  Adriaan's rough plan for
-migration is here: https://gist.github.com/adriaanm/407b451ebcd1f3b698e4
-
-The rest of this documentation covers the new infrastructure only.
-
-## New infrastructure
-
-The web UI for the new Jenkins is at https://scala-ci.typesafe.com.
-
-The new Jenkins infrastructure runs on virtual servers hosted by
+The Jenkins infrastructure runs on virtual servers hosted by
 Amazon.  The virtual servers are created and configured automatically
 via Chef.  Everything is scripted and the scripts version-controlled
 so the servers can automatically be rebuilt at anytime.  This is all
@@ -125,9 +98,6 @@ PR validation is orchestrated by Scabot, as documented in the
 on jenkins-master, listens to GitHub and Jenkins, starts
 `validate-main` jobs on Jenkins when appropriate, and updates PRs'
 build statuses.
-
-Scabot does not talk to our old Jenkins infrastructure, only the
-new stuff.
 
 ### Pushed commit validation
 
