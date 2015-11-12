@@ -1,5 +1,6 @@
-Design for scala-ci.typesafe.com: Jenkins on EC2, configured using chef.
+# Design for scala-ci.typesafe.com
 
+Jenkins on EC2, configured using chef
 
 * centered around GitHub & future move to Travis CI
    * no nightly builds (not supported on Travis) -- run integration on every merge
@@ -39,8 +40,8 @@ Design for scala-ci.typesafe.com: Jenkins on EC2, configured using chef.
       * each job in the flow sets the commit status (github now supports multiple reporters per commit)
       * each job in the flow can be restarted on jenkins (and will adjust the commit’s status by the previous bullet)
 
+# TODO
 
-TODO
 * test security setting/authentication
 * mergely builds instead of nightlies
    * every commit should be built only once, published to artifactory
@@ -48,7 +49,8 @@ TODO
    * release job (== nightly) runs for every merge commit
 
 
-Jobs:
+# Jobs
+
 * build core (library/reflect/compiler)
 * run test suite
 * full integration testing
@@ -57,43 +59,43 @@ Jobs:
    * community build
 * scala/scala-dist packaging
 
+# Timing
 
-Timing:
 * every commit must build and pass test suite, on the default part of the matrix
 * other jobs * full matrix: only on merge
 
+# Matrix
 
-Matrix:
 * unix | windows
 * jdk 6|7|8|9
 
 
-Reduce builder load:
+# Reduce builder load
+
 * windows builder only used for merge commits:
    * packaging for release (jdk 6)
    * test suite (jdk 6|8)
 
+# Dimensioning
 
-
-
-Dimensioning:
-* We had about 1.8 merges per day on scala/scala in 2014 (merged 634 of 1100 received PRs), so it seems feasible to move from nightly to “mergely” builds
- 
-
+We had about 1.8 merges per day on scala/scala in 2014 (merged 634 of 1100 received PRs), so it seems feasible to move from nightly to “mergely” builds
 
 Starting cost, monthly cost between $170 - $300:  (us-west-1 == oregon):
-  - master:           $40  for t2.medium  (2 vCPU, 4 GiB RAM, EBS Only)      (24 hr/day * 31 day/month * $0.052/hr)
-  - windows:          $25  for m3.medium  (1 vCPU, 3.75 GiB RAM, 1 x 4 SSD)  ( 6 hr/day * 31 day/month * $0.133/hr) 
-  - ubuntu:          $105  for c3.xlarge  (4 vCPU, 7.5 GiB RAM, 2 x 40 SSD)  (16 hr/day * 31 day/month * $0.210/hr) 
-  - builder-prime: < $130  for c3.xlarge  (4 vCPU, 7.5 GiB RAM, 2 x 40 SSD)  (20 hr/day * 31 day/month * $0.210/hr) 
 
+```text
+master:           $40  for t2.medium  (2 vCPU, 4 GiB RAM, EBS Only)      (24 hr/day * 31 day/month * $0.052/hr)
+windows:          $25  for m3.medium  (1 vCPU, 3.75 GiB RAM, 1 x 4 SSD)  ( 6 hr/day * 31 day/month * $0.133/hr)
+ubuntu:          $105  for c3.xlarge  (4 vCPU, 7.5 GiB RAM, 2 x 40 SSD)  (16 hr/day * 31 day/month * $0.210/hr)
+builder-prime: < $130  for c3.xlarge  (4 vCPU, 7.5 GiB RAM, 2 x 40 SSD)  (20 hr/day * 31 day/month * $0.210/hr)
+```
 
 Once we gain some experience, use reserved instances (prefer amazon linux because the reserved instance type can be changed), tentatively:
-  - master:         $73    for m3.large   (2 vCPU, 7.5 GiB RAM, 1 x 32 SSD)
-  - ubuntu:        $106.58 for c3.xlarge  (4 vCPU, 7.5 GiB RAM, 2 x 40 SSD)
 
+```text
+master:         $73    for m3.large   (2 vCPU, 7.5 GiB RAM, 1 x 32 SSD)
+ubuntu:        $106.58 for c3.xlarge  (4 vCPU, 7.5 GiB RAM, 2 x 40 SSD)
+```
 
+# References
 
-
-References: 
-  - http://soldering-iron.blogspot.com/2014/01/big-jenkins-servers-of-2013.html
+http://soldering-iron.blogspot.com/2014/01/big-jenkins-servers-of-2013.html
