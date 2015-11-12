@@ -194,6 +194,8 @@ The architecture is inspired by https://erichelgeson.github.io/blog/2014/05/10/a
 
 ### More documentation
 
+* [design.md](design.md): further notes on the design of
+  the whole setup
 * [client-setup.md](client-setup.md): how to set up your local
   machine to talk to the existing CI infrastructure
 * [maintenance.md](maintenance.md): how to maintain, troubleshoot,

@@ -1,3 +1,6 @@
+(Adriaan's original notes. some of this material is now covered
+in overview.md. some pieces may be only historical now)
+
 # Design for scala-ci.typesafe.com
 
 Jenkins on EC2, configured using chef
@@ -44,6 +47,7 @@ Jenkins on EC2, configured using chef
 
 * test security setting/authentication
 * mergely builds instead of nightlies
+   * We had about 1.8 merges per day on scala/scala in 2014 (merged 634 of 1100 received PRs), so it seems feasible to move from nightly to “mergely” builds
    * every commit should be built only once, published to artifactory
    * run test suite using published compiler instead of rebuilding it
    * release job (== nightly) runs for every merge commit
@@ -69,16 +73,13 @@ Jenkins on EC2, configured using chef
 * unix | windows
 * jdk 6|7|8|9
 
-
-# Reduce builder load
+## Reduce builder load
 
 * windows builder only used for merge commits:
    * packaging for release (jdk 6)
    * test suite (jdk 6|8)
 
 # Dimensioning
-
-We had about 1.8 merges per day on scala/scala in 2014 (merged 634 of 1100 received PRs), so it seems feasible to move from nightly to “mergely” builds
 
 Starting cost, monthly cost between $170 - $300:  (us-west-1 == oregon):
 
