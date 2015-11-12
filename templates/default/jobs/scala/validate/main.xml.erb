@@ -23,6 +23,12 @@ upstreamBuild = build(params, "#{job("validate/publish-core")}").build
 // defines maven.version.number
 upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
 
+if (upstreamPropsArtifact == null) {
+  out.println('Error: publish-core did not publish "jenkins.properties" artifact, unable to proceed.')
+  build.state.setResult(Result.FAILURE)
+  return
+}
+
 buildVersionProps = new java.util.Properties()
 buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
