@@ -12,7 +12,9 @@
   jvmFlavor:           @jvmFlavorForBranch,
   params: [
     {:name => "scala_ref", :desc => "Ref of scala to build against. To verify PR NNNN on scala/scala, use scala/scala.git\#pull/NNNN/head", :default => "#{@user}/scala.git\##{@scalaBranchForBranch}"},
-    {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath"}
+    {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath, passed to project builds (not scala/scala)"},
+    {:name => "scala_build_bootstrap_opt", :desc => "Set -Dlocker.skip=1 to skip bootstrapping when building scala/scala, or leave empty", :default => "-Dlocker.skip=1"},
+    {:name => "scala_build_extra_opt", :desc => "Option passed to ant when building scala/scala, e.g., -Dscalac.args.optimise=-Yopt:l:classpath"}
   ]
 ) %>
   <triggers>
