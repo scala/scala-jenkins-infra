@@ -13,7 +13,7 @@
 parallel (
    { build(params, "#{job("validate/partest")}")    },
    { build(params, "#{job("validate/junit")}")      },
-   { build(params, "#{job("validate/scalastyle")}") }
+   { build(params, "#{job("validate/partest-bootstrapped")}") }
 )
 
 EOX
