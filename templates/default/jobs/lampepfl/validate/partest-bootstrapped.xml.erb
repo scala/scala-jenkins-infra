@@ -13,4 +13,13 @@
   jvmFlavor:  "openjdk",
   buildNameScript: setValidateBuildNameScript)
 %>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>tests/partest-generated/**</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
 </project>
