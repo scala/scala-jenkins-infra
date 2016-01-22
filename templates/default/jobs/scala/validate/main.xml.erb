@@ -34,7 +34,10 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
 testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number"] ]
 
-build(testParams, "#{job("validate/test")}")
+parallel (
+   { build(testParams, "#{job("validate/test")}") },
+   { retry(2, { build(testParams, "#{job("integrate/ide")}") }) }
+)
 
 EOX
 ) %>
