@@ -7,7 +7,7 @@
   description:         "Community Build",
   nodeRestriction:     "jenkins-worker-behemoth-#{@behemothForBranch}",
   maxConcurrentPerNode: 1,
-  buildTimeoutMinutes: 600,
+  buildTimeoutMinutes: 720,
   jvmVersion:          @jvmVersionForBranch,
   jvmFlavor:           @jvmFlavorForBranch,
   params: [
