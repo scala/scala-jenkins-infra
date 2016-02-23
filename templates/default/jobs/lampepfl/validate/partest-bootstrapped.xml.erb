@@ -6,6 +6,7 @@
   repoRef:     @branch,
   description: "PR validation",
   nodeRestriction: "public",
+  buildTimeoutMinutes: 120,
   params: [
     {:name => "_scabot_pr", :desc => "For internal use by Scabot."}
   ],
