@@ -27,6 +27,8 @@
      :desc => "For binary compatible releases (such as 2.11.0 and 2.11.1), the short binary version (e.g. 2.11). Otherwise, the full Scala version."},
     {:name => "SCALA_FULL_VER",
      :desc => "For non-snapshot releases, the scala version, otherwise the closest scala version that&apos;s a valid binary version. Used to cross-version the scala continuations plugin."},
+    {:name => "STARR_REF",
+     :desc => "Can be set to a git ref of a separate commit that will be used to build STARR, rather than using a prebuilt STARR based on starr.version in versions.properties. Used when bootstraping compiler changes that change the ABI, e.g. changing name mangling."},
     {:name => "XML_VER",
      :desc => "The version to build for scala-xml. If the version already exists, it won&apos;t be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
     {:name => "PARSERS_VER",
