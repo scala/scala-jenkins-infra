@@ -22,10 +22,3 @@ include_recipe "scala-jenkins-infra::_master-init-jenkins"
 
 include_recipe "scala-jenkins-infra::_master-init-artifactory"
 
-# https://github.com/scala/scala-jenkins-infra/issues/26
-if node[:ec2]
-  # workaround from https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1317811/comments/22 (until we can upgrade to kernel with fix -- >3.16.1)
-  execute 'turn off scatter-gatter' do
-    command "ethtool -K eth0 sg off"
-  end
-end
