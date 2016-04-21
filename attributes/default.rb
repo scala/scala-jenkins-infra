@@ -31,6 +31,13 @@ default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp
 default['java']['jdk_version']    = '8'
 default['java']['install_flavor'] = 'openjdk'
 
+# used to have this on workers to default to java 6 -- need to default to java 8 for modern jenkins
+# override['java']['jdk_version']    = '6'
+# override['java']['install_flavor'] = 'oracle' # partest's javap tests fail on openjdk...
+# override['java']['oracle']['accept_oracle_download_terms'] = true
+# # must specify java_home explicitly, or java_ark thinks it's installed even if some other version is...
+# override['java']['java_home'] = platform_family?('debian') ? '/usr/lib/jvm/java-6-oracle-amd64' : '/usr/lib/jvm/java-1.6.0-oracle.x86_64'
+
 # the artifactory recipe does `node.set['java']['jdk_version'] = 7` unless this is false....
 default['artifactory']['install_java'] = false
 

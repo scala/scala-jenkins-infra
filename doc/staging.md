@@ -48,7 +48,7 @@ knife cookbook site install chef-vault
  - 7-zip               ==  1.0.2
  - apt                 ==  2.7.0
  - ark                 ==  0.9.0
- - artifactory         ==  0.1.1
+ - artifactory         ==  0.3.1
  - aws                 ==  2.7.0
  - build-essential     ==  2.2.3
  - chef-client         ==  4.3.0
