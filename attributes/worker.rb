@@ -61,7 +61,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     # and they sometimes need to be shipped, so encode as string, closing over `node`...
     default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
       lambda{| node | Chef::Node::ImmutableMash.new({
-        "PATH"          => "/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_92:/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd", # TODO express in terms of attributes
+        "PATH"          => "/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_92/bin:/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd", # TODO express in terms of attributes
         "sbtLauncher"   => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
         "WIX"           => node['wix']['home'],
         "TMP"           => "#{node['_jenkinsTmp']}",

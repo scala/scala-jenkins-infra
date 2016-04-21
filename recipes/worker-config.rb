@@ -9,7 +9,7 @@
 
 # This can only be run *after* bootstrap due to vault dependency.
 
-include_recipe "scala-jenkins-infra::_config-adminKeys"
+include_recipe "scala-jenkins-infra::_config-adminKeys" unless platform_family?("windows")
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   case node["platform_family"]
