@@ -57,13 +57,13 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       in_demand_delay workerConfig["in_demand_delay"]
       idle_delay      workerConfig["idle_delay"]
 
-      puts "Env for #{worker.name}:"
-      puts "masterEnvLambda: #{masterEnvLambda}"
-      puts "workerEnvLambda: #{workerEnvLambda}"
+      # puts "Env for #{worker.name}:"
+      # puts "masterEnvLambda: #{masterEnvLambda}"
+      # puts "workerEnvLambda: #{workerEnvLambda}"
       masterEnv = (eval masterEnvLambda).call(worker)
-      puts "masterEnv: #{masterEnv}"
+      # puts "masterEnv: #{masterEnv}"
       workerEnv = (eval workerEnvLambda).call(worker)
-      puts "workerEnv: #{workerEnv}"
+      # puts "workerEnv: #{workerEnv}"
 
       environment(masterEnv.merge(workerEnv))
 

@@ -1,12 +1,6 @@
 if (node.name =~ /.*-worker-.*/) != nil
   case node["platform_family"]
   when "windows"
-    # configure windows-specific recipes (attributes not node-specific!)
-    override['java']['windows']['package_name'] = 'Java(TM) SE Development Kit 6 (64-bit)'
-    override['java']['windows']['url']          = 'https://dl.dropboxusercontent.com/u/12862572/jdk-6u45-windows-x64.exe' # if you change this, must change javacVersion below
-    override['java']['windows']['checksum']     = '345059d5bc64275c1d8fdc03625d69c16d0c8730be1c152247f5f96d00b21b00'
-    override['java']['java_home']               = 'C:\java\jdk-1.6' # must specify java_home on windows (issues with installer on reinstall if it's in program files)
-    default['java']['javacVersion']            = "javac 1.6.0_45"  # we don't install if javac -version returns this string
 
     override['sbt']['script_name']   = 'sbt.bat'
     override['sbt']['launcher_path'] = 'C:\sbt'
@@ -67,7 +61,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     # and they sometimes need to be shipped, so encode as string, closing over `node`...
     default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
       lambda{| node | Chef::Node::ImmutableMash.new({
-        "PATH"          => "/bin:/usr/bin:/cygdrive/c/java/jdk-1.6/bin:/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd", # TODO express in terms of attributes
+        "PATH"          => "/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_92:/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd", # TODO express in terms of attributes
         "sbtLauncher"   => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
         "WIX"           => node['wix']['home'],
         "TMP"           => "#{node['_jenkinsTmp']}",
