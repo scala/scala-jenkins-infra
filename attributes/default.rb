@@ -27,6 +27,14 @@ default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 # sbt is used by Scabot and by the dotty build, and in some glorious future, the scala build too
 default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/968cd027dabf894bae63efd2a671aae74390d81f/sbt"
 
+# JAVA
+default['java']['jdk_version']    = '8'
+default['java']['install_flavor'] = 'openjdk'
+
+# the artifactory recipe does `node.set['java']['jdk_version'] = 7` unless this is false....
+default['artifactory']['install_java'] = false
+
+
 # attributes only needed on jenkins-master
 if node.name == "jenkins-master"
   # EBS
@@ -42,10 +50,6 @@ if node.name == "jenkins-master"
   default['ebs']['volumes']['/var/lib/artifactory']['user']      = "artifactory"
   default['ebs']['volumes']['/var/lib/artifactory']['mountopts'] = 'noatime'
 
-  # JAVA
-  default['java']['jdk_version']    = '8'
-  default['java']['install_flavor'] = 'openjdk'
-
   # ARTIFACTORY
   default['artifactory']['zip_url']            = 'https://dl.bintray.com/content/jfrog/artifactory/jfrog-artifactory-oss-4.7.4.zip?direct'
   default['artifactory']['zip_checksum']       = '05ccc6371a6adce0edb7d484a066e3556a660d9359b9bef594aad2128c1784f2'
@@ -58,7 +62,6 @@ if node.name == "jenkins-master"
   default['artifactory']['proxyPort']          = scalaCiPort
   default['artifactory']['address']            = "localhost"
   default['artifactory']['port']               = 8282 # internal use over http
-  default['artifactory']['install_java']       = false
 
   # JENKINS
   override['jenkins']['master']['install_method'] = 'war'
