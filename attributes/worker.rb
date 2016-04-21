@@ -45,6 +45,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
     default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
     default["jenkinsHomes"][jenkinsHome]["jvm_options"] = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp.gsub(/\\/,'/')}" # jenkins doesn't quote properly
+    default["jenkinsHomes"][jenkinsHome]["java_path"] = '"/cygdrive/c/Program Files/Java/jdk1.8.0_92/bin/java"'
     default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
     default["jenkinsHomes"][jenkinsHome]["publish"]     = publisher
 

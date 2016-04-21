@@ -46,6 +46,8 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       remote_fs   jenkinsHome.dup
       jvm_options workerConfig["jvm_options"]
 
+      java_path   workerConfig["java_path"] # only used on windows
+
       labels      workerConfig["labels"]
       executors   workerConfig["executors"]
 
