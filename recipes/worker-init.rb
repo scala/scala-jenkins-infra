@@ -10,9 +10,9 @@ include_recipe "scala-jenkins-infra::_config-ebs"
 
 include_recipe 'scala-jenkins-infra::_init-chef-client'
 
-include_recipe "git"
+include_recipe "git" unless platform_family?("windows")
 
-include_recipe "chef-sbt" # TODO: remove, redundant with sbt-extras, but the latter won't work on windows
+include_recipe "chef-sbt" unless platform_family?("windows")
 include_recipe "sbt-extras" unless platform_family?("windows")
 
 include_recipe "scala-jenkins-infra::_worker-init-#{node["platform_family"]}"

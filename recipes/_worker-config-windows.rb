@@ -37,10 +37,11 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   end
 end
 
-windows_package 'WIX' do
-  source node['wix']['url']
-  action :install
-end
+# TODO upgrade to https://wix.codeplex.com/releases/view/619491
+# windows_package 'WIX' do
+#   source node['wix']['url']
+#   action :install
+# end
 
 
 include_recipe 'scala-jenkins-infra::_worker-config-windows-cygwin'

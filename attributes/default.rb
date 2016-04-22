@@ -27,6 +27,16 @@ default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 # sbt is used by Scabot and by the dotty build, and in some glorious future, the scala build too
 default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/968cd027dabf894bae63efd2a671aae74390d81f/sbt"
 
+# JAVA
+# TODO does this actually do anything???
+# it seemed I had to do a `node.set['java']['jdk_version'] = 8` on jenkins-master to actually get this to work
+default['java']['jdk_version']    = '8'
+default['java']['install_flavor'] = 'openjdk'
+
+# the artifactory recipe does `node.set['java']['jdk_version'] = 7` unless this is false....
+default['artifactory']['install_java'] = false
+
+
 # attributes only needed on jenkins-master
 if node.name == "jenkins-master"
   # EBS
@@ -42,13 +52,9 @@ if node.name == "jenkins-master"
   default['ebs']['volumes']['/var/lib/artifactory']['user']      = "artifactory"
   default['ebs']['volumes']['/var/lib/artifactory']['mountopts'] = 'noatime'
 
-  # JAVA
-  default['java']['jdk_version']    = '7'
-  default['java']['install_flavor'] = 'openjdk'
-
   # ARTIFACTORY
-  default['artifactory']['zip_url']            = 'http://dl.bintray.com/content/jfrog/artifactory/artifactory-3.6.0.zip?direct'
-  default['artifactory']['zip_checksum']       = '72c375ab659d302da0b196349e152f3d799c3cada2f4d09f9399281a06d880e8'
+  default['artifactory']['zip_url']            = 'https://dl.bintray.com/content/jfrog/artifactory/jfrog-artifactory-oss-4.7.4.zip?direct'
+  default['artifactory']['zip_checksum']       = '05ccc6371a6adce0edb7d484a066e3556a660d9359b9bef594aad2128c1784f2'
   default['artifactory']['home']               = '/var/lib/artifactory'
   default['artifactory']['log_dir']            = '/var/lib/artifactory/logs'
   default['artifactory']['java']['xmx']        = '2g'
@@ -58,7 +64,6 @@ if node.name == "jenkins-master"
   default['artifactory']['proxyPort']          = scalaCiPort
   default['artifactory']['address']            = "localhost"
   default['artifactory']['port']               = 8282 # internal use over http
-  default['artifactory']['install_java']       = false
 
   # JENKINS
   override['jenkins']['master']['install_method'] = 'war'
@@ -89,11 +94,9 @@ if node.name == "jenkins-master"
   override['jenkins']['master']['jvm_options']    = '-server -Xmx4G -XX:MaxPermSize=512M -XX:+HeapDumpOnOutOfMemoryError -Dhudson.model.User.allowNonExistentUserToLogin=true -Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000' #
   # -Dfile.encoding=UTF-8
 
-  # PIN to 1.611 because later ones require Java 7 on workers...
-  # To pin the jenkins version, must also override override['jenkins']['master']['source'] !!!
-  override['jenkins']['master']['version']  = '1.611'
+  override['jenkins']['master']['version']  = '1.658'
   override['jenkins']['master']['source']   = "#{node['jenkins']['master']['mirror']}/war/#{node['jenkins']['master']['version']}/jenkins.war"
-  override['jenkins']['master']['checksum'] = '12157975cd8c5bf54bbafdc16d826fd384d7eea5e3816c2c28f82002ad866e42'
+  override['jenkins']['master']['checksum'] = '108a496a01361e598cacbcdc8fcf4070e4dab215fb76f759dd75384af7104a3c'
 
   ## GITHUB OAUTH
   default['master']['github']['webUri']                               = 'https://github.com/'

@@ -16,6 +16,7 @@ They may be out of date.  Adriaan has done this; Seth has not.
 I think you can safely ignore `ERROR: IOError: Cannot open or read **/metadata.rb!` in the below
 
 ```
+knife cookbook site install java
 knife cookbook site install cron
 knife cookbook site install logrotate
 knife cookbook site install chef_handler
@@ -47,7 +48,6 @@ knife cookbook site install chef-vault
  - 7-zip               ==  1.0.2
  - apt                 ==  2.7.0
  - ark                 ==  0.9.0
- - artifactory         ==  0.1.1
  - aws                 ==  2.7.0
  - build-essential     ==  2.2.3
  - chef-client         ==  4.3.0
@@ -58,6 +58,7 @@ knife cookbook site install chef-vault
  - ebs                 ==  0.3.6
  - git                 ==  4.2.2
  - git_user            ==  0.3.1
+ - java                ==  1.39.0
  - logrotate           ==  1.9.1
  - packagecloud        ==  0.0.17
  - partial_search      ==  1.0.8
@@ -74,7 +75,6 @@ knife cookbook site install chef-vault
 
 ```
 knife cookbook github install adriaanm/jenkins/fix305  # custom fixes + https://github.com/opscode-cookbooks/jenkins/pull/313 (b-dean/jenkins/http_ca_fixes)
-knife cookbook github install adriaanm/java/windows-jdk1.6  # jdk 1.6 installer barfs on re-install -- wipe its INSTALLDIR
 knife cookbook github install adriaanm/chef-sbt
 knife cookbook github install gildegoma/chef-sbt-extras
 knife cookbook github install adriaanm/artifactory
