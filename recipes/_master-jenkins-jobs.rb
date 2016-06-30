@@ -30,16 +30,16 @@ def templDesc(user, repo, branch, path)
   else
     relativePath = m.captures.first
 
-    [ { :templatePath        => "jobs/#{user}/#{relativePath}.xml.erb",
-        :scriptName          => "jobs/#{relativePath}",
-        :jobName             => blurbs.versionedJob(repo, branch, relativePath),
-        :user                => user,
-        :repo                => repo, # the main repo (we may refer to other repos under the same user in these jobs)
-        :branch              => branch,
-        :scalaBranchForBranch=> branch == "2.11.x-jdk8" ? "2.11.x" : branch,
-        :jvmFlavorForBranch  => branch != "2.11.x" ? "openjdk" : "oracle",
-        :jvmVersionForBranch => branch != "2.11.x" ? 8         : 6,
-        :behemothForBranch   => branch == "2.12.x" ? 2         : 1   # for community builds
+    [ { :templatePath          => "jobs/#{user}/#{relativePath}.xml.erb",
+        :scriptName            => "jobs/#{relativePath}",
+        :jobName               => blurbs.versionedJob(repo, branch, relativePath),
+        :user                  => user,
+        :repo                  => repo, # the main repo (we may refer to other repos under the same user in these jobs)
+        :branch                => branch,
+        :jvmFlavorForBranch    => branch != "2.11.x" ? "openjdk" : "oracle",
+        :jvmVersionForBranch   => branch != "2.11.x" ? 8         : 6,
+        :scalaBranchForBranch  => branch == "2.11.x-jdk8" ? "2.11.x" : branch,  # only used for community-builds
+        :behemothForBranch     => branch == "2.12.x" ? 2         : 1            # only used for community-builds
       }
     ]
   end
