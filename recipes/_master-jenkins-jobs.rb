@@ -87,7 +87,7 @@ end
 # TODO: make consistent with scabot.conf.erb by construction
 # (each github user for which we create jobs should have a corresponding top-level section in scabot.conf)
 # create scala-$branch-$jobName for every template under jobs/
-%w{ 2.11.x 2.11.x-jdk8 2.12.x }.each do | branch |
+%w{ 2.11.x 2.11.x-jdk8 2.12.x 2.12.0 }.each do | branch |
   expandJobTemplates("scala", "scala", branch)
 end
 
