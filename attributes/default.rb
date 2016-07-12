@@ -101,7 +101,7 @@ if node.name == "jenkins-master"
   ## GITHUB OAUTH
   default['master']['github']['webUri']                               = 'https://github.com/'
   default['master']['github']['apiUri']                               = 'https://api.github.com'
-  default['master']['github']['adminUserNames']                       = 'adriaanm, retronym, lrytz, SethTisue, smarter, DarkDimius, chef, scala-jenkins'
+  default['master']['github']['adminUserNames']                       = 'adriaanm, retronym, lrytz, SethTisue, smarter, DarkDimius, chef, scala-jenkins, szeiger'
   default['master']['github']['organizationNames']                    = 'scala'
   default['master']['github']['useRepositoryPermissions']             = 'true'
   default['master']['github']['allowAnonymousReadPermission']         = 'true'
