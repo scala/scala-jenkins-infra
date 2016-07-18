@@ -10,6 +10,7 @@ scala: {
     repo:  "scala"
     branches: ["2.11.x", "2.12.x", "2.12.0"]
     lastCommitOnly: false
+    checkCLA: true
     host:  "api.github.com"
     token: "<%=@scabotVault['github']['scala']['token']%>"
   }
@@ -27,6 +28,7 @@ dotty: {
     repo:  "dotty"
     branches: ["master"]
     lastCommitOnly: true
+    checkCLA: true
     host:  "api.github.com"
     token: "<%=@scabotVault['github']['lampepfl']['token']%>"
   }
