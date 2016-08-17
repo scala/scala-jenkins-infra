@@ -142,6 +142,11 @@ module ScalaJenkinsInfra
           <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
             <colorMapName>xterm</colorMapName>
           </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+          <hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper plugin="logfilesizechecker@1.2">
+            <setOwn>false</setOwn>
+            <maxLogSize>0</maxLogSize>
+            <failBuild>true</failBuild>
+          </hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper>
         </buildWrappers>
       EOX
     end
