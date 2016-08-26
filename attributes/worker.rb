@@ -92,7 +92,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"]["/home/jenkins"]["in_demand_delay"] = 0  # launch worker immediately
     default["jenkinsHomes"]["/home/jenkins"]["idle_delay"]      = 20 # take worker off-line after 20 min of idling (we're charged by the hour, so no rush)
 
-    default["jenkinsHomes"]["/home/jenkins"]["executors"]  = lightWorker ? 2 : 4
+    default["jenkinsHomes"]["/home/jenkins"]["executors"]  = lightWorker ? 2 : 3
     default["jenkinsHomes"]["/home/jenkins"]["usage_mode"] = publisher ? "exclusive" : "normal"
     default["jenkinsHomes"]["/home/jenkins"]["labels"]     = ["linux", publisher ? "publish": "public"]
 
