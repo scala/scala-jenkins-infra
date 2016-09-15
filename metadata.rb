@@ -33,3 +33,6 @@ depends 'chef-sbt'
 depends 'sbt-extras'
 
 depends 'runit', '~> 1.5'
+
+depends 'nodejs'
+
