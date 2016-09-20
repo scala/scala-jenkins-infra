@@ -41,6 +41,8 @@ knife cookbook site install partial_search
 knife cookbook site install ssh_known_hosts
 knife cookbook site install git_user
 knife cookbook site install chef-vault
+knife cookbook site install homebrew
+knife cookbook site install nodejs
 ```
 
 ### Current cookbooks
@@ -58,8 +60,10 @@ knife cookbook site install chef-vault
  - ebs                 ==  0.3.6
  - git                 ==  4.2.2
  - git_user            ==  0.3.1
+ - homebrew            ==  2.1.2
  - java                ==  1.39.0
  - logrotate           ==  1.9.1
+ - nodejs              ==  2.4.4
  - packagecloud        ==  0.0.17
  - partial_search      ==  1.0.8
  - runit               ==  1.6.0
