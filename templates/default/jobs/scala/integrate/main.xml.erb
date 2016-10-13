@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
+<%= flowProject(
+    repoUser:    @user,
+    repoRef:     @branch,
+    description: "Flow that bootstraps and runs a community build",
+    params: [
+      {:name => "scalac_opts",          :desc => "[For community-build] Scala compiler arguments, e.g., -Yopt:l:classpath, passed to project builds."},
+      {:name => "sbtBuildTask",         :desc => "[For bootstrap] Empty to skip testing. Useful when publishing a nightly to run the community build against.", :default => "testAll"},
+      {:name => "publishToSonatype",    :desc => "[For bootstrap] Set to anything but &quot;yes&quot; to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published."},
+      {:name => "testStability",        :desc => "[For bootstrap] Set to anything but &quot;yes&quot; to avoid running the stability test", :default => "yes"},
+      {:name => "moduleVersioning",     :desc => "[For bootstrap] Set to anything but &quot;versions.properties&quot; to build the latest HEAD for all modules."},
+      {:name => "SCALA_VER_BASE",       :desc => "[For bootstrap] Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version), a -nightly release is built."},
+      {:name => "SCALA_VER_SUFFIX",     :desc => "[For bootstrap] Empty for a final release, otherwise, e.g., -RC1 for the first RC or -M3 for the third milestone. (Will be parsed from the tag on SCALA_REF, if any.)"},
+      {:name => "SCALA_BINARY_VER",     :desc => "[For bootstrap] For binary compatible releases (such as 2.11.0 and 2.11.1), the short binary version (e.g. 2.11). Otherwise, the full Scala version."},
+      {:name => "SCALA_FULL_VER",       :desc => "[For bootstrap] For non-snapshot releases, the scala version, otherwise the closest scala version that&apos;s a valid binary version. Used to cross-version the scala continuations plugin."},
+      {:name => "STARR_REF",            :desc => "[For bootstrap] Can be set to a git ref of a separate commit that will be used to build STARR, rather than using a prebuilt STARR based on starr.version in versions.properties. Used when bootstraping compiler changes that change the ABI, e.g. changing name mangling."},
+      {:name => "XML_VER",              :desc => "[For bootstrap] The version to build for scala-xml. If the version already exists, it won&apos;t be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "PARSERS_VER",          :desc => "[For bootstrap] The version to build for scala-parser-combinators. If the version already exists, it won&apos;t be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "CONTINUATIONS_VER",    :desc => "[For bootstrap] The version to build for scala-continuations-plugin and -library. The plugin will be cross-versioned with SCALA_FULL_VER. If the version already exists, it won&apos;t be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "SWING_VER",            :desc => "[For bootstrap] The version to build for scala-swing. If the version already exists, it won&apos;t be published.
+      If empty, it will be parsed from versions.pr[For bootstrap] operties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "ACTORS_MIGRATION_VER", :desc => "[For bootstrap] The version to build for scala-partest. If the version already exists, it won&apos;t be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "PARTEST_VER",          :desc => "[For bootstrap] The version to build for scala-partest. If the version already exists, it won&apos;t be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "SCALACHECK_VER",       :desc => "[For bootstrap] The version to build for scalacheck. Not published. If empty, it will be parsed from versions.properties (unless moduleVersioning != &quot;versions.properties&quot;)."},
+      {:name => "AKKA_ACTOR_VER",       :desc => "[For bootstrap] The version of akka-actors to include in scala-library-all.pom. NOTE: the release script will NOT build akka, the version specified here needs to be released already. If empty, it will be parsed from versions.properties."},
+      {:name => "JLINE_VER",            :desc => "[For bootstrap] The version of jline to use for building the Scala project.NOTE: the release script will NOT build jline, the version specified here needs to be released already.If empty, it will be parsed from versions.properties."}
+    ],
+    buildNameScript: setReleaseBuildNameScript,
+    dsl: <<-EOX
+if (params.repo_ref) buildParams = params
+else buildParams = params + [ "repo_ref" : "v$ver" ]
+
+buildRun = build(buildParams, "#{job("integrate/bootstrap")}")
+
+upstreamBuild = buildRun.build
+// defines repo_ref, version, sbtDistVersionOverride
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
+
+if (upstreamPropsArtifact == null) {
+  out.println('Error: bootstrap did not publish "jenkins.properties" artifact, unable to proceed.')
+  build.state.setResult(Result.FAILURE)
+  return
+}
+
+buildVersionProps = new java.util.Properties()
+buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
+
+testParams = buildParams + buildVersionProps
+
+parallel (
+    { build(testParams, "#{job("integrate/community-build")}") },
+)
+
+EOX
+) %>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>adriaan@typesafe.com seth.tisue@typesafe.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildNeedsWorkspace>true</buildNeedsWorkspace>
+</com.cloudbees.plugins.flow.BuildFlow>

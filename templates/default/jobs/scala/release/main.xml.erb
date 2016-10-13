@@ -21,7 +21,7 @@ upstreamBuild = buildRun.build
 upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
 
 if (upstreamPropsArtifact == null) {
-  out.println('Error: publish-core did not publish "jenkins.properties" artifact, unable to proceed.')
+  out.println('Error: bootstrap did not publish "jenkins.properties" artifact, unable to proceed.')
   build.state.setResult(Result.FAILURE)
   return
 }
@@ -32,6 +32,7 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 testParams = buildParams + buildVersionProps
 
 parallel (
+    { retry(2, { build(testParams, "#{job("integrate/community-build")}") }) },
     { build(testParams, "#{job("release/package/unix")}") },
     { build(testParams, "#{job("release/package/windows")}") }
 )
