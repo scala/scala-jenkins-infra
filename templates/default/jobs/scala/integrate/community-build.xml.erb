@@ -11,20 +11,14 @@
   jvmVersion:          @jvmVersionForBranch,
   jvmFlavor:           @jvmFlavorForBranch,
   params: [
-    {:name => "scala_ref", :desc => "Ref of scala to build against. To verify PR NNNN on scala/scala, use scala/scala.git\#pull/NNNN/head", :default => "#{@user}/scala.git\##{@scalaBranchForBranch}"},
-    {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath, passed to project builds (not scala/scala)"},
-    {:name => "scala_build_bootstrap_opt", :desc => "Set -Dlocker.skip=1 to skip bootstrapping when building scala/scala, or leave empty", :default => "-Dlocker.skip=1"},
-    {:name => "scala_build_extra_opt", :desc => "Option passed to ant when building scala/scala, e.g., -Dscalac.args.optimise=-Yopt:l:classpath"}
+    {:name => "version", :desc => "Published Scala version to build the community projects with. This should be a complete build, including modules, and library sources."},
+    {:name => "projects", :desc => "List of projects to build."},
+    {:name => "scalac_opts", :desc => "Scala compiler arguments, e.g., -Yopt:l:classpath, passed to project builds."}
   ]
 ) %>
-  <triggers>
-    <hudson.triggers.TimerTrigger>
-      <spec>@weekly</spec>
-    </hudson.triggers.TimerTrigger>
-  </triggers>
   <publishers>
     <hudson.tasks.Mailer plugin="mailer@1.8">
-      <recipients>adriaan@typesafe.com seth.tisue@typesafe.com</recipients>
+      <recipients>adriaan@lightbend.com seth.tisue@lightbend.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>

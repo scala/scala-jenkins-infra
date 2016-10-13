@@ -48,8 +48,14 @@
      :desc => "The version of akka-actors to include in scala-library-all.pom. NOTE: the release script will NOT build akka, the version specified here needs to be released already. If empty, it will be parsed from versions.properties."},
     {:name => "JLINE_VER",
      :desc => "The version of jline to use for building the Scala project.NOTE: the release script will NOT build jline, the version specified here needs to be released already.If empty, it will be parsed from versions.properties."},
+    {:name    => "sbtBuildTask",
+     :desc    => "Leave empty to skip testing. Useful when publishing a nightly to run the community build against.",
+     :default => "testAll"},
     {:name => "moduleVersioning",
-     :desc => "Set to anything but &quot;versions.properties&quot; to build the latest HEAD for all modules."},
+      :desc => "Set to anything but &quot;versions.properties&quot; to build the latest HEAD for all modules."},
+    {:name     => "testStability",
+      :desc    => "Set to anything but &quot;yes&quot; to avoid running the stability test",
+      :default => "yes"},
     {:name => "publishToSonatype",
      :desc => "Set to anything but &quot;yes&quot; to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published."}
   ])
