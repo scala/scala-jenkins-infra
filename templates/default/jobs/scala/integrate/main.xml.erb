@@ -6,6 +6,7 @@
     description: "Flow that bootstraps and runs a community build",
     params: [
       {:name => "scalac_opts",          :desc => "[For community-build] Scala compiler arguments, e.g., -Yopt:l:classpath, passed to project builds."},
+      {:name => "projects",             :desc => "[For community-build] List of projects to build."},
       {:name => "sbtBuildTask",         :desc => "[For bootstrap] To skip testing, set to e.g. `update`. Useful when publishing a nightly to run the community build against.", :default => "testAll"},
       {:name => "publishToSonatype",    :desc => "[For bootstrap] Set to anything but &quot;yes&quot; to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published."},
       {:name => "testStability",        :desc => "[For bootstrap] To avoid running the stability test, set to e.g., `no`", :default => "yes"},
