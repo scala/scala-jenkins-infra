@@ -44,7 +44,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   git_user workerConfig["jenkinsUser"] do
     home        jenkinsHome
     full_name   'Scala Jenkins'
-    email       'adriaan@typesafe.com'
+    email       'adriaan@lightbend.com'
   end
 end
 

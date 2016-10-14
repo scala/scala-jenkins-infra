@@ -6,7 +6,7 @@
   repoRef:     @branch,
   description: "<H1>Run as part of the #{job("release/main")} flow.</H1>" +
    %{<p>It downloads the archives for a Scala release
-       from http://downloads.typesafe.com/scala/$version/index.html and
+       from http://downloads.lightbend.com/scala/$version/index.html and
        re-organizes them into the right hierarchy for scala-lang.org/files/archive.</p>
     <p>Also expands api docs for library, reflect, compiler and other modules
        to http://www.scala-lang.org/api/2.11.x/$module (it expands under api/$version).</p>
@@ -17,7 +17,7 @@
   nodeRestriction: "linux && publish",
   concurrent: false,
   params: [
-    {:name => "version", :desc => "The version of scala that we should download the archives for (from http://downloads.typesafe.com/scala/$version/index.html); e.g., 2.10.3-RC2"}
+    {:name => "version", :desc => "The version of scala that we should download the archives for (from http://downloads.lightbend.com/scala/$version/index.html); e.g., 2.10.3-RC2"}
   ])
 %>
 </project>
