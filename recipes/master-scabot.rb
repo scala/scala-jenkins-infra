@@ -49,7 +49,7 @@ git_user scabotUser do
   home      scabotHome
   # owner     scabotUser
   full_name 'Scabot'
-  email     'adriaan@typesafe.com'
+  email     'adriaan@lightbend.com'
 end
 
 # scabotCheckout must be an empty dir

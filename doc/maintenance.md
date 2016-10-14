@@ -194,7 +194,7 @@ To verify that you have Windows connectivity:
 If connections hang, make sure:
 
 * security group allows access to your IP
-    * unless you happen to be at an already-whitelisted location (the Typesafe office in SF, perhaps?) you must specifically whitelist your IP address or a range of IP addresses, in the "Windows" security group in the AWS Console, for incoming access to port 3389 (RDP))
+    * unless you happen to be at an already-whitelisted location (the Lightbend office in SF, perhaps?) you must specifically whitelist your IP address or a range of IP addresses, in the "Windows" security group in the AWS Console, for incoming access to port 3389 (RDP))
 * WinRM was enabled using `--user-data`
 * ...?
 

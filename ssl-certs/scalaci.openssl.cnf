@@ -20,7 +20,7 @@ commonName  = Common Name (eg, your name or your server\'s hostname)
 commonName_default = scala-ci.typesafe.com
 commonName_max	= 64
 
-emailAddress = ssl-admin@typesafe.com
+emailAddress = ssl-admin@lightbend.com
 
 [ v3_req ]
 # Extensions to add to a certificate request

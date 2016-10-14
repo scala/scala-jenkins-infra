@@ -111,7 +111,7 @@ if node.name == "jenkins-master"
   default['master']['github']['authenticatedUserCreateJobPermission'] = 'false'
 
   ## CONTACT INFO
-  default['master']['adminAddress']         = "adriaan@typesafe.com"
+  default['master']['adminAddress']         = "adriaan@lightbend.com"
   default['master']['jenkinsHost']          = scalaCiHost
   default['master']['jenkinsUrl']           = "https://#{scalaCiHost}/"
   default['master']['jenkins']['notifyUrl'] = "http://#{scalaCiHost}:#{scabotPort}/jenkins" # scabot listens here
