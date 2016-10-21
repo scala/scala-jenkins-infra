@@ -22,10 +22,8 @@ default['repos']['caching-proxy']['jcenter']['url']      = "https://#{scalaCiHos
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
-# work around https://github.com/gildegoma/chef-sbt-extras/issues/33 by overriding the URL we get
-# the sbt launch script from. latest version as of 9 Sep 2015
-# sbt is used by Scabot and by the dotty build, and in some glorious future, the scala build too
-default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/968cd027dabf894bae63efd2a671aae74390d81f/sbt"
+# bumped to sbt-extras as of Oct 21 2016 (0.13.13-RC3)
+default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/ab365a8354a493fa90deabfd7884da0bed976c8b/sbt"
 
 # JAVA
 # TODO does this actually do anything???

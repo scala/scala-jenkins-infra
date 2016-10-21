@@ -1,10 +1,9 @@
+default['sbt']['version'] = "0.13.12"
+
 if (node.name =~ /.*-worker-.*/) != nil
   case node["platform_family"]
   when "windows"
-
-    override['sbt']['script_name']   = 'sbt.bat'
-    override['sbt']['launcher_path'] = 'C:\sbt'
-    override['sbt']['bin_path']      = 'C:\sbt'
+    override['sbt']['launcher_path'] = 'C:\sbt\sbt-launch.jar'
 
     # this zip was reworked to have the binaries under the `bin/` directory, which is what sbt-nativepackager expects
     override['wix']['home']     = 'C:\Program Files (x86)\WiX Toolset v3.9'
@@ -63,7 +62,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
       lambda{| node | Chef::Node::ImmutableMash.new({
         "PATH"          => "/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_92/bin:/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd", # TODO express in terms of attributes
-        "sbtLauncher"   => "#{node['sbt']['launcher_path']}\\sbt-launch.jar", # from chef-sbt cookbook
+        "sbtLauncher"   => node['sbt']['launcher_path'],
         "WIX"           => node['wix']['home'],
         "TMP"           => "#{node['_jenkinsTmp']}",
         "_JAVA_OPTIONS" => "-Duser.home=#{node['_jenkinsHome']}", # no other way to do this... sbt boot will fail pretty weirdly if it can't write to $HOME/.sbt and $TMP/...
@@ -75,6 +74,8 @@ if (node.name =~ /.*-worker-.*/) != nil
     # If node name contains "-publish", configure it with necessary secrets/package to roll & publish a release
     publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
     lightWorker = publisher  # TODO: better heuristic...
+
+    override['sbt']['launcher_path'] = '/usr/local/lib/share/sbt-launch.jar'
 
     default['graphviz']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/graphviz_2.28.0-1_amd64.deb'
     default['graphviz']['checksum'] = '76236edc36d5906b93f35e83f8f19a2045318852d3f826e920f189431967c081'
@@ -103,7 +104,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"]["/home/jenkins"]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
       lambda{| node | Chef::Node::ImmutableMash.new({
         "sshCharaArgs" => '("scalatest@chara.epfl.ch" "-i" "/home/jenkins/.ssh/for_chara")',
-        "sbtLauncher"  => File.join(node['sbt']['launcher_path'], "sbt-launch.jar"), # from chef-sbt cookbook
+        "sbtLauncher"  => node['sbt']['launcher_path'],
         "sbtCmd"       => File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
       })}
       EOH

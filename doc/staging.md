@@ -79,7 +79,6 @@ knife cookbook site install nodejs
 
 ```
 knife cookbook github install adriaanm/jenkins/fix305  # custom fixes + https://github.com/opscode-cookbooks/jenkins/pull/313 (b-dean/jenkins/http_ca_fixes)
-knife cookbook github install adriaanm/chef-sbt
 knife cookbook github install gildegoma/chef-sbt-extras
 knife cookbook github install adriaanm/artifactory
 ```
