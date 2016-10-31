@@ -16,9 +16,10 @@ processes are running, that kind of thing.
 
 ## Monitoring disk space
 
-A member of the Scala team should check the free disk space numbers
-on all nodes about every 3 to 4 days.  We should always have at
-least 10G free on all nodes.
+We should always have at least 10G or so free on all nodes.  A member
+of the Scala team should check the free disk space numbers on all
+nodes about every 3 to 4 days.  (Better yet, automate it.  And if
+there is a chronic space problem, address the cause.)
 
 A quick way to keep an eye on disk space is by visiting
 https://scala-ci.typesafe.com/computer/.  You'll need to launch
