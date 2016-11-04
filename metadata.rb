@@ -28,8 +28,6 @@ depends 'artifactory'
 depends 'git'
 depends 'git_user'
 
-# TODO remove chef-sbt dependency, but not sure sbt-extras supports windows
-depends 'chef-sbt'
 depends 'sbt-extras'
 
 depends 'runit', '~> 1.5'
