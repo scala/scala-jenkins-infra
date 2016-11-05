@@ -51,6 +51,10 @@ if node[:ec2]
         end
       end
 
+      # workaround for when user doesn't exist during bootstrap
+#      user ebsConfig['user'] do
+#      end
+
       directory mountPoint do
         owner ebsConfig['user']
         mode 0755
