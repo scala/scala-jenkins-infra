@@ -430,3 +430,7 @@ Add a webhook via https://github.com/scala/scala/settings/hooks/new:
 - they are tricky to access, might disappear,...
 - checksum is computed with `shasum -a 256`
 - TODO: host them on an s3 bucket (credentials are available automatically)
+
+# Recreating Jenkins master
+
+see [recreate-jenkins-master.md](recreate-jenkins-master.md)

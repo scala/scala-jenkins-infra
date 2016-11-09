@@ -204,3 +204,4 @@ The architecture is inspired by https://erichelgeson.github.io/blog/2014/05/10/a
   locally
 * [genesis.md](genesis.md): how the infrastructure was initially
   created, and how to re-create it if needed
+     * [recreate-jenkins-master.md](recreate-jenkins-master.md)
