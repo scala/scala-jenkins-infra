@@ -4,7 +4,7 @@ scabotPort  = 8888
 
 # JENKINS WORKER CONFIG
 # see below (note that default['master']['env'] can only indirect through node -- workerJavaOpts is not in scope)
-workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4"
+workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Djava.io.tmpdir=/home/jenkins/tmp"
 
 default['jenkinsEnv']['JAVA_OPTS']  = workerJavaOpts
 default['jenkinsEnv']['ANT_OPTS']   = workerJavaOpts
