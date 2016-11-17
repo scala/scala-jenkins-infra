@@ -43,31 +43,56 @@ if node[:ec2]
     else
       device = node[:platform_family] == 'debian' ? ebsConfig['dev'].gsub(%r{^/dev/sd}, '/dev/xvd') : ebsConfig['dev']
 
-      execute 'mkfs' do
-        command "mkfs -t #{ebsConfig['fstype']} #{device}"
-        not_if do
-          BlockDevice.wait_for(device)
-          system("blkid -s TYPE -o value #{device}")
+      case ebsConfig['fstype']
+      when "swap"
+        execute 'mkswap' do
+          command "mkswap #{device}"
+          not_if do
+            BlockDevice.wait_for(device)
+            system("blkid -s TYPE -o value #{device}")
+          end
         end
-      end
 
-      # workaround for when user doesn't exist during bootstrap
-#      user ebsConfig['user'] do
-#      end
+        execute 'swapon' do
+          command "swapon #{device}"
+        end
 
-      directory mountPoint do
-        owner ebsConfig['user']
-        mode 0755
+        mount mountPoint do
+          device  device
+          fstype  ebsConfig['fstype']
+          options ebsConfig['mountopts']
 
-        action :create
-      end
+          pass    0
+          action [:enable]
+        end
 
-      mount mountPoint do
-        device  device
-        fstype  ebsConfig['fstype']
-        options ebsConfig['mountopts']
+      else
+        execute 'mkfs' do
+          command "mkfs -t #{ebsConfig['fstype']} #{device}"
+          not_if do
+            BlockDevice.wait_for(device)
+            system("blkid -s TYPE -o value #{device}")
+          end
+        end
 
-        action [:mount, :enable]
+        # workaround for when user doesn't exist during bootstrap
+  #      user ebsConfig['user'] do
+  #      end
+
+        directory mountPoint do
+          owner ebsConfig['user']
+          mode 0755
+
+          action :create
+        end
+
+        mount mountPoint do
+          device  device
+          fstype  ebsConfig['fstype']
+          options ebsConfig['mountopts']
+
+          action [:mount, :enable]
+        end
       end
     end
   end

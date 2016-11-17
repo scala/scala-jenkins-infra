@@ -75,6 +75,13 @@ if (node.name =~ /.*-worker-.*/) != nil
     publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
     lightWorker = publisher  # TODO: better heuristic...
 
+    if !lightWorker
+      default['ebs']['volumes']['none']['size']      = 16
+      default['ebs']['volumes']['none']['dev']       = "/dev/sdp"
+      default['ebs']['volumes']['none']['fstype']    = "swap"
+      default['ebs']['volumes']['none']['mountopts'] = "sw"
+    end
+
     override['sbt']['launcher_path'] = '/usr/local/lib/share/sbt-launch.jar'
 
     default['graphviz']['url']      = 'https://dl.dropboxusercontent.com/u/12862572/graphviz_2.28.0-1_amd64.deb'
