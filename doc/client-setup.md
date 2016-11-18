@@ -98,13 +98,13 @@ Host jenkins-master
   User ec2-user
 
 Host jenkins-worker-behemoth-1
-  User jenkins
+  User ubuntu
 
 Host jenkins-worker-behemoth-2
-  User jenkins
+  User ubuntu
 
 Host jenkins-worker-ubuntu-publish
-  User jenkins
+  User ubuntu
 
 Host jenkins-worker-windows-publish
   User jenkins

@@ -35,6 +35,11 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     owner workerConfig["jenkinsUser"]
   end
 
+  # for use by java.io.tmpdir since /tmp may not have enough space
+  directory "#{jenkinsHome}/tmp" do
+    owner workerConfig["jenkinsUser"]
+  end
+
   file "#{jenkinsHome}/.ssh/authorized_keys" do
     owner workerConfig["jenkinsUser"]
     mode  '600'
