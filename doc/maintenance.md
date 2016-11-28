@@ -34,6 +34,7 @@ Tips for addressing gradually dwindling free space:
 * on jenkins-worker-windows-publish, the usual culprit is
   `/home/tmp`.  ssh in and just blow away everything in there
   (but not while a job is running!).
+* on jenkins-worker-ubuntu-publish, same but `/home/jenkins/tmp`
 * on jenkins-master, the culprit may vary.  Usually the problem
   is under `/var/lib/jenkins`. Poke around with commands like
   `find` and `du` and see where the space is going.
