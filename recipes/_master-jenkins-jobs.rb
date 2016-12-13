@@ -91,12 +91,6 @@ end
   expandJobTemplates("scala", "scala", branch)
 end
 
-# create dotty-$branch-$jobName for every template under jobs/
-%w{ master }.each do | branch |
-  expandJobTemplates("lampepfl", "dotty", branch)
-end
-
-
 # TODO #10: make a view for each top-level directory under jobs/ that lists all jobs under it (scala-2.11.x-integrate, scala-2.11.x-release, scala-2.11.x-validate)
 # https://issues.jenkins-ci.org/browse/JENKINS-8927
 def viewXML(viewPrefix)
