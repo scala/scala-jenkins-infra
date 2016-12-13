@@ -15,21 +15,3 @@ scala: {
     token: "<%=@scabotVault['github']['scala']['token']%>"
   }
 }
-
-dotty: {
-  jenkins: {
-    jobSuffix: "validate-main"
-    host:  "<%=node['master']['jenkinsHost']%>"
-    user:  "<%=node['scabot']['jenkins']['user']%>"
-    token: "<%=@scabotVault['jenkins']['token']%>"
-  }
-  github: {
-    user:  "lampepfl"
-    repo:  "dotty"
-    branches: ["master"]
-    lastCommitOnly: true
-    checkCLA: true
-    host:  "api.github.com"
-    token: "<%=@scabotVault['github']['lampepfl']['token']%>"
-  }
-}
