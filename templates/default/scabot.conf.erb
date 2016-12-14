@@ -15,3 +15,15 @@ scala: {
     token: "<%=@scabotVault['github']['scala']['token']%>"
   }
 }
+
+dotty: {
+  github: {
+    user:  "lampepfl"
+    repo:  "dotty"
+    branches: ["master"]
+    lastCommitOnly: true
+    checkCLA: true
+    host:  "api.github.com"
+    token: "<%=@scabotVault['github']['lampepfl']['token']%>"
+  }
+}

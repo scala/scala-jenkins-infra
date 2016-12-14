@@ -6,6 +6,9 @@
   "github": {
     "scala": {
       "token": "XXX"
+    },
+    "lampepfl": {
+      "token": "XXX"
     }
   },
   "play": { 
