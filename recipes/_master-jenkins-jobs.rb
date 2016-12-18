@@ -39,7 +39,7 @@ def templDesc(user, repo, branch, path)
         :jvmFlavorForBranch    => branch != "2.11.x" ? "openjdk" : "oracle",
         :jvmVersionForBranch   => branch != "2.11.x" ? 8         : 6,
         :scalaBranchForBranch  => branch == "2.11.x-jdk8" ? "2.11.x" : branch,  # only used for community-builds
-        :behemothForBranch     => branch =~ /^2\.12.*/ ? 2         : 1          # only used for community-builds
+        :behemothForBranch     => branch =~ /^2\.11.*/ ? 1       : 2            # only used for community-builds
       }
     ]
   end
