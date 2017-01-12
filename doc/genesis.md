@@ -244,7 +244,7 @@ knife vault create master scabot \
 
 ## For github oauth
 
-https://github.com/settings/applications/new --> https://github.com/settings/applications/154904
+https://github.com/organizations/scala/settings/applications --> https://github.com/organizations/scala/settings/applications/154904
  - Authorization callback URL = https://scala-ci.typesafe.com/securityRealm/finishLogin
 
 ```
