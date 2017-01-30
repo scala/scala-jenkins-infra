@@ -33,6 +33,21 @@ module ScalaJenkinsInfra
           <defaultValue>%{default}</defaultValue>
         </hudson.model.StringParameterDefinition>""".gsub(/        /, '')
 
+      notificationEndpoint =
+        """
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <url>%{url}</url>
+          <event>%{event}</event>
+          <timeout>30000</timeout>
+        </com.tikal.hudson.plugins.notification.Endpoint>""".gsub(/        /, '')
+
+      notifications = [
+        {:url => node['master']['jenkins']['notifyUrl'], :event => "all"},
+        {:url => node['master']['jenkins']['benchqUrl'], :event => "all"}
+      ]
+
       paramDefaults = {:default => nil}
 
       concurr = @@concurrentDefaults.merge(concurrentOptions)
@@ -48,13 +63,7 @@ module ScalaJenkinsInfra
       """<properties>
         <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin=\"notification@1.7\">
           <endpoints>
-            <com.tikal.hudson.plugins.notification.Endpoint>
-              <protocol>HTTP</protocol>
-              <format>JSON</format>
-              <url>#{node['master']['jenkins']['notifyUrl']}</url>
-              <event>all</event>
-              <timeout>30000</timeout>
-            </com.tikal.hudson.plugins.notification.Endpoint>
+            #{notifications.map { |notification| notificationEndpoint % notification }.join("\n")}
           </endpoints>
         </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
         <hudson.model.ParametersDefinitionProperty>
