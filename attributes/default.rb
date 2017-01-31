@@ -113,7 +113,7 @@ if node.name == "jenkins-master"
   default['master']['jenkinsHost']          = scalaCiHost
   default['master']['jenkinsUrl']           = "https://#{scalaCiHost}/"
   default['master']['jenkins']['notifyUrl'] = "http://#{scalaCiHost}:#{scabotPort}/jenkins" # scabot listens here
-  default['master']['jenkins']['benchqUrl'] = "https://scala-ci.typesafe.com/benchq/webhooks/jenkins"
+  default['master']['jenkins']['benchqUrl'] = "https://#{scalaCiHost}/benchq/webhooks/jenkins"
 
   # NOTE: This is a string that represents a closure that closes over the worker node for which it computes the environment.
   # (by convention -- see `environment((eval node["master"]["env"])...` in _master-config-workers
