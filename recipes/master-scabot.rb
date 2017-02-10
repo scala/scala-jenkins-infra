@@ -59,6 +59,17 @@ git scabotCheckout do
   revision   "master"
 end
 
+bash 'git config' do
+  cwd  scabotCheckout
+  user scabotUser
+  code "git config receive.denyCurrentBranch ignore"
+end
+
+cookbook_file "scabot-post-receive" do
+  mode '755'
+  path "#{scabotHome}/scabot/.git/hooks/post-receive"
+end
+
 template "#{scabotHome}/scabot.conf" do
   source    'scabot.conf.erb'
   user      scabotUser
