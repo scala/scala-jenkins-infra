@@ -15,5 +15,4 @@ jvmSelect openjdk 8
 
 exec chpst -P -u scabot -U scabot \
   env HOME=/home/scabot \
-  env JAVA_OPTS='-Dhttp.port=<%=node['scabot']['port']%> -Dlogger.resource=prod-logger.xml -Dconfig.file=/home/scabot/production.conf -Dscabot.config.file=/home/scabot/scabot.conf -Dpidfile.path=/dev/null'\
-  /home/scabot/scabot/scripts/run
+  /home/scabot/scabot/scripts/run -Dhttp.port=<%=node['scabot']['port']%> -Dlogger.resource=prod-logger.xml -Dconfig.file=/home/scabot/production.conf -Dscabot.config.file=/home/scabot/scabot.conf -Dpidfile.path=/dev/null
