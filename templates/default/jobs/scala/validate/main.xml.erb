@@ -34,10 +34,15 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 
 testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number"] ]
 
-parallel (
-   { build(testParams, "#{job("validate/test")}") },
-   { retry(2, { build(testParams, "#{job("integrate/ide")}") }) }
-)
+if (branch.index("2.11.x") == 0) {
+  parallel (
+     { build(testParams, "#{job("validate/test")}") },
+     { retry(2, { build(testParams, "#{job("integrate/ide")}") }) }
+  )
+}
+else {
+  build(testParams, "#{job("validate/test")}")
+}
 
 EOX
 ) %>

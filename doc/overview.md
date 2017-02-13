@@ -75,7 +75,8 @@ status" becomes green:
 * `validate-main` -- top-level Jenkins job.
   Does no work of its own, just orchestrates the other jobs
   as follows: runs `validate-publish-core` first, and if it succeeds,
-  then runs `validate-test` and `integrate-ide` in parallel.
+  then runs `validate-test` and `integrate-ide` (on branches
+  where `integrate-ide` is supported) in parallel.
 * `validate-publish-core` -- build Scala and publish artifacts via
   Artifactory on scala-ci. The resulting artifacts are used during the
   remaining stages of validation.  The artifacts can also be used for
@@ -83,7 +84,8 @@ status" becomes green:
   setting `scalaVersion` appropriately are in the
   [Scala repo README](https://github.com/scala/scala/blob/2.11.x/README.md).
 * `validate-test` -- run the Scala test suite
-* `integrate-ide` -- run the ScalaIDE test suite
+* `integrate-ide` -- run the ScalaIDE test suite. currently (February 2017)
+  only runs on 2.11.x branches
 
 Normally, every commit in the PR (not just the last commit) must pass
 all checks.  Putting `[ci: last-only]` in the PR title tells Scabot to
