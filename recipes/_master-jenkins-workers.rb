@@ -40,8 +40,8 @@ search(:node, 'name:jenkins-worker*').each do |worker|
       credentials credentialsMap[workerConfig["jenkinsUser"]]  # must use id (groovy script fails otherwise)
 
       # TODO: make retrying more robust
-      max_num_retries  10  # how often to retry when the SSH connection is refused during initial connect
-      retry_wait_time  60  # seconds between retries
+      ssh_retries  10  # how often to retry when the SSH connection is refused during initial connect
+      ssh_wait_retries  60  # seconds between retries
 
       remote_fs   jenkinsHome.dup
       jvm_options workerConfig["jvm_options"]
