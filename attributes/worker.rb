@@ -6,19 +6,19 @@ if (node.name =~ /.*-worker-.*/) != nil
     override['sbt']['launcher_path'] = 'C:\sbt\sbt-launch.jar'
 
     # this zip was reworked to have the binaries under the `bin/` directory, which is what sbt-nativepackager expects
-    override['wix']['home']     = 'C:\Program Files (x86)\WiX Toolset v3.9'
-    override['wix']['url']      = 'http://static.wixtoolset.org/releases/v3.9.421.0/wix39.exe'
-    override['wix']['checksum'] = '46eda1dd64bfdfc3cc117e76902d767f1a47a1e40f7b6aad68b32a18b609eb7c'
-
-    override['cygwin']['home']             = 'c:\cygwin'
-    override['cygwin']['installer']['url'] = "http://cygwin.com/setup-x86_64.exe"
+    override['wix']['home']     = 'C:\Program Files (x86)\WiX Toolset v3.10'
+    # override['wix']['url']      = 'http://static.wixtoolset.org/releases/v3.9.421.0/wix39.exe'
+    # override['wix']['checksum'] = '46eda1dd64bfdfc3cc117e76902d767f1a47a1e40f7b6aad68b32a18b609eb7c'
+    #
+    override['cygwin']['home']             = 'C:\tools\cygwin'
+    # override['cygwin']['installer']['url'] = "http://cygwin.com/setup-x86_64.exe"
 
     # This zip should contain the "#{Chef::Config[:file_cache_path]}/cygwin" directory,
     # after it was manually populated by running "#{Chef::Config[:file_cache_path]}/cygwin-setup.exe",
     # selecting openssh, cygrunsrv in addition to cygwin's base packages.
     # I did not succeed in automating the cygwin installer without having a local cache of the package archives
-    override['cygwin']['base']['url']      = "https://dl.dropboxusercontent.com/u/12862572/cygwin-base-x64.zip"
-    override['cygwin']['base']['checksum'] = "dab686bc685ba1447240804a47d10f3b146d4b17b6f9fea781ed9bb59c67e664"
+    # override['cygwin']['base']['url']      = "https://dl.dropboxusercontent.com/u/12862572/cygwin-base-x64.zip"
+    # override['cygwin']['base']['checksum'] = "dab686bc685ba1447240804a47d10f3b146d4b17b6f9fea781ed9bb59c67e664"
 
     # TODO: also derive PATH variable from attributes
     ## Git is installed to Program Files (x86) on 64-bit machines and
@@ -44,7 +44,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
     default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
     default["jenkinsHomes"][jenkinsHome]["jvm_options"] = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp.gsub(/\\/,'/')}" # jenkins doesn't quote properly
-    default["jenkinsHomes"][jenkinsHome]["java_path"] = '"/cygdrive/c/Program Files/Java/jdk1.8.0_92/bin/java"'
+    default["jenkinsHomes"][jenkinsHome]["java_path"] = '"/cygdrive/c/Program Files/Java/jdk1.8.0_121/bin/java"'
     default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
     default["jenkinsHomes"][jenkinsHome]["publish"]     = publisher
 
@@ -61,7 +61,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     # and they sometimes need to be shipped, so encode as string, closing over `node`...
     default["jenkinsHomes"][jenkinsHome]["env"]         = <<-'EOH'.gsub(/^ {4}/, '')
       lambda{| node | Chef::Node::ImmutableMash.new({
-        "PATH"          => "/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_92/bin:/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd", # TODO express in terms of attributes
+        "PATH"          => "/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_121/bin:/cygdrive/c/Program Files/Git/Cmd", # TODO express in terms of attributes
         "sbtLauncher"   => node['sbt']['launcher_path'],
         "WIX"           => node['wix']['home'],
         "TMP"           => "#{node['_jenkinsTmp']}",

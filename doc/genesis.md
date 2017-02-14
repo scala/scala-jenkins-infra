@@ -11,7 +11,7 @@ a collection of notes)
 
   - jenkins-master: ami-3b14f27f (Amazon Linux AMI 2015.03 on HVM Instance Store 64-bit for US West N. California)
   - ubuntu:         ami-2915e16d (search for "vivid hvm:ebs-ssd us-west-1" on https://cloud-images.ubuntu.com/locator/ec2/)
-  - windows:        ami-cfa5b68a (Windows_Server-2012-R2_RTM-English-64Bit-Base-2014.12.10)
+  - windows:        ami-76227116 (source: amazon/Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.01.11)
 
 Eventually we would like to move jenkins-master off Amazon Linux and
 onto Ubuntu.
@@ -305,7 +305,7 @@ NOTE:
   - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
   - can't access the vault on bootstrap (see After bootstrap below)
   - AWS machines have a persistent root partition.
-
+  - make sure the security group allows inbound from the machine used to bootstrap chef on the ec2 instance
 
 
 ```
@@ -325,7 +325,7 @@ knife ec2 server create -N jenkins-master                  \
 knife ec2 server create -N jenkins-worker-windows-publish \
    --flavor c4.xlarge                                     \
    --region us-west-1                                     \
-   -I ami-45332200 --user-data chef/userdata/win2012.txt  \
+   -I ami-76227116 --user-data chef/userdata/win2012.txt  \
    --iam-profile JenkinsWorkerPublish                     \
    --ebs-optimized --ebs-volume-type gp2                  \
    --security-group-ids sg-1dec3d78                       \
