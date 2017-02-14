@@ -25,7 +25,7 @@ template "#{node['jenkins']['master']['home']}/users/chef/config.xml" do
   })
 end
 
-%w(notification ssh-credentials groovy cygpath job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger ansicolor).each do |plugin|
+%w(notification ssh-credentials groovy cygpath job-dsl build-flow-plugin rebuild greenballs build-timeout copyartifact email-ext slack throttle-concurrents dashboard-view parameterized-trigger ansicolor github github-api).each do |plugin|
   plugin, version = plugin.split('=') # in case we decide to pin versions later
   jenkins_plugin plugin
 end
