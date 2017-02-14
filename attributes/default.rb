@@ -3,12 +3,7 @@ scalaCiPort = 443
 scabotPort  = 8888
 
 # JENKINS WORKER CONFIG
-# see below (note that default['master']['env'] can only indirect through node -- workerJavaOpts is not in scope)
-workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Djava.io.tmpdir=/home/jenkins/tmp"
 
-default['jenkinsEnv']['JAVA_OPTS']  = workerJavaOpts
-default['jenkinsEnv']['ANT_OPTS']   = workerJavaOpts
-default['jenkinsEnv']['MAVEN_OPTS'] = workerJavaOpts # doesn't technically need the -Dpartest one, but oh well
 
 default['repos']['private']['realm']        = "Artifactory Realm"
 default['repos']['private']['host']         = scalaCiHost
@@ -117,19 +112,6 @@ if node.name == "jenkins-master"
   default['master']['jenkins']['notifyUrl'] = "http://#{scalaCiHost}:#{scabotPort}/jenkins" # scabot listens here
   default['master']['jenkins']['benchqUrl'] = "https://#{scalaCiHost}/benchq/webhooks/jenkins"
 
-  # NOTE: This is a string that represents a closure that closes over the worker node for which it computes the environment.
-  # (by convention -- see `environment((eval node["master"]["env"])...` in _master-config-workers
-  # Since we can't marshall closures, while attributes need to be sent from master to workers, we must encode them as something that can be shipped...
-  default['master']['env'] = <<-'EOH'.gsub(/^ {2}/, '')
-    lambda{| node | Chef::Node::ImmutableMash.new({
-      "JAVA_HOME"          => node['java']['java_home'], # we get the jre if we don't do this
-      "JAVA_OPTS"          => node['jenkinsEnv']['JAVA_OPTS'],
-      "ANT_OPTS"           => node['jenkinsEnv']['ANT_OPTS'],
-      "MAVEN_OPTS"         => node['jenkinsEnv']['MAVEN_OPTS'],
-      "prRepoUrl"          => node['repos']['private']['pr-snap'],
-      "releaseTempRepoUrl" => node['repos']['private']['release-temp']
-    })}
-    EOH
 
   ## PLUGIN
   default['master']['ec2-start-stop']['url'] = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
