@@ -18,7 +18,7 @@ depends 'aws'
 
 depends 'ebs'
 
-depends 'windows', '~> 2.1.1'
+depends 'windows'
 depends 'chocolatey'
 
 depends 'java'
@@ -31,7 +31,7 @@ depends 'git_user'
 
 depends 'sbt-extras'
 
-depends 'runit', '~> 1.5'
+depends 'runit', '~> 1.7'
 
 depends 'nodejs'
 
