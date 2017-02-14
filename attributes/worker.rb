@@ -13,6 +13,8 @@ if (node.name =~ /.*-worker-.*/) != nil
     override['cygwin']['home']             = 'C:\tools\cygwin'
     # override['cygwin']['installer']['url'] = "http://cygwin.com/setup-x86_64.exe"
 
+    override['java']['java_home'] = 'c:\Program Files\Java\jdk1.8.0_121'
+
     # This zip should contain the "#{Chef::Config[:file_cache_path]}/cygwin" directory,
     # after it was manually populated by running "#{Chef::Config[:file_cache_path]}/cygwin-setup.exe",
     # selecting openssh, cygrunsrv in addition to cygwin's base packages.

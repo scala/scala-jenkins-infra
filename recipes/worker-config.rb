@@ -33,6 +33,7 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
 
   directory "#{jenkinsHome}/.ssh" do
     owner workerConfig["jenkinsUser"]
+    mode  '700'
   end
 
   # for use by java.io.tmpdir since /tmp may not have enough space

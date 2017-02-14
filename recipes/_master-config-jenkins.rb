@@ -30,10 +30,11 @@ end
   jenkins_plugin plugin
 end
 
-jenkins_plugin "ec2-start-stop" do
-  source   node['master']['ec2-start-stop']['url']
-  # doesn't support checksum
-end
+# TODO: publish jar and update the url
+# jenkins_plugin "ec2-start-stop" do
+#   source   node['master']['ec2-start-stop']['url']
+#   # doesn't support checksum
+# end
 
 jenkins_plugin "github-oauth" do
   notifies :restart, 'runit_service[jenkins]', :immediately
