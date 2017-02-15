@@ -33,7 +33,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
     default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
     default["jenkinsHomes"][jenkinsHome]["jvm_options"] = jvmDirOptions
-    default["jenkinsHomes"][jenkinsHome]["java_path"]   = "#{jvmBin}/java"
+    default["jenkinsHomes"][jenkinsHome]["java_path"]   = '"c:/Program Files/Java/jdk1.8.0_121/bin/java"' # note the double quoting
     default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
     default["jenkinsHomes"][jenkinsHome]["publish"]     = publisher
 
