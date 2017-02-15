@@ -43,7 +43,11 @@ end
 #end
 
 chocolatey_package 'git'
-chocolatey_package 'jdk8'
+chocolatey_package 'jdk8' # manually installed jdk-6u45-windows-x64 (have to explicitly select all packages or it won't install the jdk)
+chocolatey_package 'ant' do
+  version "1.9.8" # 1.10 needs jdk8, which is no go for 2.11
+end
+
 
 chocolatey_package 'wixtoolset' do
   options '--allow-empty-checksums'

@@ -7,33 +7,7 @@
 # All rights reserved - Do Not Redistribute
 #
 
-# TODO: submit PRs to upstream cookbook
-
-### CYGWIN + sshd
-
-# first download base system, because installer fails to download in unattended mode
-# windows_zipfile needs chef_gem[rubyzip], which fails when run during bootstrap (PATH messed up?)
-# windows_zipfile "cygwin-base" do
-#   path      Chef::Config[:file_cache_path]
-#   source    node['cygwin']['base']['url']
-#   checksum  node['cygwin']['base']['checksum']
-#   overwrite true
-#
-#   action :unzip
-# end
-#
-# # the above unzips to this directory
-# cygPackages = File.join(Chef::Config[:file_cache_path], "cygwin")
-#
-# remote_file "#{Chef::Config[:file_cache_path]}/cygwin-setup.exe" do
-#   source node['cygwin']['installer']['url']
-#   action :create_if_missing
-# end
-#
-# execute "cygwin-setup" do
-#   cwd     Chef::Config[:file_cache_path]
-#   command "cygwin-setup.exe -q -L -l #{cygPackages} -O -R #{node['cygwin']['home']} -P openssh,cygrunsrv"
-# end
+### CYGWIN: manual install, need packages openssh, curl
 
 windows_path "#{node['cygwin']['home']}\\bin" do
   action :add
