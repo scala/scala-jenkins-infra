@@ -115,7 +115,7 @@ chef-client
 #### Windows node
 
 ```
-PASS=$(aws ec2 get-password-data --instance-id i-f67c0a35 --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem | jq .PasswordData | xargs echo)
+PASS=$(aws ec2 get-password-data --instance-id i-0485455cc766c86ef --priv-launch-key ~/.ssh/typesafe-scala-aws-$AWS_USER.pem | jq .PasswordData | xargs echo)
 knife winrm jenkins-worker-windows-publish chef-client -m -P $PASS
 ```
 

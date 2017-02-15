@@ -37,11 +37,18 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   end
 end
 
-# TODO upgrade to https://wix.codeplex.com/releases/view/619491
-# windows_package 'WIX' do
-#   source node['wix']['url']
-#   action :install
-# end
+# cygwin must be installed manually...  C:\Users\Administrator\AppData\Local\Temp\Cygwin\2.7.0\setup-x86_64.exe" --site http://mirrors.kernel.org/sourceware/cygwin/ --packages default --root C:\tools\cygwin --local-package-dir C:\tools\cygwin
+#chocolatey_package 'openssh' do
+#  options '--params="/SSHServerFeature"'
+#end
+
+chocolatey_package 'git'
+chocolatey_package 'jdk8'
+
+chocolatey_package 'wixtoolset' do
+  options '--allow-empty-checksums'
+  action [:install]
+end
 
 
 include_recipe 'scala-jenkins-infra::_worker-config-windows-cygwin'

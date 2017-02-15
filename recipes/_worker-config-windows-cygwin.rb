@@ -13,33 +13,33 @@
 
 # first download base system, because installer fails to download in unattended mode
 # windows_zipfile needs chef_gem[rubyzip], which fails when run during bootstrap (PATH messed up?)
-windows_zipfile "cygwin-base" do
-  path      Chef::Config[:file_cache_path]
-  source    node['cygwin']['base']['url']
-  checksum  node['cygwin']['base']['checksum']
-  overwrite true
-
-  action :unzip
-end
-
-# the above unzips to this directory
-cygPackages = File.join(Chef::Config[:file_cache_path], "cygwin")
-
-remote_file "#{Chef::Config[:file_cache_path]}/cygwin-setup.exe" do
-  source node['cygwin']['installer']['url']
-  action :create_if_missing
-end
-
-execute "cygwin-setup" do
-  cwd     Chef::Config[:file_cache_path]
-  command "cygwin-setup.exe -q -L -l #{cygPackages} -O -R #{node['cygwin']['home']} -P openssh,cygrunsrv"
-end
+# windows_zipfile "cygwin-base" do
+#   path      Chef::Config[:file_cache_path]
+#   source    node['cygwin']['base']['url']
+#   checksum  node['cygwin']['base']['checksum']
+#   overwrite true
+#
+#   action :unzip
+# end
+#
+# # the above unzips to this directory
+# cygPackages = File.join(Chef::Config[:file_cache_path], "cygwin")
+#
+# remote_file "#{Chef::Config[:file_cache_path]}/cygwin-setup.exe" do
+#   source node['cygwin']['installer']['url']
+#   action :create_if_missing
+# end
+#
+# execute "cygwin-setup" do
+#   cwd     Chef::Config[:file_cache_path]
+#   command "cygwin-setup.exe -q -L -l #{cygPackages} -O -R #{node['cygwin']['home']} -P openssh,cygrunsrv"
+# end
 
 windows_path "#{node['cygwin']['home']}\\bin" do
   action :add
 end
 
-# map /home and /tmp to ephemeral storage (local ssd)
+# map /home to a separate volume
 file "#{node['cygwin']['home']}/etc/fstab" do
   content <<-EOH.gsub(/^    /, '')
     none /cygdrive cygdrive binary,posix=0,user 0 0
@@ -49,6 +49,7 @@ end
 
 cygbash="#{node['cygwin']['home']}/bin/bash.exe"
 
+# ssh-host-config takes care of setting up the user account for Tcb and other privileges needed for pubkey auth via LSA
 require 'securerandom'
 bash 'configure sshd' do
   interpreter cygbash
@@ -66,7 +67,11 @@ bash 'start sshd' do
   not_if "cygrunsrv --query sshd | grep Running"
 end
 
-include_recipe 'windows::reboot_handler'
+# IMPORTANT NOTE: /etc/sshd_config should have:
+# ```
+# StrictModes no
+# PubkeyAuthentication yes
+# ```
 
 # needed to allow pubkey login on windows
 # this needs a reboot!
@@ -76,9 +81,9 @@ bash 'config lsa' do
 
   code   'auto_answer="yes" cyglsa-config'
   not_if "regtool get '/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Lsa/Authentication Packages' | grep cyglsa"
-
-  notifies :request, 'windows_reboot[7]', :delayed
 end
+
+# IMPORTANT MANUAL STEP: REBOOT -- LSA install won't take effect until after a reboot
 
 bash 'git config' do
   interpreter cygbash
@@ -89,8 +94,3 @@ bash 'git config' do
   code "git config --global core.longpaths true"
 end
 
-windows_reboot 7 do
-  timeout 7
-  reason 'Restarting computer in 7 seconds!'
-  action :nothing
-end

@@ -27,12 +27,13 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
 
   directory jenkinsHome do
     owner workerConfig["jenkinsUser"]
-    mode 00755
+#    mode 00755  -- TODO: enable on linux, but NOT on windows, as it causes permissions problems (no idea how to fix)
     action :create
   end
 
   directory "#{jenkinsHome}/.ssh" do
     owner workerConfig["jenkinsUser"]
+#    mode  '700' -- TODO: enable on linux, but NOT on windows, as it causes permissions problems (no idea how to fix)
   end
 
   # for use by java.io.tmpdir since /tmp may not have enough space

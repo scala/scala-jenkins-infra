@@ -55,6 +55,9 @@ if node[:ec2]
 
         execute 'swapon' do
           command "swapon #{device}"
+          not_if do
+            system("swaplabel #{device}")
+          end
         end
 
         mount mountPoint do

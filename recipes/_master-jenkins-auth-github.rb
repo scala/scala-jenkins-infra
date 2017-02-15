@@ -19,7 +19,8 @@ jenkins_script 'add_gh_authentication' do
       '#{node['master']['github']['webUri']}',
       '#{node['master']['github']['apiUri']}',
       '#{apiVault['client-id']}',
-      '#{apiVault['client-secret']}')
+      '#{apiVault['client-secret']}',
+      '#{node['master']['github']['oauthScopes']}')
 
     def githubStrategy = new GithubAuthorizationStrategy(
       '#{node['master']['github']['adminUserNames']}',
@@ -29,7 +30,8 @@ jenkins_script 'add_gh_authentication' do
       '#{node['master']['github']['organizationNames']}',
       #{node['master']['github']['allowGithubWebHookPermission']},
       #{node['master']['github']['allowCcTrayPermission']},
-      #{node['master']['github']['allowAnonymousReadPermission']})
+      #{node['master']['github']['allowAnonymousReadPermission']},
+      #{node['master']['github']['allowAnonymousJobStatusPermission']})
 
     Jenkins.instance.setSecurityRealm(githubRealm)
     Jenkins.instance.setAuthorizationStrategy(githubStrategy)
