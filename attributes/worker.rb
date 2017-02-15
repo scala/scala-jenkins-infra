@@ -10,10 +10,13 @@ if (node.name =~ /.*-worker-.*/) != nil
     override['sbt']['launcher_path'] = 'C:\sbt\sbt-launch.jar'
     override['wix']['home']          = 'C:\Program Files (x86)\WiX Toolset v3.10'
     override['cygwin']['home']       = 'C:\tools\cygwin'
-    override['java']['java_home']    = 'C:\Program Files\Java\jdk1.8.0_121'
-    jvmBin                           = '/cygdrive/c/Program Files/Java/jdk1.8.0_121/bin'
+    jvmHome                          = '/Program Files/Java/jdk1.8.0_121'
     gitBin                           = '/cygdrive/c/Program Files/Git/Cmd'
+    chocoBin                         = '/cygdrive/c/ProgramData/chocolatey/bin'
     jenkinsTmp                       = 'y:/jenkins/tmp'
+
+    override['java']['java_home']    = "C:#{jvmHome.gsub(/\//,'\\')}"
+    jvmBin                           = "/cygdrive/c#{jvmHome}/bin"
   
     # deal with weirdness in java using registry keys to find the homedir (c:\users\jenkins), instead of the cygin home (/home/jenkins or y:\jenkins)
     jvmDirOptions = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp}" # jenkins doesn't quote properly
@@ -33,7 +36,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["workerName"]  = node.name
     default["jenkinsHomes"][jenkinsHome]["jenkinsUser"] = 'jenkins'
     default["jenkinsHomes"][jenkinsHome]["jvm_options"] = jvmDirOptions
-    default["jenkinsHomes"][jenkinsHome]["java_path"]   = '"c:/Program Files/Java/jdk1.8.0_121/bin/java"' # note the double quoting
+    default["jenkinsHomes"][jenkinsHome]["java_path"]   = "\"C:#{jvmHome}/bin/java\"" # note the double quoting
     default["jenkinsHomes"][jenkinsHome]["labels"]      = ["windows", publisher ? "publish": "public"]
     default["jenkinsHomes"][jenkinsHome]["publish"]     = publisher
 
@@ -49,7 +52,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["env"]['MAVEN_OPTS']         = "#{workerJavaOpts} #{jvmDirOptions}"
     default["jenkinsHomes"][jenkinsHome]["env"]['prRepoUrl']          = node['repos']['private']['pr-snap']
     default["jenkinsHomes"][jenkinsHome]["env"]['releaseTempRepoUrl'] = node['repos']['private']['release-temp']
-    default["jenkinsHomes"][jenkinsHome]["env"]['PATH']               = "/bin:/usr/bin:#{jvmBin}:#{gitBin}"
+    default["jenkinsHomes"][jenkinsHome]["env"]['PATH']               = "/bin:/usr/bin:#{jvmBin}:#{gitBin}:#{chocoBin}"
     default["jenkinsHomes"][jenkinsHome]["env"]['sbtLauncher']        = node['sbt']['launcher_path']
     default["jenkinsHomes"][jenkinsHome]["env"]['WIX']                = node['wix']['home']
     default["jenkinsHomes"][jenkinsHome]["env"]['TMP']                = jenkinsTmp
