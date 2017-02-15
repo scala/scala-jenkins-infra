@@ -10,11 +10,12 @@ if (node.name =~ /.*-worker-.*/) != nil
     override['sbt']['launcher_path'] = 'C:\sbt\sbt-launch.jar'
     override['wix']['home']          = 'C:\Program Files (x86)\WiX Toolset v3.10'
     override['cygwin']['home']       = 'C:\tools\cygwin'
-    override['java']['java_home']    = 'c:\Program Files\Java\jdk1.8.0_121'
+    override['java']['java_home']    = 'C:\Program Files\Java\jdk1.8.0_121'
     jvmBin                           = '/cygdrive/c/Program Files/Java/jdk1.8.0_121/bin'
-    gitBin                           = '/cygdrive/c/Program Files (x86)/Git-2.5.3/Cmd'
-
-    jenkinsTmp  = 'y:/jenkins/tmp'
+    gitBin                           = '/cygdrive/c/Program Files/Git/Cmd'
+    jenkinsTmp                       = 'y:/jenkins/tmp'
+  
+    # deal with weirdness in java using registry keys to find the homedir (c:\users\jenkins), instead of the cygin home (/home/jenkins or y:\jenkins)
     jvmDirOptions = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp}" # jenkins doesn't quote properly
 
     # If node name contains "-publish", configure it with necessary secrets/package to roll & publish a release
