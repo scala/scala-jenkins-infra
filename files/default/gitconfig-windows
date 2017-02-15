@@ -1,0 +1,6 @@
+[user]
+  name = Scala Jenkins
+  email = adriaan@lightbend.com
+
+[core]
+  longpaths = true

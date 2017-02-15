@@ -85,12 +85,3 @@ end
 
 # IMPORTANT MANUAL STEP: REBOOT -- LSA install won't take effect until after a reboot
 
-bash 'git config' do
-  interpreter cygbash
-  # without longpaths enabled we have:
-  # - known problems with `git clean -fdx` failing
-  # - suspected problems with intermittent build failures due to
-  #   very long paths to some classfiles
-  code "git config --global core.longpaths true"
-end
-

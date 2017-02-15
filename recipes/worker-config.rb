@@ -47,10 +47,23 @@ node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
     content chef_vault_item("master", "scala-jenkins-keypair")['public_key'] + "\n#{node['authorized_keys']['jenkins']}"
   end
 
-  git_user workerConfig["jenkinsUser"] do
-    home        jenkinsHome
-    full_name   'Scala Jenkins'
-    email       'adriaan@lightbend.com'
+
+  case node["platform_family"]
+  when "windows"
+    # also sets core.longpaths true
+    # without longpaths enabled we have:
+    # - known problems with `git clean -fdx` failing
+    # - suspected problems with intermittent build failures due to
+    #   very long paths to some classfiles
+    cookbook_file 'gitconfig-windows' do
+      path "#{jenkinsHome}/.gitconfig"
+    end
+  else
+    git_user workerConfig["jenkinsUser"] do
+      home        jenkinsHome
+      full_name   'Scala Jenkins'
+      email       'adriaan@lightbend.com'
+    end
   end
 end
 
