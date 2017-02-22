@@ -12,7 +12,7 @@ It also shows when each node last checked for updated cookbooks ("Last Check-In"
 
 For troubleshooting Jenkins in particular it's often to helpful to ssh
 in to the worker nodes and poke around the workspaces, see what
-processes are running, that kind of thing.
+processes are running, that kind of thing. (See [setup instructions](client-setup.md#hosts-and-ssh-config).)
 
 ## Monitoring disk space
 
