@@ -65,7 +65,7 @@ mkdir .chef/config
 
 (The `core.autocrlf` thing may be needed to prevent "fatal: CRLF would be replaced by LF" errors when cloning cookbook repos, depending on your global git config.)
 
-You can then generate and download your private key on https://www.chef.io/account/password. Put it in `~/git/cookbooks/scala-jenkins-infra/.chef/config/$CHEF_USER.pem`. Then you can use knife without further config. See `.chef/knife.rb` for key locations.
+You can then generate and download your private key on https://manage.chef.io/organizations/typesafe-scala/users. Put it in `~/git/cookbooks/scala-jenkins-infra/.chef/config/$CHEF_USER.pem`. Then you can use knife without further config. See `.chef/knife.rb` for key locations.
 
 Test if knife works correctly by running `knife cookbook list`.
 
