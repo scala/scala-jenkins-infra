@@ -123,6 +123,9 @@ module ScalaJenkinsInfra
         jvmSelectScript=jvmSelect
       end
 
+      useExternalScript = options.fetch(:useExternalScript, false)
+      mainScript = useExternalScript ? externalScript : "source scripts/#{@scriptName}"
+
       restriction =
       """<assignedNode>%{nodes}</assignedNode>
       <canRoam>false</canRoam>""".gsub(/      /, '')
@@ -139,7 +142,7 @@ module ScalaJenkinsInfra
         <concurrentBuild>#{concurrent}</concurrentBuild>
         <builders>
           #{groovySysScript(buildNameScript)}
-          #{scriptBuild(jvmSelectScript)}
+          #{scriptBuild(jvmSelectScript, mainScript)}
         </builders>
         <buildWrappers>
           <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
@@ -204,12 +207,19 @@ module ScalaJenkinsInfra
       EOH
     end
 
-    def scriptBuild(setup)
+    def externalScript
+      <<-EOH.gsub(/^      /, '')
+      wget https://raw.githubusercontent.com/scala/scala-jenkins-infra/master/externalScripts/#{@scriptName} -O externalScript
+      source externalScript
+      EOH
+    end
+
+    def scriptBuild(setup, mainScript)
       <<-EOH.gsub(/^      /, '')
       <hudson.tasks.Shell>
         <command>#!/bin/bash -ex
       #{setup}
-      source scripts/#{@scriptName}
+      #{mainScript}
         </command>
       </hudson.tasks.Shell>
       EOH

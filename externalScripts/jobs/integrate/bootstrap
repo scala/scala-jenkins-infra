@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+baseDir=${WORKSPACE-`pwd`}
+scriptsDir="$baseDir/scripts"
+. $scriptsDir/common
+
+source $scriptsDir/jobs/integrate/bootstrap

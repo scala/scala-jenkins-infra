@@ -18,6 +18,7 @@
   buildTimeoutMinutes: 200,
   jvmVersion: @jvmVersionForBranch,
   jvmFlavor:  @jvmFlavorForBranch,
+  useExternalScript: true,
   params: [
     {:name => "SCALA_VER_BASE",
      :desc => "Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version), a -nightly release is built."},
