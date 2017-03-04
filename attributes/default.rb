@@ -8,7 +8,7 @@ scabotPort  = 8888
 default['repos']['private']['realm']        = "Artifactory Realm"
 default['repos']['private']['host']         = scalaCiHost
 default['repos']['private']['pr-snap']      = "https://#{scalaCiHost}/artifactory/scala-pr-validation-snapshots/"
-default['repos']['private']['release-temp'] = "https://#{scalaCiHost}/artifactory/scala-release-temp/"
+default['repos']['private']['integration']  = "https://#{scalaCiHost}/artifactory/scala-integration/"
 
 default['repos']['caching-proxy']['central']['mirrorOf'] = "central" # TODO: add ",sonatype.release,sonatype.snapshot"
 default['repos']['caching-proxy']['central']['url']      = "https://#{scalaCiHost}/artifactory/central/"

@@ -51,7 +51,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["env"]['ANT_OPTS']           = "#{workerJavaOpts} #{jvmDirOptions}"
     default["jenkinsHomes"][jenkinsHome]["env"]['MAVEN_OPTS']         = "#{workerJavaOpts} #{jvmDirOptions}"
     default["jenkinsHomes"][jenkinsHome]["env"]['prRepoUrl']          = node['repos']['private']['pr-snap']
-    default["jenkinsHomes"][jenkinsHome]["env"]['releaseTempRepoUrl'] = node['repos']['private']['release-temp']
+    default["jenkinsHomes"][jenkinsHome]["env"]['integrationRepoUrl'] = node['repos']['private']['integration']
     default["jenkinsHomes"][jenkinsHome]["env"]['PATH']               = "/bin:/usr/bin:#{jvmBin}:#{gitBin}:#{chocoBin}"
     default["jenkinsHomes"][jenkinsHome]["env"]['sbtLauncher']        = node['sbt']['launcher_path']
     default["jenkinsHomes"][jenkinsHome]["env"]['WIX']                = node['wix']['home']
@@ -98,7 +98,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["env"]['ANT_OPTS']           = workerJavaOpts
     default["jenkinsHomes"][jenkinsHome]["env"]['MAVEN_OPTS']         = workerJavaOpts
     default["jenkinsHomes"][jenkinsHome]["env"]['prRepoUrl']          = node['repos']['private']['pr-snap']
-    default["jenkinsHomes"][jenkinsHome]["env"]['releaseTempRepoUrl'] = node['repos']['private']['release-temp']
+    default["jenkinsHomes"][jenkinsHome]["env"]['integrationRepoUrl'] = node['repos']['private']['integration']
     default["jenkinsHomes"][jenkinsHome]["env"]['sbtLauncher']        = node['sbt']['launcher_path']
     default["jenkinsHomes"][jenkinsHome]["env"]['sshCharaArgs']       = '("scalatest@chara.epfl.ch" "-i" "/home/jenkins/.ssh/for_chara")'
     default["jenkinsHomes"][jenkinsHome]["env"]['sbtCmd']             = File.join(node['sbt-extras']['setup_dir'], node['sbt-extras']['script_name']) # sbt-extras
