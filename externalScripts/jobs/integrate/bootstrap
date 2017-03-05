@@ -4,4 +4,37 @@ baseDir=${WORKSPACE-`pwd`}
 scriptsDir="$baseDir/scripts"
 . $scriptsDir/common
 
-source $scriptsDir/jobs/integrate/bootstrap
+function containsCommit(){
+  local mb=$(git merge-base $1 HEAD 2> /dev/null)
+  [[ $1 != "" && $mb == $1 ]]
+}
+
+# - changed default repo from "scala-release-temp" to "scala-integration"
+# - renamed $releaseTempRepoUrl to $integrationRepoUrl
+rIntegrationRepo212=9b6820f259a7583671ae910a63d6e6d95a5e7cdf
+rIntegrationRepo211=not-yet-backported
+function fIntegrationRepo(){
+  source $scriptsDir/jobs/integrate/bootstrap
+}
+
+# - introducded the $releaseTempRepoUrl variable
+rReleaseTempVarName=706d68f863ebffb0f63811afe0835c5f975ba225
+function fReleaseTempVarName(){
+  releaseTempRepoUrl="https://scala-ci.typesafe.com/artifactory/scala-integration/"
+  source $scriptsDir/jobs/integrate/bootstrap
+}
+
+# TODO: support older revisions
+
+# main
+if containsCommit $rIntegrationRepo212 || containsCommit $rIntegrationRepo211; then
+  fIntegrationRepo
+
+else if containsCommit $rReleaseTempVarName; then
+  fReleaseTempVarName
+
+else
+  echo "Cannot build revision $(git rev-parse HEAD)"
+  exit 42
+
+fi
