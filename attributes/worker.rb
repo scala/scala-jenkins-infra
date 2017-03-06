@@ -1,4 +1,4 @@
-default['sbt']['version'] = "0.13.12"
+default['sbt']['version'] = "0.13.13"
 
 workerJavaOpts = "-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4"
 
