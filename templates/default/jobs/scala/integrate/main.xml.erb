@@ -11,7 +11,7 @@
       {:name => "publishToSonatype",    :desc => "[For bootstrap] Set to anything but &quot;yes&quot; to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published."},
       {:name => "testStability",        :desc => "[For bootstrap] To avoid running the stability test, set to e.g., `no`", :default => "yes"},
       {:name => "moduleVersioning",     :desc => "[For bootstrap] Set to anything but &quot;versions.properties&quot; to build the latest HEAD for all modules."},
-      {:name => "SCALA_VER_BASE",       :desc => "[For bootstrap] Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version), a -nightly release is built."},
+      {:name => "SCALA_VER_BASE",       :desc => "[For bootstrap] Specifying this parameter will cause a release to be built. If it&apos;s empty (and HEAD does not have a tag that parses as a version), an integration release is built."},
       {:name => "SCALA_VER_SUFFIX",     :desc => "[For bootstrap] Empty for a final release, otherwise, e.g., -RC1 for the first RC or -M3 for the third milestone. (Will be parsed from the tag on SCALA_REF, if any.)"},
       {:name => "SCALA_BINARY_VER",     :desc => "[For bootstrap] For binary compatible releases (such as 2.11.0 and 2.11.1), the short binary version (e.g. 2.11). Otherwise, the full Scala version."},
       {:name => "SCALA_FULL_VER",       :desc => "[For bootstrap] For non-snapshot releases, the scala version, otherwise the closest scala version that&apos;s a valid binary version. Used to cross-version the scala continuations plugin."},

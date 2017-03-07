@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+baseDir=${WORKSPACE-`pwd`}
+scriptsDir="$baseDir/scripts"
+. $scriptsDir/common
+
+cd $baseDir
+
+function containsCommit(){
+  local mb=$(git merge-base $1 HEAD 2> /dev/null)
+  [[ $1 != "" && $mb == $1 ]]
+}
+
+rNewVersionFormat212=18b8f932928bbc440d68babd1270c0bd5406d4fd
+rNewVersionFormat211=not-yet-backported
+function fNewVersionFormat(){
+  source $scriptsDir/jobs/integrate/bootstrap
+}
+
+function setNewScalaVersionStyle(){
+  publishToSonatype="no"
+
+  # change to use `generateBuildCharacterPropertiesFile` to get the scala version
+  local useBuildCharacter=e2b6c7b608b82fca5343f6d09236c2b48b5d824d
+  if containsCommit $useBuildCharacter; then
+    $SBT_CMD 'set baseVersionSuffix in Global := "UNUSED-SUFFIX"' generateBuildCharacterPropertiesFile
+    parseScalaProperties "buildcharacter.properties"
+    SCALA_VER_BASE=$maven_version_base
+  else
+    parseScalaProperties "build.number"
+    SCALA_VER_BASE="$version_major.$version_minor.$version_patch"
+  fi
+
+  local shaSuffix=$(git rev-parse HEAD | cut -c1-7)
+  local cross="bin"
+  if [[ $SCALA_VER_BASE =~ ^.*\.0$ ]]; then
+    cross="pre"
+  fi
+  SCALA_VER_SUFFIX="-$cross-$shaSuffix"
+}
+
+# - changed default repo from "scala-release-temp" to "scala-integration"
+# - renamed $releaseTempRepoUrl to $integrationRepoUrl
+rIntegrationRepo212=9b6820f259a7583671ae910a63d6e6d95a5e7cdf
+rIntegrationRepo211=not-yet-backported
+function fIntegrationRepo(){
+  setNewScalaVersionStyle
+  source $scriptsDir/jobs/integrate/bootstrap
+}
+
+# - introducded the $releaseTempRepoUrl variable
+rReleaseTempVarName=706d68f863ebffb0f63811afe0835c5f975ba225
+function fReleaseTempVarName(){
+  setNewScalaVersionStyle
+  releaseTempRepoUrl="https://scala-ci.typesafe.com/artifactory/scala-integration/"
+  source $scriptsDir/jobs/integrate/bootstrap
+}
+
+# TODO: support older revisions
+
+# main
+if containsCommit $rNewVersionFormat212 || containsCommit $rNewVersionFormat211; then
+  fNewVersionFormat
+
+if containsCommit $rIntegrationRepo212 || containsCommit $rIntegrationRepo211; then
+  fIntegrationRepo
+
+else if containsCommit $rReleaseTempVarName; then
+  fReleaseTempVarName
+
+else
+  echo "Cannot build revision $(git rev-parse HEAD)"
+  exit 42
+
+fi

@@ -394,7 +394,7 @@ The jenkins token for scabot has to be configured manually:
 
  - Set admin password.
  - create repos (TODO: automate)
- - Create scala-ci user that can push to scala-release-temp and scala-pr-validation-snapshots,
+ - Create scala-ci user that can push to scala-integration and scala-pr-validation-snapshots,
  - coordinate scala-ci credentials with jenkins via
 ```
 knife vault update worker-publish private-repo -J private-repo.json
