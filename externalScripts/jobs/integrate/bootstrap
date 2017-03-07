@@ -62,7 +62,7 @@ function fReleaseTempVarName(){
 if containsCommit $rNewVersionFormat212 || containsCommit $rNewVersionFormat211; then
   fNewVersionFormat
 
-if containsCommit $rIntegrationRepo212 || containsCommit $rIntegrationRepo211; then
+else if containsCommit $rIntegrationRepo212 || containsCommit $rIntegrationRepo211; then
   fIntegrationRepo
 
 else if containsCommit $rReleaseTempVarName; then
