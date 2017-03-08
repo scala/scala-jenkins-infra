@@ -4,6 +4,9 @@ baseDir=${WORKSPACE-`pwd`}
 scriptsDir="$baseDir/scripts"
 . $scriptsDir/common
 
+# adapted from the boostrap script in scala/scala
+sbtArgs="-no-colors -ivy $baseDir/ivy2 -Dsbt.global.base=$HOME/.sbt/0.13 -sbt-dir $HOME/.sbt/0.13"
+
 cd $baseDir
 
 function containsCommit(){
@@ -11,7 +14,11 @@ function containsCommit(){
   [[ $1 != "" && $mb == $1 ]]
 }
 
-rNewVersionFormat212=18b8f932928bbc440d68babd1270c0bd5406d4fd
+# - changed version number format to 2.12.2-bin-sha7
+# - changed relese repo from "scala-release-temp" to "scala-integration" (for "quick" and modules)
+# - new $integrationRepoUrl variable to overwrite that repo url
+# - $releaseTempRepoUrl is unchanged, still used to published "starr" and "locker"
+rNewVersionFormat212=8dc0dd4582314d99d5a4fc427933116339b497ed
 rNewVersionFormat211=not-yet-backported
 function fNewVersionFormat(){
   source $scriptsDir/jobs/integrate/bootstrap
@@ -23,7 +30,7 @@ function setNewScalaVersionStyle(){
   # change to use `generateBuildCharacterPropertiesFile` to get the scala version
   local useBuildCharacter=e2b6c7b608b82fca5343f6d09236c2b48b5d824d
   if containsCommit $useBuildCharacter; then
-    $SBT_CMD 'set baseVersionSuffix in Global := "UNUSED-SUFFIX"' generateBuildCharacterPropertiesFile
+    $SBT_CMD $sbtArgs 'set baseVersionSuffix in Global := "UNUSED-SUFFIX"' generateBuildCharacterPropertiesFile
     parseScalaProperties "buildcharacter.properties"
     SCALA_VER_BASE=$maven_version_base
   else
@@ -39,15 +46,6 @@ function setNewScalaVersionStyle(){
   SCALA_VER_SUFFIX="-$cross-$shaSuffix"
 }
 
-# - changed default repo from "scala-release-temp" to "scala-integration"
-# - renamed $releaseTempRepoUrl to $integrationRepoUrl
-rIntegrationRepo212=9b6820f259a7583671ae910a63d6e6d95a5e7cdf
-rIntegrationRepo211=not-yet-backported
-function fIntegrationRepo(){
-  setNewScalaVersionStyle
-  source $scriptsDir/jobs/integrate/bootstrap
-}
-
 # - introducded the $releaseTempRepoUrl variable
 rReleaseTempVarName=706d68f863ebffb0f63811afe0835c5f975ba225
 function fReleaseTempVarName(){
@@ -61,9 +59,6 @@ function fReleaseTempVarName(){
 # main
 if containsCommit $rNewVersionFormat212 || containsCommit $rNewVersionFormat211; then
   fNewVersionFormat
-
-elif containsCommit $rIntegrationRepo212 || containsCommit $rIntegrationRepo211; then
-  fIntegrationRepo
 
 elif containsCommit $rReleaseTempVarName; then
   fReleaseTempVarName
