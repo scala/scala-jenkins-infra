@@ -51,6 +51,9 @@ rReleaseTempVarName=706d68f863ebffb0f63811afe0835c5f975ba225
 function fReleaseTempVarName(){
   setNewScalaVersionStyle
   releaseTempRepoUrl="https://scala-ci.typesafe.com/artifactory/scala-integration/"
+  # note: `removeExistingBuilds` in the bootstrap script won't work correctly, as it has
+  # `scala-release-temp` hard-coded. it will use a wrong query url, which (hopefully) doesn't
+  # return anything to be removed..
   source $scriptsDir/jobs/integrate/bootstrap
 }
 
