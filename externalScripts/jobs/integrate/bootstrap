@@ -19,7 +19,7 @@ function containsCommit(){
 # - new $integrationRepoUrl variable to overwrite that repo url
 # - $releaseTempRepoUrl is unchanged, still used to published "starr" and "locker"
 rNewVersionFormat212=8dc0dd4582314d99d5a4fc427933116339b497ed
-rNewVersionFormat211=7be322cd7094249d9afb4d4d35df7bd36e70ec17
+rNewVersionFormat211=42f813e18160b6ea8dfc9c2ae850a67dd0819773
 function fNewVersionFormat(){
   source $scriptsDir/jobs/integrate/bootstrap
 }
