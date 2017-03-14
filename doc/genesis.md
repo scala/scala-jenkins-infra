@@ -235,6 +235,7 @@ knife vault create master scabot \
     },
     "github": {
       "scala":    {"token": "..."}
+      "lampepfl": {"token": "..."}
     }
   }
   --search 'name:jenkins-master' \
