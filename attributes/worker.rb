@@ -61,6 +61,7 @@ if (node.name =~ /.*-worker-.*/) != nil
 
   else
     jenkinsHome="/home/jenkins"
+    tmpdirJavaOpt="-Djava.io.tmpdir=#{jenkinsHome}/tmp"
     # If node name contains "-publish", configure it with necessary secrets/package to roll & publish a release
     publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
     lightWorker = publisher  # TODO: better heuristic...
@@ -94,9 +95,9 @@ if (node.name =~ /.*-worker-.*/) != nil
     default["jenkinsHomes"][jenkinsHome]["usage_mode"] = publisher ? "exclusive" : "normal"
     default["jenkinsHomes"][jenkinsHome]["labels"]     = ["linux", publisher ? "publish": "public"]
 
-    default["jenkinsHomes"][jenkinsHome]["env"]['JAVA_OPTS']          = workerJavaOpts
-    default["jenkinsHomes"][jenkinsHome]["env"]['ANT_OPTS']           = workerJavaOpts
-    default["jenkinsHomes"][jenkinsHome]["env"]['MAVEN_OPTS']         = workerJavaOpts
+    default["jenkinsHomes"][jenkinsHome]["env"]['JAVA_OPTS']          = "#{workerJavaOpts} #{tmpdirJavaOpt}"
+    default["jenkinsHomes"][jenkinsHome]["env"]['ANT_OPTS']           = "#{workerJavaOpts} #{tmpdirJavaOpt}"
+    default["jenkinsHomes"][jenkinsHome]["env"]['MAVEN_OPTS']         = "#{workerJavaOpts} #{tmpdirJavaOpt}"
     default["jenkinsHomes"][jenkinsHome]["env"]['prRepoUrl']          = node['repos']['private']['pr-snap']
     default["jenkinsHomes"][jenkinsHome]["env"]['integrationRepoUrl'] = node['repos']['private']['integration']
     default["jenkinsHomes"][jenkinsHome]["env"]['sbtLauncher']        = node['sbt']['launcher_path']
