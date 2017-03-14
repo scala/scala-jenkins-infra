@@ -32,7 +32,7 @@ buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
 testParams = buildParams + buildVersionProps
 
 parallel (
-    { retry(2, { build(testParams, "#{job("integrate/community-build")}") }) },
+    { ignore(FAILURE) { retry(2, { build(testParams, "#{job("integrate/community-build")}") }) } },
     { build(testParams, "#{job("release/package/unix")}") },
     { build(testParams, "#{job("release/package/windows")}") }
 )
