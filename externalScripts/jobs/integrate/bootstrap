@@ -17,10 +17,12 @@ function containsCommit(){
 # - changed version number format to 2.12.2-bin-sha7
 # - changed relese repo from "scala-release-temp" to "scala-integration" (for "quick" and modules)
 # - new $integrationRepoUrl variable to overwrite that repo url
-# - $releaseTempRepoUrl is unchanged, still used to published "starr" and "locker"
 rNewVersionFormat212=8dc0dd4582314d99d5a4fc427933116339b497ed
 rNewVersionFormat211=42f813e18160b6ea8dfc9c2ae850a67dd0819773
 function fNewVersionFormat(){
+  # in this revision, $releaseTempRepoUrl is still used to published "starr" and "locker". but in
+  # the end, we decided to use the same repo for "locker" and "quick", see https://github.com/scala/scala/pull/5780
+  releaseTempRepoUrl=${integrationRepoUrl:-"https://scala-ci.typesafe.com/artifactory/scala-integration/"}
   source $scriptsDir/jobs/integrate/bootstrap
 }
 
@@ -50,7 +52,7 @@ function setNewScalaVersionStyle(){
 rReleaseTempVarName=706d68f863ebffb0f63811afe0835c5f975ba225
 function fReleaseTempVarName(){
   setNewScalaVersionStyle
-  releaseTempRepoUrl="https://scala-ci.typesafe.com/artifactory/scala-integration/"
+  releaseTempRepoUrl=${integrationRepoUrl:-"https://scala-ci.typesafe.com/artifactory/scala-integration/"}
   # note: `removeExistingBuilds` in the bootstrap script won't work correctly, as it has
   # `scala-release-temp` hard-coded. it will use a wrong query url, which (hopefully) doesn't
   # return anything to be removed..
