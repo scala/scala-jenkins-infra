@@ -11,7 +11,7 @@ function jvmSelect(){
 
   # find first jdk home, where home is one dir up from where javac is
   for javacCmd in $eligibleCmds; do
-    if [ ! -d "$jdkHome" ] && ($javacCmd -version 2>&1 | grep "javac 1\.$jvmMajorVersion" &> /dev/null); then
+    if [ ! -d "$jdkHome" ] && ($javacCmd -version 2>&1 | egrep "javac ($jvmMajorVersion|1\.$jvmMajorVersion)\b" &> /dev/null); then
       jdkHome=$(cd $(dirname $javacCmd)/.. && pwd)
     fi
   done
