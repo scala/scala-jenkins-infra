@@ -48,6 +48,7 @@ Tips for addressing a temporary free-space issue on the behemoths:
 * Alternatively, on the command line, in `/home/jenkins/workspace`,
   you can blow away `*/{dbuild,clones,target}-*`.  (Not while a
   community build job is running!)
+* From time to time we can delete `~/.dbuild`, `~/.ivy2`, `~/.m2`
 
 ## Updating the scala-jenkins-infra cookbook
 
