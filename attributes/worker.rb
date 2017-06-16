@@ -19,7 +19,7 @@ if (node.name =~ /.*-worker-.*/) != nil
     jvmBin                           = "/cygdrive/c#{jvmHome}/bin"
   
     # deal with weirdness in java using registry keys to find the homedir (c:\users\jenkins), instead of the cygin home (/home/jenkins or y:\jenkins)
-    jvmDirOptions = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp}" # jenkins doesn't quote properly
+    jvmDirOptions = "-Duser.home=#{jenkinsHome.gsub(/\\/,'/')} -Djava.io.tmpdir=#{jenkinsTmp} -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native" # jenkins doesn't quote properly
 
     # If node name contains "-publish", configure it with necessary secrets/package to roll & publish a release
     publisher = (node.name =~ /.*-publish.*/) != nil # TODO: use tag?
