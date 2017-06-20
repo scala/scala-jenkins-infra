@@ -47,38 +47,44 @@ knife cookbook site install nodejs
 
 ### Current cookbooks
 
- - 7-zip               ==  1.0.2
- - apt                 ==  2.7.0
- - ark                 ==  0.9.0
- - aws                 ==  2.7.0
- - build-essential     ==  2.2.3
- - chef-client         ==  4.3.0
- - chef_handler        ==  1.1.6
- - cron                ==  1.6.1
- - delayed_evaluator   ==  0.2.0
- - dmg                 ==  2.2.2
- - ebs                 ==  0.3.6
- - git                 ==  4.2.2
- - git_user            ==  0.3.1
- - homebrew            ==  2.1.2
- - java                ==  1.39.0
- - logrotate           ==  1.9.1
- - nodejs              ==  2.4.4
- - packagecloud        ==  0.0.17
- - partial_search      ==  1.0.8
- - runit               ==  1.6.0
- - sbt                 ==  0.1.0
- - sbt-extras          ==  0.4.0
- - ssh_known_hosts     ==  2.0.0
- - user                ==  0.4.2
- - windows             ==  1.36.6
- - yum                 ==  3.6.0
- - yum-epel            ==  0.6.0
+  - apt (6.1.2)
+  - ark (2.2.1)
+  - artifactory (2.0.0)
+  - aws (4.1.3)
+  - build-essential (7.0.3)
+  - chef-client (7.1.0)
+  - chef-vault (1.3.0)
+  - chocolatey (1.1.0)
+  - compat_resource (12.19.0)
+  - cron (3.0.0)
+  - delayed_evaluator (0.2.0)
+  - dmg (2.2.2)
+  - dpkg_autostart (0.2.0)
+  - ebs (0.3.6)
+  - git (4.2.2)
+  - git_user (0.3.1)
+  - homebrew (2.1.2)
+  - java (1.39.0)
+  - jenkins (5.0.2)
+  - logrotate (2.1.0)
+  - magic_shell (1.0.1)
+  - mingw (1.2.5)
+  - nodejs (2.4.4)
+  - ohai (4.2.3)
+  - packagecloud (0.3.0)
+  - partial_search (1.0.8)
+  - runit (1.7.0)
+  - sbt-extras (0.4.0)
+  - scala-jenkins-infra (0.6.0)
+  - seven_zip (2.0.2)
+  - ssh_known_hosts (2.0.0)
+  - user (0.4.2)
+  - windows (2.1.1)
+  - yum-epel (2.1.2)
 
 ### Switch to unreleased versions from github
 
 ```
-knife cookbook github install adriaanm/jenkins/fix305  # custom fixes + https://github.com/opscode-cookbooks/jenkins/pull/313 (b-dean/jenkins/http_ca_fixes)
 knife cookbook github install gildegoma/chef-sbt-extras
 knife cookbook github install adriaanm/artifactory
 ```

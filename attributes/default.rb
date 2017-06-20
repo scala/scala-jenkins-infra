@@ -65,6 +65,7 @@ if node.name == "jenkins-master"
   override['jenkins']['master']['group']          = 'jenkins'
 
   override['jenkins']['java'] = '/usr/lib/jvm/java-1.8.0/bin/java' # need java 8!
+  override['jenkins']['executor']['protocol'] = false # jenkins 1.x does not support specifying the remoting protocol for the cli
 
   # NOTES on override['jenkins']['master']['jvm_options']:
   #  - org.eclipse.jetty.server.Request.maxFormContentSize is to fix:

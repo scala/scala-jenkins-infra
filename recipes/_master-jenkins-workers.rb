@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: scala-jenkins-infra
-# Recipe:: _master-config-workers
+# Recipe:: _master-jenkins-workers
 #
 # Copyright 2014, Typesafe, Inc.
 #
@@ -25,6 +25,11 @@ credentialsMap.each do |userName, uniqId|
   jenkins_private_key_credentials userName.dup do # dup is workaround for jenkins cookbook doing a gsub! in convert_to_groovy
     id uniqId
     private_key privKey
+    # https://github.com/chef-cookbooks/jenkins/issues/591#issuecomment-300873666
+    not_if do
+      credentials_file = '/var/lib/jenkins/credentials.xml'
+      File.exist?(credentials_file) && File.readlines(credentials_file).grep(/Credentials for #{userName} - created by Chef/).any?
+    end
   end
 end
 
