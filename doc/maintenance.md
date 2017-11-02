@@ -164,6 +164,19 @@ Confirm values in the csr using:
 $ openssl req -text -noout -in scala-ci.csr
 ```
 
+# Give up, bypass Chef?
+
+When automating something Chef is too painful, we sometimes just make
+a change manually.  This has obvious downsides:
+
+* if the node needs to be recreated, we'll lose the manual change
+* we could easily lose or forget about the manual change other
+  ways, too
+
+As a matter of policy, if you do anything manually, please add
+an entry to
+https://github.com/scala/scala-jenkins-infra/blob/master/automationPending.md
+that explains what you did, when, and why.
 
 # Troubleshooting
 
