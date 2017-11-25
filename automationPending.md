@@ -56,3 +56,8 @@ Update chef vault "worker-publish" / "gnupg" items "pubring-base64", "secring-ba
 ## Alternate JDK installation
 
 Jason installed, or plans to install, Graal, Java 9 and J9 JDKs on the behemoth-workers to support. I'll add a transcript here when I next update them.
+
+## cloc
+
+Seth did `sudo apt-get install cloc` on behemoth 2 so we can count lines of code in the
+Scala community build.
