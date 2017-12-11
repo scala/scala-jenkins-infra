@@ -61,3 +61,23 @@ Jason installed, or plans to install, Graal, Java 9 and J9 JDKs on the behemoth-
 
 Seth did `sudo apt-get install cloc` on behemoth 2 so we can count lines of code in the
 Scala community build.
+
+## curl
+
+Adriaan installed curl to /usr/bin/curl.exe (how?)
+
+## ant
+
+Adriaan installed ant to /cygdrive/c/apache-ant-1.9.6: "just unzip the archive and set ANT_HOME and PATH accordingly in windows node env vars", he writes
+
+## Git
+
+Seth installed Git 2.5.3 to /cygdrive/c/Program Files (x86)/Git-2.5.3 by downloading a GUI-based installer from https://git-for-windows.github.io (I think it was from there and not http://www.git-scm.com, or does it even matter?) and running it through CoRD.
+
+the needed longpaths setting is done through Chef via recipes/_worker-config-windows-cygwin.rb
+
+## JDK 8
+
+"we have also contemplated manually installing JDK 8 as a quick and
+dirty way to get the 2.12 tests running on Windows (#142)" -- did this happen?
+not sure
