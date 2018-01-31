@@ -17,8 +17,8 @@ default['repos']['caching-proxy']['jcenter']['url']      = "https://#{scalaCiHos
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
-# bumped to sbt-extras as of Oct 21 2016 (0.13.13-RC3)
-default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/ab365a8354a493fa90deabfd7884da0bed976c8b/sbt"
+# bumped to sbt-extras as of 30 Jan 2018 (commit date 13 Dec 2017)
+default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/d28a7e41fdb49941e8ba7d50cdb9f9cb98efd26a/sbt"
 
 # JAVA
 # TODO does this actually do anything???
