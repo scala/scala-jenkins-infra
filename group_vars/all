@@ -1,4 +1,4 @@
-admin_user: "ubuntu"
+admin_user: "root" # on ec2 images, this is "admin"
 master_jenkinsHost: "scala-ci.typesafe.com"
 scabot_port: 8888
 artifactory_port: 8282

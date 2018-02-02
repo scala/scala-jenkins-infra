@@ -6,9 +6,9 @@
     state: present
     key: https://github.com/adriaanm.keys
 
-# - name: Add repo with older Java
-#   become: true
-#   apt_repository: repo='ppa:openjdk-r/ppa'
+- name: Add repo for Java 9 backports
+  become: true
+  apt_repository: repo='deb http://ftp.debian.org/debian stretch-backports main'
 #
 # - name: Install java 6
 #   become: true
@@ -24,7 +24,7 @@
 
 - name: Install java 9
   become: true
-  apt: name=openjdk-9-jdk-headless state=present # https://bugs.launchpad.net/ubuntu/+source/openjdk-9/+bug/1593191
+  apt: name=openjdk-9-jdk state=present
 
 - name: Copy jvm-select script
   become: true
