@@ -15,19 +15,17 @@
     state: present
     key: "{{ scabot_public_key }}"
 
+- name: Register scabot service with systemd
+  copy: src=scabot.service dest=/etc/systemd/system
+
 - name: Configure scabot
   template: src=scabot.conf dest="{{scabot_home}}" owner="{{scabot_user}}"
 
 - name: Configure scabot (prod)
   template: src=scabot-production.conf dest="{{scabot_home}}" owner="{{scabot_user}}"
 
-# git_user scabot_user do
-#   home      scabot_home
-#   # owner     scabot_user
-#   full_name 'Scabot'
-#   email     'adriaan@lightbend.com'
-# end
-
+- name: Create scabot runner
+  template: src=run dest="{{scabot_home}}" owner="{{scabot_user}}" owner="{{scabot_user}}" mode="0755"
     
 - name: Checkout scabot repo
   become_user: "{{scabot_user}}"
@@ -36,13 +34,10 @@
     repo: 'https://github.com/scala/scabot.git'
     dest: "{{scabot_home}}/scabot"
 
-# - name: Owner is scabot
-#   file: dest="{{scabot_home}}/scabot" owner={{scabot_user}} mode=0775 recurse=yes
-
 - name: Git config denyCurrentBranch
   become_user: "{{scabot_user}}"
   become: yes
-  command: "git config receive.denyCurrentBranch ignore" # sudo -u {{scabot_user}} 
+  command: "git config receive.denyCurrentBranch ignore"
   args:
     chdir: "{{scabot_home}}/scabot/"
 
@@ -54,3 +49,6 @@
   command: "scripts/stage"
   args:
     chdir: "{{scabot_home}}/scabot/"
+
+- name: Run scabot, run!
+  systemd: state=started name=scabot
