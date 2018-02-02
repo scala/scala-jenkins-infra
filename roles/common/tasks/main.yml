@@ -9,23 +9,40 @@
 - name: Add repo for Java 9 backports
   become: true
   apt_repository: repo='deb http://ftp.debian.org/debian stretch-backports main'
-#
-# - name: Install java 6
-#   become: true
-#   apt: name=openjdk-6-jdk state=present
-#
-# - name: Install java 7
-#   become: true
-#   apt: name=openjdk-7-jdk state=present
 
-- name: Install java 8
+- name: Install openjdk
   become: true
-  apt: name=openjdk-8-jdk state=present
-
-- name: Install java 9
-  become: true
-  apt: name=openjdk-9-jdk state=present
+  apt: name={{item}} state=installed
+  with_items:
+       # - openjdk-6-jdk
+       # - openjdk-7-jdk
+       - openjdk-8-jdk
+       - openjdk-9-jdk
 
 - name: Copy jvm-select script
   become: true
   copy: src=jvm-select dest=/usr/local/share/jvm/ owner=root mode=755
+
+
+- name: Install basic packages
+  become: true
+  apt: name={{item}} state=installed
+  with_items:
+       - ant
+       - ant-contrib
+       - ant-optional
+       - maven
+       - s3curl
+       - tofrodos
+
+- name: Create sbt launcher path
+  become: true
+  file: path="{{sbt_launcher_path}}" state=directory
+
+- name: Download sbt launcher
+  become: true
+  get_url:
+      url: "https://repo.lightbend.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/{{ sbt_version }}/sbt-launch.jar"
+      dest: "{{sbt_launcher_path}}"
+      owner: root
+      mode: 755

@@ -3,3 +3,5 @@ master_jenkinsHost: "scala-ci.typesafe.com"
 scabot_port: 8888
 artifactory_port: 8282
 jenkins_master_port: 8080
+sbt_launcher_path: "/usr/local/lib/share/"
+sbt_version: "0.13.13"
