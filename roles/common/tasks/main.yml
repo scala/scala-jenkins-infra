@@ -10,6 +10,10 @@
 #   become: true
 #   apt_repository: repo='ppa:openjdk-r/ppa'
 #
+# - name: Install java 6
+#   become: true
+#   apt: name=openjdk-6-jdk state=present
+#
 # - name: Install java 7
 #   become: true
 #   apt: name=openjdk-7-jdk state=present
@@ -21,3 +25,7 @@
 - name: Install java 9
   become: true
   apt: name=openjdk-9-jdk-headless state=present # https://bugs.launchpad.net/ubuntu/+source/openjdk-9/+bug/1593191
+
+- name: Copy jvm-select script
+  become: true
+  copy: src=jvm-select dest=/usr/local/share/jvm/ owner=root mode=755
