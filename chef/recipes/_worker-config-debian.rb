@@ -1,23 +1,32 @@
-#
-# Cookbook Name:: scala-jenkins-infra
-# Recipe:: _worker-config-debian
-#
-# Copyright 2014, Typesafe, Inc.
-#
-# All rights reserved - Do Not Redistribute
-#
 
-# This can only be run *after* bootstrap due to vault dependency
-# thus, factored out of worker-linux.
-# Also, it needs to run on every reboot of the worker instance(s),
-# since jenkins's home dir is mounted on ephemeral storage (see chef/userdata/ubuntu-publish-c3.xlarge)
 
-require 'cgi'
-require 'base64'
+  directory jenkinsHome do
+    owner workerConfig["jenkinsUser"]
+#    mode 00755  -- TODO: enable on linux, but NOT on windows, as it causes permissions problems (no idea how to fix)
+    action :create
+  end
 
-%w{ant ant-contrib ant-optional maven s3curl tofrodos}.each do |pkg|
-  package pkg
-end
+  directory "#{jenkinsHome}/.ssh" do
+    owner workerConfig["jenkinsUser"]
+#    mode  '700' -- TODO: enable on linux, but NOT on windows, as it causes permissions problems (no idea how to fix)
+  end
+
+  # for use by java.io.tmpdir since /tmp may not have enough space
+  directory "#{jenkinsHome}/tmp" do
+    owner workerConfig["jenkinsUser"]
+  end
+
+  file "#{jenkinsHome}/.ssh/authorized_keys" do
+    owner workerConfig["jenkinsUser"]
+    mode  '600'
+    content chef_vault_item("master", "scala-jenkins-keypair")['public_key'] + "\n#{node['authorized_keys']['jenkins']}"
+  end
+
+    git_user workerConfig["jenkinsUser"] do
+      home        jenkinsHome
+      full_name   'Scala Jenkins'
+      email       'adriaan@lightbend.com'
+    end
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   jenkinsUser=workerConfig["jenkinsUser"]

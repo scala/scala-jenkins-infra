@@ -7,6 +7,25 @@
 # All rights reserved - Do Not Redistribute
 #
 
+# the regular resource approach does not work for me
+execute 'create jenkins user' do
+  command "net user /ADD #{workerConfig["jenkinsUser"]}"
+  not_if  "net user #{workerConfig["jenkinsUser"]}"
+end
+
+# also sets core.longpaths true
+# without longpaths enabled we have:
+# - known problems with `git clean -fdx` failing
+# - suspected problems with intermittent build failures due to
+#   very long paths to some classfiles
+cookbook_file 'gitconfig-windows' do
+  path "#{jenkinsHome}/.gitconfig"
+end
+
+user workerConfig["jenkinsUser"] do
+  home jenkinsHome
+end
+
 
 node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
   if workerConfig["publish"]
