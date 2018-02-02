@@ -5,6 +5,19 @@ scabotPort  = 8888
 # JENKINS WORKER CONFIG
 
 
+# ARTIFACTORY
+default['artifactory']['zip_url']            = 'https://dl.bintray.com/content/jfrog/artifactory/jfrog-artifactory-oss-4.7.4.zip?direct'
+default['artifactory']['zip_checksum']       = '05ccc6371a6adce0edb7d484a066e3556a660d9359b9bef594aad2128c1784f2'
+default['artifactory']['home']               = '/var/lib/artifactory'
+default['artifactory']['log_dir']            = '/var/lib/artifactory/logs'
+default['artifactory']['java']['xmx']        = '2g'
+default['artifactory']['java']['extra_opts'] = '-server'
+default['artifactory']['user']               = 'artifactory'
+default['artifactory']['proxyName']          = scalaCiHost
+default['artifactory']['proxyPort']          = scalaCiPort
+default['artifactory']['address']            = "localhost"
+default['artifactory']['port']               = 8282 # internal use over http
+
 default['repos']['private']['realm']        = "Artifactory Realm"
 default['repos']['private']['host']         = scalaCiHost
 default['repos']['private']['pr-snap']      = "https://#{scalaCiHost}/artifactory/scala-pr-validation-snapshots/"
@@ -17,17 +30,6 @@ default['repos']['caching-proxy']['jcenter']['url']      = "https://#{scalaCiHos
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 
-# bumped to sbt-extras as of Oct 21 2016 (0.13.13-RC3)
-default["sbt-extras"]["download_url"] = "https://raw.githubusercontent.com/paulp/sbt-extras/ab365a8354a493fa90deabfd7884da0bed976c8b/sbt"
-
-# JAVA
-# TODO does this actually do anything???
-# it seemed I had to do a `node.set['java']['jdk_version'] = 8` on jenkins-master to actually get this to work
-default['java']['jdk_version']    = '8'
-default['java']['install_flavor'] = 'openjdk'
-
-# the artifactory recipe does `node.set['java']['jdk_version'] = 7` unless this is false....
-default['artifactory']['install_java'] = false
 
 
 # attributes only needed on jenkins-master
@@ -45,18 +47,6 @@ if node.name == "jenkins-master"
   default['ebs']['volumes']['/var/lib/artifactory']['user']      = "artifactory"
   default['ebs']['volumes']['/var/lib/artifactory']['mountopts'] = 'noatime'
 
-  # ARTIFACTORY
-  default['artifactory']['zip_url']            = 'https://dl.bintray.com/content/jfrog/artifactory/jfrog-artifactory-oss-4.7.4.zip?direct'
-  default['artifactory']['zip_checksum']       = '05ccc6371a6adce0edb7d484a066e3556a660d9359b9bef594aad2128c1784f2'
-  default['artifactory']['home']               = '/var/lib/artifactory'
-  default['artifactory']['log_dir']            = '/var/lib/artifactory/logs'
-  default['artifactory']['java']['xmx']        = '2g'
-  default['artifactory']['java']['extra_opts'] = '-server'
-  default['artifactory']['user']               = 'artifactory'
-  default['artifactory']['proxyName']          = scalaCiHost
-  default['artifactory']['proxyPort']          = scalaCiPort
-  default['artifactory']['address']            = "localhost"
-  default['artifactory']['port']               = 8282 # internal use over http
 
   # JENKINS
   override['jenkins']['master']['install_method'] = 'war'
@@ -117,8 +107,5 @@ if node.name == "jenkins-master"
   ## PLUGIN
   default['master']['ec2-start-stop']['url'] = 'https://dl.dropboxusercontent.com/u/12862572/ec2-start-stop.hpi'
 
-  # SCABOT
-  default['scabot']['jenkins']['user'] = "scala-jenkins"
-  default['scabot']['port'] = scabotPort
 
 end
