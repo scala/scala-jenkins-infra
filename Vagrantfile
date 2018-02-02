@@ -34,7 +34,7 @@ Vagrant.configure("2") do |config|
     machine.vm.provision "ansible" do |ansible|
       ansible.verbose = "v"
       ansible.playbook = "site.yml"
-      ansible.ask_vault_pass = true
+      ansible.vault_password_file = "bin/ask_vault_pw.sh"
     end
 
   end
