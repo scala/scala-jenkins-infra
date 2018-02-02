@@ -7,5 +7,4 @@ sbt_version: "0.13.13"
 sbt_extras_url: "https://raw.githubusercontent.com/paulp/sbt-extras/715a3a8ba9bf16796eee0b034143acb4594c1d2d/sbt"
 sbt_extras_path: '/usr/local/bin'
 
-scabot_jenkins_user: "scala-jenkins"
 scabot_port: 8888

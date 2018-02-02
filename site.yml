@@ -1,5 +1,5 @@
 ---
-- name: Install Nginx, Jenkins, Artifactory for scala-ci
+- name: Install Nginx, Scabot for scala-ci
   hosts: all
   remote_user: root
   become: true
@@ -7,3 +7,4 @@
   roles:
     - common
     - nginx
+    - scabot
