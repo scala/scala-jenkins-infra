@@ -27,6 +27,9 @@ Vagrant.configure("2") do |config|
       vb.cpus = 2
     end
 
+    machine.vm.provision "shell",
+       inline: "sudo apt-get update && sudo apt-get install python-dev python-pip -q -y"
+
     machine.vm.provision "ansible" do |ansible|
       ansible.verbose = "v"
       ansible.playbook = "site.yml"
