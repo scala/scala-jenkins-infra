@@ -16,6 +16,8 @@
        - openjdk-8-jdk
        - openjdk-9-jdk
 
+# TODO investigate https://github.com/sdkman/sdkman-cli
+
 - name: Copy jvm-select script
   copy: src=jvm-select dest=/usr/local/share/jvm/ owner=root mode=755
 
