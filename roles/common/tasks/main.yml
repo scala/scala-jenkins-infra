@@ -1,0 +1,7 @@
+---
+- name: Give adriaanm's github pubkey admin access
+  become: true
+  authorized_key:
+    user: "{{ admin_user }}"
+    state: present
+    key: https://github.com/adriaanm.keys
