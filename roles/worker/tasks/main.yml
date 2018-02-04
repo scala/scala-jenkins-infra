@@ -91,3 +91,5 @@
     name: nodejs
     state: present
 
+- include_tasks: publisher.yml
+  when: "'publisher' in group_names"

@@ -57,42 +57,42 @@
 
 
 
-
-# TODO      
-# - name: Create gpg sec/pub ring
-#   no_log: true
-#   copy: src={{item}} dest="{{jenkins_home}/.gnupg/" owner="{{jenkins_user}}" mode=0600
-#   with_items:
-#       - secring.gpg
-#       - pubring.gpg
 #
-
-template:
-    privateRepo = chef_vault_item("worker-publish", "private-repo")
-    s3Downloads = chef_vault_item("worker-publish", "s3-downloads")
-    sonatype    = chef_vault_item("worker-publish", "sonatype")
-
-    { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
-      "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
-      "#{jenkinsHome}/.credentials"              => "credentials-private-repo.erb",
-      "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
-      "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
-      "#{jenkinsHome}/.s3curl"                   => "s3curl.erb",
-      "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb" # TODO: remove pr-scala stuff, use different credentials for private-repo for PR validation and temp release artifacts
-    }.each do |target, templ|
-      template target do
-        source    templ
-        user      jenkinsUser
-        owner     jenkinsUser
-        mode      '600'
-        sensitive true
-
-        variables({
-          :privateRepo => privateRepo,
-          :s3Downloads => s3Downloads,
-          :sonatype    => sonatype
-        })
-        helpers(ScalaJenkinsInfra::JobBlurbs)
-      end
-    end
-
+# # TODO
+# # - name: Create gpg sec/pub ring
+# #   no_log: true
+# #   copy: src={{item}} dest="{{jenkins_home}/.gnupg/" owner="{{jenkins_user}}" mode=0600
+# #   with_items:
+# #       - secring.gpg
+# #       - pubring.gpg
+# #
+#
+# template:
+#     privateRepo = chef_vault_item("worker-publish", "private-repo")
+#     s3Downloads = chef_vault_item("worker-publish", "s3-downloads")
+#     sonatype    = chef_vault_item("worker-publish", "sonatype")
+#
+#     { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
+#       "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
+#       "#{jenkinsHome}/.credentials"              => "credentials-private-repo.erb",
+#       "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
+#       "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
+#       "#{jenkinsHome}/.s3curl"                   => "s3curl.erb",
+#       "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb" # TODO: remove pr-scala stuff, use different credentials for private-repo for PR validation and temp release artifacts
+#     }.each do |target, templ|
+#       template target do
+#         source    templ
+#         user      jenkinsUser
+#         owner     jenkinsUser
+#         mode      '600'
+#         sensitive true
+#
+#         variables({
+#           :privateRepo => privateRepo,
+#           :s3Downloads => s3Downloads,
+#           :sonatype    => sonatype
+#         })
+#         helpers(ScalaJenkinsInfra::JobBlurbs)
+#       end
+#     end
+#

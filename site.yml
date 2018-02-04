@@ -1,10 +1,25 @@
 ---
-- name: Install Nginx, Scabot for scala-ci
+- name: Common stuff
   hosts: all
   remote_user: root
   become: true
 
   roles:
     - common
+
+- name: Common stuff
+  hosts: master
+  remote_user: root
+  become: true
+  
+  roles:
     - nginx
     - scabot
+
+- name: Install Nginx, Scabot for scala-ci
+  hosts: publisher
+  remote_user: root
+  become: true
+
+  roles:
+    - worker
