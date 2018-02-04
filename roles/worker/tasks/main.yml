@@ -1,10 +1,33 @@
 ---
-# TODO: lrytz, retronym, SethTisue, szeiger
-- name: Give adriaanm's github pubkey admin access
-  authorized_key:
-    user: "{{ admin_user }}"
-    state: present
-    key: https://github.com/adriaanm.keys
+- name: Create jenkins user
+  user: name="{{jenkins_user}}"
+
+- name: Give core team access to jenkins user
+  authorized_key: user="{{jenkins_user}}" state="present" key="https://github.com/{{item}}.keys"
+  with_items:
+      - adriaanm
+      - lrytz
+      - SethTisue
+      - retronym
+      - szeiger
+
+- name: Create jenkins dirs
+  file: path={{item}} state=directory owner="{{jenkins_user}}" mode="0755"
+  with_items:
+      - "{{jenkins_home}}/tmp"
+      - "{{jenkins_home}}/.ssh"
+      - "{{jenkins_home}}/.m2"
+
+
+- name: Copy Maven settings (public jobs)
+  no_log: true
+  template: src="m2-settings-pub.xml" dest="{{jenkins_home}}/.m2/settings.xml"      owner="{{jenkins_user}}" mode="0600"
+
+- name: Copy Private repo credentials (public jobs)
+  no_log: true
+  template: src="credentials-private-repo-pub" dest="{{jenkins_home}}/.credentials" owner="{{jenkins_user}}" mode="0600"
+
+
 
 - name: Add apt repo for Java 9 backports
   apt_repository: repo='deb http://ftp.debian.org/debian stretch-backports main'
@@ -67,3 +90,4 @@
   apt:
     name: nodejs
     state: present
+

@@ -18,15 +18,6 @@ default['artifactory']['proxyPort']          = scalaCiPort
 default['artifactory']['address']            = "localhost"
 default['artifactory']['port']               = 8282 # internal use over http
 
-default['repos']['private']['realm']        = "Artifactory Realm"
-default['repos']['private']['host']         = scalaCiHost
-default['repos']['private']['pr-snap']      = "https://#{scalaCiHost}/artifactory/scala-pr-validation-snapshots/"
-default['repos']['private']['integration']  = "https://#{scalaCiHost}/artifactory/scala-integration/"
-
-default['repos']['caching-proxy']['central']['mirrorOf'] = "central" # TODO: add ",sonatype.release,sonatype.snapshot"
-default['repos']['caching-proxy']['central']['url']      = "https://#{scalaCiHost}/artifactory/central/"
-default['repos']['caching-proxy']['jcenter']['mirrorOf'] = "jcenter" # TODO: add ",sonatype.release,sonatype.snapshot"
-default['repos']['caching-proxy']['jcenter']['url']      = "https://#{scalaCiHost}/artifactory/jcenter/"
 
 default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
 

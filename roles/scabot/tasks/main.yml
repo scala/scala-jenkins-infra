@@ -36,7 +36,6 @@
 
 - name: Git config denyCurrentBranch
   become_user: "{{scabot_user}}"
-  become: yes
   command: "git config receive.denyCurrentBranch ignore"
   args:
     chdir: "{{scabot_home}}/scabot/"

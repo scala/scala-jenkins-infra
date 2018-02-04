@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-  <!--
+  <!-- 
     Maven repos are not safe for concurrent access, thus give each job its own.
     The WORKSPACE env var is set by jenkins to the path of the current job's workspace.
     This settings file will cause ant/maven to break if WORKSPACE is not set (to a writeable directory).
@@ -10,43 +10,35 @@
 
   <servers>
     <server>
-      <id>pr-scala</id>
-      <username><%= @privateRepo['user'] %></username>
-      <password><%= xmlSafe(@privateRepo['pass']) %></password>
+      <id>sonatype-nexus</id>
+      <username>{{sonatype_user}}</username>
+      <password>{{sonatype_pass | escape}}</password>
     </server>
+    <server>
+      <id>private-repo</id>
+      <username>{{repos_private_user}}</username>
+      <password>{{repos_private_pass | escape}}</password>
+    </server>
+    <!-- <server>
+      <id>mirror</id>
+      <username>jenkins</username>
+      <password></password>
+    </server> -->
   </servers>
-
-  <profiles>
-    <profile>
-      <id>pr-scala</id> <!-- for IDE integration, I think -->
-      <repositories>
-        <repository>
-          <id>pr-scala</id>
-          <name>Scala PR validation snapshots</name>
-          <url><%=node['repos']['private']['pr-snap']%></url>
-        </repository>
-        <repository>
-          <id>scala-integration</id>
-          <name>Scala Release snapshots</name>
-          <url><%=node['repos']['private']['integration']%></url>
-        </repository>
-      </repositories>
-    </profile>
-  </profiles>
 
   <mirrors>
     <mirror>
       <id>central-cache</id>
       <name>Central Cache for Scala CI</name>
-      <url>     <%=node['repos']['caching-proxy']['central']['url']%></url>
-      <mirrorOf><%=node['repos']['caching-proxy']['central']['mirrorOf']%></mirrorOf>
+      <url>     {{repos_caching_proxy_central_url}}</url>
+      <mirrorOf>{{repos_caching_proxy_central_mirrorOf}}</mirrorOf>
     </mirror>
 
     <mirror>
       <id>jcenter-cache</id>
       <name>JCenter Cache for Scala CI</name>
-      <url>     <%=node['repos']['caching-proxy']['jcenter']['url']%></url>
-      <mirrorOf><%=node['repos']['caching-proxy']['jcenter']['mirrorOf']%></mirrorOf>
+      <url>     {{repos_caching_proxy_jcenter_url}}</url>
+      <mirrorOf>{{repos_caching_proxy_jcenter_mirrorOf}}</mirrorOf>
     </mirror>
 
     <!--
@@ -63,5 +55,6 @@
       <mirrorOf>codehaus-snapshots</mirrorOf>
     </mirror>
   </mirrors>
+
 
 </settings>

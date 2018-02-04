@@ -1,0 +1,98 @@
+
+- name: Install packages needed to publish
+  apt: name="{{item}}" state=installed
+  with_items:
+       - jq
+       - curl
+       - zip
+       - xz-utils
+       - rpm
+       - dpkg
+       - lintian
+       - fakeroot
+       - graphviz
+
+# - name: Install old graphviz
+#     # NOTE: graphviz version 2.36.0 (20140111.2315) crashes during scaladoc:
+#     #       *** Error in `dot': corrupted double-linked list: 0x00000000019648c0 ***
+#     #       this caused some diagrams not to be rendered...
+#     #       Same for graphviz version 2.38.0 (20140413.2041):
+#     #       *** Error in `dot': corrupted double-linked list: 0x000000000196f5f0 ***
+#     # The old build server was on 2.28.0.... thus:
+#     #   sudo apt-get install gcc checkinstall libexpat-dev
+#     #   curl -O http://graphviz.org/pub/graphviz/stable/SOURCES/graphviz-2.28.0.tar.gz
+#     #   tar xvzf graphviz-2.28.0.tar.gz && cd graphviz-2.28.0/
+#     #   ./configure && make && sudo checkinstall
+#     deb = remote_file "#{Chef::Config[:file_cache_path]}/graphviz-#{node['graphviz']['version']}.deb" do
+#       source   node['graphviz']['url']
+#       checksum node['graphviz']['checksum']
+#       notifies :install, "dpkg_package[graphviz]"
+#     end
+#
+#     dpkg_package "graphviz" do
+#       source  deb.path
+#       version node['graphviz']['version']
+#       action :nothing # triggered by the corresponding remote_file above
+#     end
+
+- name: Create core dirs before populating them
+  file: path="{{jenkins_home}}/{{item}}" state=directory owner="{{jenkins_user}}" mode="0755" recurse="yes"
+  with_items:
+      - .ssh
+      - .gnupg
+      - .ivy2
+      - .m2
+      - .sbt/0.13/plugins
+
+- name: Add chara keypair
+  no_log: true
+  copy: src=for_chara dest="{{jenkins_home}}/.ssh/" owner="{{jenkins_user}}" mode=0600
+
+- name: Accept chara host key
+  become_user: "{{jenkins_user}}"
+  command: "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"{{jenkins_home}}/.ssh/for_chara\" true"
+
+- name: Add gpg sbt plugin
+  copy: src=gpg.sbt dest="{{jenkins_home}}/.sbt/0.13/plugins/" owner="{{jenkins_user}}"
+
+
+
+
+# TODO      
+# - name: Create gpg sec/pub ring
+#   no_log: true
+#   copy: src={{item}} dest="{{jenkins_home}/.gnupg/" owner="{{jenkins_user}}" mode=0600
+#   with_items:
+#       - secring.gpg
+#       - pubring.gpg
+#
+
+template:
+    privateRepo = chef_vault_item("worker-publish", "private-repo")
+    s3Downloads = chef_vault_item("worker-publish", "s3-downloads")
+    sonatype    = chef_vault_item("worker-publish", "sonatype")
+
+    { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
+      "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
+      "#{jenkinsHome}/.credentials"              => "credentials-private-repo.erb",
+      "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
+      "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
+      "#{jenkinsHome}/.s3curl"                   => "s3curl.erb",
+      "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb" # TODO: remove pr-scala stuff, use different credentials for private-repo for PR validation and temp release artifacts
+    }.each do |target, templ|
+      template target do
+        source    templ
+        user      jenkinsUser
+        owner     jenkinsUser
+        mode      '600'
+        sensitive true
+
+        variables({
+          :privateRepo => privateRepo,
+          :s3Downloads => s3Downloads,
+          :sonatype    => sonatype
+        })
+        helpers(ScalaJenkinsInfra::JobBlurbs)
+      end
+    end
+
