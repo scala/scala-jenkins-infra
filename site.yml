@@ -7,17 +7,17 @@
   roles:
     - common
 
-- name: Common stuff
+- name: Install nginx and scabot on the master
   hosts: master
   remote_user: root
   become: true
-  
+
   roles:
     - nginx
     - scabot
 
-- name: Install Nginx, Scabot for scala-ci
-  hosts: publisher
+- name: Configure a publisher worker
+  hosts: worker
   remote_user: root
   become: true
 

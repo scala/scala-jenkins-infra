@@ -25,7 +25,7 @@
 
 - name: Copy Private repo credentials (public jobs)
   no_log: true
-  template: src="credentials-private-repo-pub" dest="{{jenkins_home}}/.credentials" owner="{{jenkins_user}}" mode="0600"
+  template: src="credentials-private-repo" dest="{{jenkins_home}}/.credentials" owner="{{jenkins_user}}" mode="0600"
 
 
 

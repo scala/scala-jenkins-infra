@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
     ansible.playbook = "site.yml"
     
     ansible.groups = {
+          "worker" => ["jenkins-worker-publisher"],
           "publisher" => ["jenkins-worker-publisher"],
           "master" => ["jenkins-master"]
         }

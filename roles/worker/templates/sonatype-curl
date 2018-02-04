@@ -1,1 +1,1 @@
-user = <%= @sonatype['user'] %>:<%= @sonatype['pass'] %>
+user = {{ sonatype_user }}:{{ sonatype_pass }}

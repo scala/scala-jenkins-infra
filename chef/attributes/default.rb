@@ -19,8 +19,6 @@ default['artifactory']['address']            = "localhost"
 default['artifactory']['port']               = 8282 # internal use over http
 
 
-default['s3']['downloads']['host'] = "downloads.typesafe.com.s3.amazonaws.com"
-
 
 
 # attributes only needed on jenkins-master

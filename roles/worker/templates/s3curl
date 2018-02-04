@@ -1,6 +1,6 @@
 %awsSecretAccessKeys = (
     typesafe => {
-        id  => '<%= @s3Downloads['user'] %>',
-        key => '<%= @s3Downloads['pass'] %>',
+        id  => '{{s3_downloads_user}}',
+        key => '{{s3_downloads_pass}}',
     }
 )

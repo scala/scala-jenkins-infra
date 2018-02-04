@@ -1,3 +1,4 @@
+---
 
 - name: Install packages needed to publish
   apt: name="{{item}}" state=installed
@@ -55,8 +56,6 @@
 - name: Add gpg sbt plugin
   copy: src=gpg.sbt dest="{{jenkins_home}}/.sbt/0.13/plugins/" owner="{{jenkins_user}}"
 
-
-
 #
 # # TODO
 # # - name: Create gpg sec/pub ring
@@ -67,32 +66,14 @@
 # #       - pubring.gpg
 # #
 #
-# template:
-#     privateRepo = chef_vault_item("worker-publish", "private-repo")
-#     s3Downloads = chef_vault_item("worker-publish", "s3-downloads")
-#     sonatype    = chef_vault_item("worker-publish", "sonatype")
-#
-#     { "#{jenkinsHome}/.credentials-private-repo" => "credentials-private-repo.erb",
-#       "#{jenkinsHome}/.credentials-sonatype"     => "credentials-sonatype.erb",
-#       "#{jenkinsHome}/.credentials"              => "credentials-private-repo.erb",
-#       "#{jenkinsHome}/.sonatype-curl"            => "sonatype-curl.erb",
-#       "#{jenkinsHome}/.s3credentials"            => "s3credentials.erb",
-#       "#{jenkinsHome}/.s3curl"                   => "s3curl.erb",
-#       "#{jenkinsHome}/.m2/settings.xml"          => "m2-settings.xml.erb" # TODO: remove pr-scala stuff, use different credentials for private-repo for PR validation and temp release artifacts
-#     }.each do |target, templ|
-#       template target do
-#         source    templ
-#         user      jenkinsUser
-#         owner     jenkinsUser
-#         mode      '600'
-#         sensitive true
-#
-#         variables({
-#           :privateRepo => privateRepo,
-#           :s3Downloads => s3Downloads,
-#           :sonatype    => sonatype
-#         })
-#         helpers(ScalaJenkinsInfra::JobBlurbs)
-#       end
-#     end
-#
+
+- name: Copy private credentials
+  no_log: true
+  template: src="{{item.src}}" dest="{{jenkins_home}}/{{item.dest}}" owner="{{jenkins_user}}" mode="0600"
+  with_items:
+      - { dest: ".credentials-private-repo",  src: "credentials-private-repo" }
+      - { dest: ".credentials-sonatype",      src: "credentials-sonatype" }
+      - { dest: ".sonatype-curl",             src: "sonatype-curl" }
+      - { dest: ".s3credentials",             src: "s3credentials" }
+      - { dest: ".s3curl",                    src: "s3curl" }
+      - { dest: ".m2/settings.xml",           src: "m2-settings.xml" } # TODO: remove pr-scala stuff, use different  credentials for private-repo for PR validation and temp release artifacts
