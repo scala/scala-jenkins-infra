@@ -45,19 +45,20 @@
       - .m2
       - .sbt/0.13/plugins
 
-- name: Add chara keypair
-  no_log: true
-  copy: src=for_chara dest="{{jenkins_home}}/.ssh/" owner="{{jenkins_user}}" mode=0600
+# TODO: regen keypair
+# - name: Add chara keypair
+#   no_log: true
+#   copy: src=for_chara dest="{{jenkins_home}}/.ssh/" owner="{{jenkins_user}}" mode=0600
 
-- name: Accept chara host key
-  become_user: "{{jenkins_user}}"
-  command: "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"{{jenkins_home}}/.ssh/for_chara\" true"
+# - name: Accept chara host key
+#   become_user: "{{jenkins_user}}"
+#   command: "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"{{jenkins_home}}/.ssh/for_chara\" true"
 
 - name: Add gpg sbt plugin
   copy: src=gpg.sbt dest="{{jenkins_home}}/.sbt/0.13/plugins/" owner="{{jenkins_user}}"
 
 #
-# # TODO
+# # TODO: regen keypair, import private key instead of serializing secring/pubring?
 # # - name: Create gpg sec/pub ring
 # #   no_log: true
 # #   copy: src={{item}} dest="{{jenkins_home}/.gnupg/" owner="{{jenkins_user}}" mode=0600

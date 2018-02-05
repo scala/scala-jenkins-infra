@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
+      <description>PR validation -- called for every commit in every PR and every push</description>
+      <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+       <hudson.model.StringParameterDefinition>
+ <name>repo_name</name>
+ <description>The name of the repo to clone.</description>
+ <defaultValue>scala</defaultValue>
+       </hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.12.x</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>prDryRun</name>
+  <description/>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>antBuildArgs</name>
+  <description>Extra arguments for the ant build. For example, `-Dscalac.args="-Xcheckinit"`.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>testExtraArgs</name>
+  <description>Extra arguments for partest. For example, `-Dpartest.scalac_opts="-Xcheckinit"`.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>testTarget</name>
+  <description>Ant test targets to call. The default is 'test.core docs.done'.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>_scabot_pr</name>
+  <description>For internal use by Scabot.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>_scabot_last</name>
+  <description>For internal use by Scabot.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        
+      </properties>
+      <scm class="hudson.scm.NullSCM"/>
+      <canRoam>true</canRoam>
+      <concurrentBuild>true</concurrentBuild>
+      <dsl>repo_user   = build.buildVariableResolver.resolve("repo_user")
+repo_name   = build.buildVariableResolver.resolve("repo_name")
+repo_ref    = build.buildVariableResolver.resolve("repo_ref").take(6)
+_scabot_pr  = build.buildVariableResolver.resolve("_scabot_pr")
+build.setDisplayName("[${build.number}] $repo_user/$repo_name#$_scabot_pr at $repo_ref")
+
+
+upstreamBuild = build(params, "scala-2.12.x-validate-publish-core").build
+
+// for testing, to avoid re-running the main build:
+//   upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "scala-2.12.x-validate-publish-core"}.builds[0]
+
+// defines maven.version.number
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
+
+if (upstreamPropsArtifact == null) {
+  out.println('Error: publish-core did not publish "jenkins.properties" artifact, unable to proceed.')
+  build.state.setResult(Result.FAILURE)
+  return
+}
+
+buildVersionProps = new java.util.Properties()
+buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
+
+testParams = params + [ "scalaVersion" : buildVersionProps["maven.version.number"] ]
+
+parallel (
+   { build(testParams, "scala-2.12.x-validate-test") },
+   { retry(2, { build(testParams, "scala-2.12.x-integrate-ide") }) }
+)
+
+</dsl>
+
+</com.cloudbees.plugins.flow.BuildFlow>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+        <description>&lt;H1&gt;Run as part of the scala-2.12.0-release-main flow.&lt;/H1&gt;&lt;p&gt;It downloads the archives for a Scala release
+   from http://downloads.lightbend.com/scala/$version/index.html and
+   re-organizes them into the right hierarchy for scala-lang.org/files/archive.&lt;/p&gt;
+&lt;p&gt;Also expands api docs for library, reflect, compiler and other modules
+   to http://www.scala-lang.org/api/2.11.x/$module (it expands under api/$version).&lt;/p&gt;
+&lt;p&gt;When version ends in -nightly, the root for the expansion process
+   is http://www.scala-lang.org/files/archive/nightly/2.11.x/
+   instead of http://www.scala-lang.org/files/archive/&lt;/p&gt;
+   </description>
+        <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            <com.tikal.hudson.plugins.notification.Endpoint>
+              <protocol>HTTP</protocol>
+              <format>JSON</format>
+              <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+              <event>all</event>
+              <timeout>30000</timeout>
+            </com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+       <hudson.model.StringParameterDefinition>
+ <name>repo_name</name>
+ <description>The name of the repo to clone.</description>
+ <defaultValue>scala-dist</defaultValue>
+       </hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.12.0</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>version</name>
+  <description>The version of scala that we should download the archives for (from http://downloads.lightbend.com/scala/$version/index.html); e.g., 2.10.3-RC2</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        
+      </properties>
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
+  <configVersion>2</configVersion>
+  <userRemoteConfigs>
+    <hudson.plugins.git.UserRemoteConfig>
+      <name>${repo_user}</name>
+      <refspec>+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head</refspec>
+      <url>https://github.com/${repo_user}/${repo_name}.git</url>
+    </hudson.plugins.git.UserRemoteConfig>
+  </userRemoteConfigs>
+  <branches>
+    <hudson.plugins.git.BranchSpec>
+      <name>${repo_ref}</name>
+    </hudson.plugins.git.BranchSpec>
+  </branches>
+  <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+  <submoduleCfg class="list"/>
+  <extensions>
+  <hudson.plugins.git.extensions.impl.CleanCheckout/>
+  </extensions>
+</scm>
+
+        <assignedNode>linux &amp;&amp; publish</assignedNode>
+<canRoam>false</canRoam>
+        <concurrentBuild>false</concurrentBuild>
+        <builders>
+          <hudson.plugins.groovy.SystemGroovy plugin="groovy">
+  <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+    <command>repo_user = build.buildVariableResolver.resolve("repo_user")
+repo_name = build.buildVariableResolver.resolve("repo_name")
+repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+build.setDisplayName("[${build.number}] $repo_user/$repo_name#$repo_ref")
+</command>
+  </scriptSource>
+</hudson.plugins.groovy.SystemGroovy>
+
+          <hudson.tasks.Shell>
+  <command>#!/bin/bash -ex
+
+source scripts/jobs/release/website/archives
+  </command>
+</hudson.tasks.Shell>
+
+        </builders>
+        <buildWrappers>
+          <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
+             <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+               <timeoutMinutes>1440</timeoutMinutes>
+             </strategy>
+             <operationList/>
+          </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+          <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
+            <colorMapName>xterm</colorMapName>
+          </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+          <hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper plugin="logfilesizechecker@1.2">
+            <setOwn>false</setOwn>
+            <maxLogSize>0</maxLogSize>
+            <failBuild>true</failBuild>
+          </hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper>
+        </buildWrappers>
+
+</project>

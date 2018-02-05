@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+        <description>Run as part of the scala-2.11.x-release-main flow.&lt;p&gt;Builds and uploads the universal and unix-specific artifacts for a
+Scala release.&lt;br&gt;
+
+Specify a tag that exists on &lt;a href="https://github.com/scala/scala-dist"&gt;scala/scala-dist&lt;/a&gt;,&lt;br&gt; and that points to a
+version of scala-dist that&amp;apos;s available in one of the repositories listed in repositories-scala-release (see
+scala/jenkins-scripts), and sit back.&lt;p&gt;
+
+NOTE: the sbt build derives the version to build from the tag, which must thus be of the shape vNN.NN.NN-suffix for
+version NN.NN.NN-suffix&lt;p&gt;
+
+NOTE2: multiple tags on the same commit will lead to havoc -- you&amp;apos;ll have to create a new commit and tag it (or set
+sbtDistVersionOverride to -Dproject.version=$SCALA_VER)
+
+The downloads will be available at http://downloads.lightbend.com/scala/$ver/scala-$ver*
+   </description>
+        <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+       <hudson.model.StringParameterDefinition>
+ <name>repo_name</name>
+ <description>The name of the repo to clone.</description>
+ <defaultValue>scala-dist</defaultValue>
+       </hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.11.x</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>sbtDistTarget</name>
+  <description>To upload to S3, use s3-upload. A dry run (everything but uploading to S3): s3Upload::mappings</description>
+  <defaultValue>s3-upload</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>sbtDistVersionOverride</name>
+  <description>may be -Dproject.version=....  to override the version of the dist to build (only for testing, you should use tags for real releases!)</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        
+      </properties>
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
+  <configVersion>2</configVersion>
+  <userRemoteConfigs>
+    <hudson.plugins.git.UserRemoteConfig>
+      <name>${repo_user}</name>
+      <refspec>+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head</refspec>
+      <url>https://github.com/${repo_user}/${repo_name}.git</url>
+    </hudson.plugins.git.UserRemoteConfig>
+  </userRemoteConfigs>
+  <branches>
+    <hudson.plugins.git.BranchSpec>
+      <name>${repo_ref}</name>
+    </hudson.plugins.git.BranchSpec>
+  </branches>
+  <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+  <submoduleCfg class="list"/>
+  <extensions>
+  <hudson.plugins.git.extensions.impl.CleanCheckout/>
+  </extensions>
+</scm>
+
+        <assignedNode>linux &amp;&amp; publish</assignedNode>
+<canRoam>false</canRoam>
+        <concurrentBuild>true</concurrentBuild>
+        <builders>
+          <hudson.plugins.groovy.SystemGroovy plugin="groovy">
+  <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+    <command>repo_user = build.buildVariableResolver.resolve("repo_user")
+repo_name = build.buildVariableResolver.resolve("repo_name")
+repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+build.setDisplayName("[${build.number}] $repo_user/$repo_name#$repo_ref")
+</command>
+  </scriptSource>
+</hudson.plugins.groovy.SystemGroovy>
+
+          <hudson.tasks.Shell>
+  <command>#!/bin/bash -ex
+
+source scripts/jobs/release/package/unix
+  </command>
+</hudson.tasks.Shell>
+
+        </builders>
+        <buildWrappers>
+          <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
+             <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+               <timeoutMinutes>1440</timeoutMinutes>
+             </strategy>
+             <operationList/>
+          </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+          <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
+            <colorMapName>xterm</colorMapName>
+          </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+          <hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper plugin="logfilesizechecker@1.2">
+            <setOwn>false</setOwn>
+            <maxLogSize>0</maxLogSize>
+            <failBuild>true</failBuild>
+          </hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper>
+        </buildWrappers>
+
+</project>

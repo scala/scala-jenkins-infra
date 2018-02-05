@@ -1,0 +1,71 @@
+---
+- name: Create jenkins homedir
+  file: path={{jenkins_home}} state=directory mode="0755"
+  
+- name: Mount jenkins home
+  mount:
+    src: "{{ec2_vol_jenkins.device_name}}"
+    path: "{{jenkins_home}}"
+    fstype: ext4
+    opts: noatime
+    state: present
+  tags:
+    - ec2
+
+- name: Create user
+  user: name={{jenkins_user}} home={{jenkins_home}}
+
+- name: Chmod jenkins homedir
+  file: path={{jenkins_home}} state=directory mode="0755" owner={{jenkins_user}}
+
+- name: Add the jenkins gpg key
+  apt_key:
+    url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+    state: present
+
+- name: Add apt repo for jenkins
+  apt_repository:
+    repo: "deb https://pkg.jenkins.io/debian binary/"
+    state: present
+
+- name: Install jenkins
+  apt:
+      name: jenkins
+      state: present
+      update_cache: yes
+
+- name: Copy jenkins config
+  copy: src=../files/ dest={{jenkins_home}} owner={{jenkins_user}}
+  notify: restart jenkins
+
+
+- get admin pass from /var/lib/jenkins/secrets/initialAdminPassword
+- add ssh key to admin user
+
+#   build-flow-plugin
+#   groovy
+#   slack
+
+
+# - name: install plugins:
+#   ansicolor
+#   build-timeout
+#   copyartifact
+#   credentials
+#   cygpath
+#   dashboard-view
+#   email-ext
+#   git
+#   github
+#   github-api
+#   github-oauth
+#   greenballs
+#   job-dsl
+#   logfilesizechecker
+#   mailer
+#   notification
+#   parameterized-trigger
+#   rebuild
+#   ssh-credentials
+#   ssh-slaves
+#   throttle-concurrents

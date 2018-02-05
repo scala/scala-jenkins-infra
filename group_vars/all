@@ -1,19 +1,22 @@
 admin_user: "root" # on ec2 images, this is "admin"
 server_name: "scala-ci.typesafe.com"
-artifactory_port: 8282
-jenkins_master_port: 8080
+
 sbt_launcher_path: "/usr/local/lib/share/"
 sbt_version: "0.13.13"
 sbt_extras_url: "https://raw.githubusercontent.com/paulp/sbt-extras/715a3a8ba9bf16796eee0b034143acb4594c1d2d/sbt"
 sbt_extras_path: '/usr/local/bin'
 
-scabot_port: 8888
-
 artifactory_user: artifactory
 artifactory_home: "/var/opt/jfrog/artifactory"
 artifactory_etc: "/etc/opt/jfrog/artifactory"
+artifactory_port: 8081
 
+# used both for jenkins worker and master
+jenkins_user: jenkins
 jenkins_home: "/var/lib/jenkins"
+jenkins_master_port: 8080
+
+scabot_port: 8888
 
 ec2_vol_artifactory: {
   id : "vol-1fe1a902",

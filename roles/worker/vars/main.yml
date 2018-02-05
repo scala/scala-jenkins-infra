@@ -1,5 +1,3 @@
-jenkins_user: "jenkins"
-
 repos_private_host: "{{server_name}}"
 repos_private_realm: "Artifactory Realm"
 repos_private_integration: "https://{{server_name}}/artifactory/scala-integration/"

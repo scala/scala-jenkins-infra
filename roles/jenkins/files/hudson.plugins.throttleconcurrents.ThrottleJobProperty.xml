@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.throttleconcurrents.ThrottleJobProperty_-DescriptorImpl plugin="throttle-concurrents@1.8.4">
+  <categories>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty_-ThrottleCategory>
+      <maxConcurrentPerNode>2</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categoryName>cpu-heavy</categoryName>
+      <nodeLabeledPairs/>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty_-ThrottleCategory>
+  </categories>
+</hudson.plugins.throttleconcurrents.ThrottleJobProperty_-DescriptorImpl>

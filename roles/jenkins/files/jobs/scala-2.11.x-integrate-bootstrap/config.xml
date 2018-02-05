@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+        <description> Stage a Scala distribution on sonatype using scripts/job/integrate/bootstrap.
+It builds locker and uses it to build and publish the required modules as well as the
+Scala compiler/library for this release, and generates an updated versions.properties
+that captures the modules/STARR used.
+
+&lt;p&gt; This job is run on every merge to publish a "nightly" snapshot, and on every tag, to stage a full release on sonatype.
+
+&lt;p&gt; Use github.com/scala/make-release-notes to build the release notes.
+   </description>
+        <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+       <hudson.model.StringParameterDefinition>
+ <name>repo_name</name>
+ <description>The name of the repo to clone.</description>
+ <defaultValue>scala</defaultValue>
+       </hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.11.x</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_VER_BASE</name>
+  <description>Specifying this parameter will cause a release to be built. If it's empty (and HEAD does not have a tag that parses as a version), an integration release is built.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_VER_SUFFIX</name>
+  <description>Empty for a final release, otherwise, e.g., -RC1 for the first RC or -M3 for the third milestone. (Will be parsed from the tag on SCALA_REF, if any.)</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_BINARY_VER</name>
+  <description>For binary compatible releases (such as 2.11.0 and 2.11.1), the short binary version (e.g. 2.11). Otherwise, the full Scala version.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_FULL_VER</name>
+  <description>For non-snapshot releases, the scala version, otherwise the closest scala version that's a valid binary version. Used to cross-version the scala continuations plugin.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>STARR_REF</name>
+  <description>Can be set to a git ref of a separate commit that will be used to build STARR, rather than using a prebuilt STARR based on starr.version in versions.properties. Used when bootstraping compiler changes that change the ABI, e.g. changing name mangling.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>XML_VER</name>
+  <description>The version to build for scala-xml. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>PARSERS_VER</name>
+  <description>The version to build for scala-parser-combinators. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>CONTINUATIONS_VER</name>
+  <description>The version to build for scala-continuations-plugin and -library. The plugin will be cross-versioned with SCALA_FULL_VER. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SWING_VER</name>
+  <description>The version to build for scala-swing. If the version already exists, it won't be published.
+    If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>ACTORS_MIGRATION_VER</name>
+  <description>The version to build for scala-partest. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>PARTEST_VER</name>
+  <description>The version to build for scala-partest. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALACHECK_VER</name>
+  <description>The version to build for scalacheck. Not published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>AKKA_ACTOR_VER</name>
+  <description>The version of akka-actors to include in scala-library-all.pom. NOTE: the release script will NOT build akka, the version specified here needs to be released already. If empty, it will be parsed from versions.properties.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>JLINE_VER</name>
+  <description>The version of jline to use for building the Scala project.NOTE: the release script will NOT build jline, the version specified here needs to be released already.If empty, it will be parsed from versions.properties.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>sbtBuildTask</name>
+  <description>Leave empty to skip testing. Useful when publishing a nightly to run the community build against.</description>
+  <defaultValue>testAll</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>moduleVersioning</name>
+  <description>Set to anything but "versions.properties" to build the latest HEAD for all modules.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>testStability</name>
+  <description>Set to anything but "yes" to avoid running the stability test</description>
+  <defaultValue>yes</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>publishToSonatype</name>
+  <description>Set to anything but "yes" to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>integrationRepoUrl</name>
+  <description>The repo where the build is published, requires a trailing `/`. Use https://scala-ci.typesafe.com/artifactory/scala-release-temp/ if the commit is not yet merged to scala/scala. Leave empty to use the default (https://scala-ci.typesafe.com/artifactory/scala-integration/).</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>benchqTaskId</name>
+  <description>For Scala builds triggered by the benchmark queue, this parameter contains the `id: Long` of the task.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>jvmFlavor</name>
+  <description>Java flavor to use (oracle/openjdk).</description>
+  <defaultValue>oracle</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>jvmVersion</name>
+  <description>Java version to use (6/7/8).</description>
+  <defaultValue>6</defaultValue>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.4">
+          <maxConcurrentPerNode>1</maxConcurrentPerNode>
+          <maxConcurrentTotal>0</maxConcurrentTotal>
+          <throttleEnabled>true</throttleEnabled>
+          <throttleOption>project</throttleOption>
+        </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+      
+      </properties>
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
+  <configVersion>2</configVersion>
+  <userRemoteConfigs>
+    <hudson.plugins.git.UserRemoteConfig>
+      <name>${repo_user}</name>
+      <refspec>+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head</refspec>
+      <url>https://github.com/${repo_user}/${repo_name}.git</url>
+    </hudson.plugins.git.UserRemoteConfig>
+  </userRemoteConfigs>
+  <branches>
+    <hudson.plugins.git.BranchSpec>
+      <name>${repo_ref}</name>
+    </hudson.plugins.git.BranchSpec>
+  </branches>
+  <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+  <submoduleCfg class="list"/>
+  <extensions>
+  <hudson.plugins.git.extensions.impl.CleanCheckout/>
+  </extensions>
+</scm>
+
+        <assignedNode>linux &amp;&amp; publish</assignedNode>
+<canRoam>false</canRoam>
+        <concurrentBuild>true</concurrentBuild>
+        <builders>
+          <hudson.plugins.groovy.SystemGroovy plugin="groovy">
+  <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+    <command>repo_user = build.buildVariableResolver.resolve("repo_user")
+repo_name = build.buildVariableResolver.resolve("repo_name")
+repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+build.setDisplayName("[${build.number}] $repo_user/$repo_name#$repo_ref")
+</command>
+  </scriptSource>
+</hudson.plugins.groovy.SystemGroovy>
+
+          <hudson.tasks.Shell>
+  <command>#!/bin/bash -ex
+if [ -f /usr/local/share/jvm/jvm-select ]; then
+  source /usr/local/share/jvm/jvm-select
+  jvmSelect $jvmFlavor $jvmVersion
+else
+  echo "WARNING: jvm-select not present. using system default Java"
+fi
+
+wget https://raw.githubusercontent.com/scala/scala-jenkins-infra/master/externalScripts/jobs/integrate/bootstrap -O externalScript
+source externalScript
+
+  </command>
+</hudson.tasks.Shell>
+
+        </builders>
+        <buildWrappers>
+          <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
+             <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+               <timeoutMinutes>200</timeoutMinutes>
+             </strategy>
+             <operationList/>
+          </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+          <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
+            <colorMapName>xterm</colorMapName>
+          </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+          <hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper plugin="logfilesizechecker@1.2">
+            <setOwn>false</setOwn>
+            <maxLogSize>0</maxLogSize>
+            <failBuild>true</failBuild>
+          </hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper>
+        </buildWrappers>
+
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>versions.properties,jenkins.properties,logs/**</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+</project>
