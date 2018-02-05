@@ -39,8 +39,8 @@
   notify: restart jenkins
 
 
-- get admin pass from /var/lib/jenkins/secrets/initialAdminPassword
-- add ssh key to admin user
+# - get admin pass from /var/lib/jenkins/secrets/initialAdminPassword
+# - add ssh key to admin user
 
 #   build-flow-plugin
 #   slack
