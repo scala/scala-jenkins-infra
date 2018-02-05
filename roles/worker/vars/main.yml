@@ -1,5 +1,4 @@
 jenkins_user: "jenkins"
-jenkins_home: "/home/jenkins"
 
 repos_private_host: "{{server_name}}"
 repos_private_realm: "Artifactory Realm"

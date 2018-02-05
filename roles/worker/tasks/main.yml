@@ -1,6 +1,16 @@
 ---
 - name: Create jenkins user
-  user: name="{{jenkins_user}}"
+  user: name="{{jenkins_user}}" home="{{jenkins_home}}"
+
+- name: Mount jenkins home
+  mount:
+    src: {{ec2_vol_jenkins.device_name}}
+    path: {{jenkins_home}}
+    fstype: ext4
+    opts: noatime
+    state: present
+  tags:
+    - ec2
 
 - name: Give core team access to jenkins user
   authorized_key: user="{{jenkins_user}}" state="present" key="https://github.com/{{item}}.keys"
@@ -37,8 +47,8 @@
   with_items:
        # - openjdk-6-jdk
        # - openjdk-7-jdk
-       - openjdk-8-jdk
        - openjdk-9-jdk
+       - openjdk-8-jdk
 
 # TODO investigate https://github.com/sdkman/sdkman-cli
 
@@ -53,7 +63,6 @@
        - ant-contrib
        - ant-optional
        - apt-transport-https
-       - git
        - maven
        - s3curl
        - tofrodos

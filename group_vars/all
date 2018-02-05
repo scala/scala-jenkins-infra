@@ -8,3 +8,27 @@ sbt_extras_url: "https://raw.githubusercontent.com/paulp/sbt-extras/715a3a8ba9bf
 sbt_extras_path: '/usr/local/bin'
 
 scabot_port: 8888
+
+artifactory_user: artifactory
+artifactory_home: "/var/opt/jfrog/artifactory"
+artifactory_etc: "/etc/opt/jfrog/artifactory"
+
+jenkins_home: "/var/lib/jenkins"
+
+ec2_vol_artifactory: {
+  id : "vol-1fe1a902",
+  device_name: "/dev/sdk",
+  volume_size: 500,
+  volume_type: "gp2",
+  iops: 1500,
+  zone: "us-west-1c",
+  delete_on_termination: "no"}
+
+ec2_vol_jenkins: {
+  id: "vol-1ce1a901",
+  device_name: "/dev/sdj",
+  volume_size: 100,
+  volume_type: "gp2",
+  iops: 300,
+  zone: "us-west-1c",
+  delete_on_termination: "no"}

@@ -6,64 +6,9 @@
     state: present
     key: https://github.com/adriaanm.keys
 
-- name: Add apt repo for Java 9 backports
-  apt_repository: repo='deb http://ftp.debian.org/debian stretch-backports main'
-
-- name: Install openjdk
-  apt: name={{item}} state=installed
-  with_items:
-       # - openjdk-6-jdk
-       # - openjdk-7-jdk
-       - openjdk-8-jdk
-       - openjdk-9-jdk
-
-# TODO investigate https://github.com/sdkman/sdkman-cli
-
-- name: Copy jvm-select script
-  copy: src=jvm-select dest=/usr/local/share/jvm/ owner=root mode=755
-
-
 - name: Install basic packages
   apt: name={{item}} state=installed
   with_items:
-       - ant
-       - ant-contrib
-       - ant-optional
        - apt-transport-https
+       - openjdk-8-jdk
        - git
-       - maven
-       - s3curl
-       - tofrodos
-
-- name: Create sbt launcher path
-  file: path="{{sbt_launcher_path}}" state=directory
-
-- name: Download sbt launcher
-  get_url:
-      url: "https://repo.lightbend.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/{{ sbt_version }}/sbt-launch.jar"
-      dest: "{{sbt_launcher_path}}"
-      owner: root
-      mode: "755"
-
-- name: Download sbt-extras
-  get_url:
-      url: "{{sbt_extras_url}}"
-      dest: "{{sbt_extras_path}}"
-      owner: root
-      mode: "755"
-
-- name: Install the gpg key for nodejs LTS
-  apt_key:
-    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
-    state: present
-
-- name: Add apt repo for nodejs LTS
-  apt_repository:
-    repo: "deb https://deb.nodesource.com/node_6.x stretch main"
-    state: present
-    update_cache: yes
-
-- name: Install nodejs
-  apt:
-    name: nodejs
-    state: present
