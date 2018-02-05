@@ -1,0 +1,4 @@
+---
+- name: restart artifactory
+  become: true
+  service: name=artifactory state=restarted enabled=yes
