@@ -1,0 +1,51 @@
+# https://wiki.debian.org/Cloud/AmazonEC2Image/Stretch
+
+- name: Create the jenkins cluster instances
+  hosts: localhost
+  gather_facts: False
+  vars:
+    - instances:  [
+        {name: "jenkins-master"                 instance_type: "m4.large"  , image: "ami-6d03030d", network_interface: "eni-ade2f2a2", instance_profile_name: "JenkinsMaster",  public_ip: "54.67.111.226", private_ip: "172.31.15.118"},
+        {name: "jenkins-worker-ubuntu-publish"  instance_type: "c4.xlarge" , image: "ami-6d03030d", network_interface: "eni-a4a199fd", instance_profile_name: "JenkinsWorkerPublish",  public_ip: "54.67.33.167",  private_ip: "172.31.15.209"},
+        {name: "jenkins-worker-behemoth-1"      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-809c0ad8", instance_profile_name: "JenkinsWorker",  public_ip: "54.153.2.9",    private_ip: "172.31.4.164"},
+        {name: "jenkins-worker-behemoth-2"      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-be9503e6", instance_profile_name: "JenkinsWorker",  public_ip: "54.153.1.99",   private_ip: "172.31.12.38"},
+  #     {name: "jenkins-worker-windows-publish" instance_type: "c4.xlarge",  image: "TODO",         network_interface: "eni-78a74a79", instance_profile_name: "JenkinsWorker",  public_ip: "54.183.156.89", private_ip: "172.31.0.178"}
+      ]
+
+  tasks:
+    - name: Launch instance
+      ec2:
+        keypair: ansible
+        wait: yes
+        region: us-west-1
+        ebs_optimzed: true
+        name: "{{item.name}}"
+        instance_profile_name: "{{item.instance_profile_name}}"
+        instance_type: "{{item.instance_type}}"
+        image: "{{item.image}}" 
+        network_interface: "{{item.network_interface}}"
+      with_items: "{{instances}}"
+      register: ec2
+
+#
+# a list of hash/dictionaries of volumes to add to the new instance;
+# '[{"key":"value", "key":"value"}]'; keys allowed are
+# device_name: "", volume_size: 100, volume_type: "gp2", iops: 300
+
+  
+    - name: Add new instance to host group
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groupname: master
+      with_items: "{{ ec2.instances }}"
+
+    # - name: Wait for SSH to come up
+    #   wait_for:
+    #     host: "{{ item.public_dns_name }}"
+    #     port: 22
+    #     delay: 60
+    #     timeout: 320
+    #     state: started
+    #   with_items: "{{ ec2.instances }}"
+
+
