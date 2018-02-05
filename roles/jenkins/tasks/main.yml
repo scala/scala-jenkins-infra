@@ -28,6 +28,21 @@
     repo: "deb https://pkg.jenkins.io/debian binary/"
     state: present
 
+- name: Create jenkins dirs
+  file: path={{item}} state=directory owner="{{jenkins_user}}" mode="0755"
+  with_items:
+      - "{{jenkins_home}}/.ssh"
+
+- name: Worker ssh key pairs
+  shell: ssh-keygen -q -t rsa -b 4096 -f "{{jenkins_home}}/.ssh/id_{{item}}" -N '' -C "{{item}} adriaan+jenkins@lightbend.com"
+  args:
+    creates: "{{jenkins_home}}/.ssh/{{item}}"
+  with_items:
+      - id_worker
+      - id_worker_publisher
+      - id_worker_kalles   # TODO: copy manually to host's authorized_keys
+      - id_worker_windows. # TODO: copy manually to host's authorized_keys
+
 - name: Install jenkins
   apt:
       name: jenkins
@@ -44,7 +59,6 @@
 
 #   build-flow-plugin
 #   slack
-
 
 # - name: install plugins:
 #   ansicolor
@@ -69,3 +83,35 @@
 #   ssh-credentials
 #   ssh-slaves
 #   throttle-concurrents
+
+# TODO: ec2-start-stop
+
+#
+# jenkins_script 'add_gh_authentication' do
+#   command <<-EOH.gsub(/^ {4}/, '')
+#     import jenkins.model.Jenkins
+#     import org.jenkinsci.plugins.*
+#
+#     def githubRealm = new GithubSecurityRealm(
+#       '#{node['master']['github']['webUri']}',
+#       '#{node['master']['github']['apiUri']}',
+#       '#{apiVault['client-id']}',
+#       '#{apiVault['client-secret']}',
+#       '#{node['master']['github']['oauthScopes']}')
+#
+#     def githubStrategy = new GithubAuthorizationStrategy(
+#       '#{node['master']['github']['adminUserNames']}',
+#       #{node['master']['github']['authenticatedUserReadPermission']},
+#       #{node['master']['github']['useRepositoryPermissions']},
+#       #{node['master']['github']['authenticatedUserCreateJobPermission']},
+#       '#{node['master']['github']['organizationNames']}',
+#       #{node['master']['github']['allowGithubWebHookPermission']},
+#       #{node['master']['github']['allowCcTrayPermission']},
+#       #{node['master']['github']['allowAnonymousReadPermission']},
+#       #{node['master']['github']['allowAnonymousJobStatusPermission']})
+#
+#     Jenkins.instance.setSecurityRealm(githubRealm)
+#     Jenkins.instance.setAuthorizationStrategy(githubStrategy)
+#     Jenkins.instance.save()
+#   EOH
+# end

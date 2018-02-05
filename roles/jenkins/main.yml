@@ -1,3 +1,0 @@
-jenkins_private_key_path_worker: /home/jenkins/.ssh/id_worker
-jenkins_private_key_path_worker_publish: /home/jenkins/.ssh/id_worker_publish
-jenkins_private_key_path_kalles: /home/jenkins/.ssh/id_worker_kalles
