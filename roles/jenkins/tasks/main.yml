@@ -34,14 +34,14 @@
       - "{{jenkins_home}}/.ssh"
 
 - name: Worker ssh key pairs
-  shell: ssh-keygen -q -t rsa -b 4096 -f "{{jenkins_home}}/.ssh/id_{{item}}" -N '' -C "{{item}} adriaan+jenkins@lightbend.com"
+  shell: ssh-keygen -q -t rsa -b 4096 -f "{{jenkins_home}}/.ssh/{{item}}" -N '' -C "{{item}} adriaan+jenkins@lightbend.com"
   args:
     creates: "{{jenkins_home}}/.ssh/{{item}}"
   with_items:
       - id_worker
       - id_worker_publisher
-      - id_worker_kalles   # TODO: copy manually to host's authorized_keys
-      - id_worker_windows. # TODO: copy manually to host's authorized_keys
+      - id_worker_kalles    # TODO: copy manually to host's authorized_keys
+      - id_worker_windows   # TODO: copy manually to host's authorized_keys
 
 - name: Install jenkins
   apt:

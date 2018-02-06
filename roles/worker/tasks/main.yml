@@ -2,15 +2,44 @@
 - name: Create jenkins user
   user: name="{{jenkins_user}}" home="{{jenkins_home}}"
 
-- name: Mount jenkins home
+- name: Ensure fs for jenkins home
+  filesystem:
+    fstype: ext4
+    dev: "{{ec2_vol_worker.device_name}}"
+
+- name: Mount jenkins worker home
   mount:
-    src: "{{ec2_vol_jenkins.device_name}}"
+    src: "{{ec2_vol_worker.device_name}}"
     path: "{{jenkins_home}}"
     fstype: ext4
     opts: noatime
-    state: present
+    state: mounted
   tags:
     - ec2
+
+- name: Check if swap dev exists
+  stat:
+    path: "{{ec2_vol_worker_swap.device_name}}"
+  tags:
+    - ec2
+  register: swap_dev
+
+- name: Ensure swap fs
+  filesystem:
+    fstype: swap # TODO does this work?
+    dev: "{{ec2_vol_worker_swap.device_name}}"
+  when: swap_dev.stat.exists
+
+- name: Mount swap
+  mount:
+    src: "{{ec2_vol_worker_swap.device_name}}"
+    fstype: swap
+    opts: sw
+    state: mounted
+  tags:
+    - ec2
+  when: swap_dev.stat.exists
+
 
 - name: Create jenkins dirs
   file: path={{item}} state=directory owner="{{jenkins_user}}" mode="0755"

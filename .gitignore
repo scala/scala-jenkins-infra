@@ -2,3 +2,4 @@
 .DS_Store
 .chef/
 .vagrant/
+ec2-credentials.yml

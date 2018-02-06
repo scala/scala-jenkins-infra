@@ -19,19 +19,37 @@ jenkins_master_port: 8080
 scabot_port: 8888
 
 ec2_vol_artifactory: {
-  id : "vol-1fe1a902",
-  device_name: "/dev/sdk",
+  # id : "vol-1fe1a902",
+  device_name: "/dev/xvdk",
   volume_size: 500,
   volume_type: "gp2",
-  iops: 1500,
+  # iops: 1500,
   zone: "us-west-1c",
   delete_on_termination: "no"}
 
 ec2_vol_jenkins: {
-  id: "vol-1ce1a901",
-  device_name: "/dev/sdj",
+  # id: "vol-1ce1a901",
+  device_name: "/dev/xvdj",
+  volume_size: 100,
+  volume_type: "gp2",
+  # iops: 300,
+  zone: "us-west-1c",
+  delete_on_termination: "no"
+}
+
+ec2_vol_worker: {
+  device_name: "/dev/xvdj",
   volume_size: 100,
   volume_type: "gp2",
   iops: 300,
   zone: "us-west-1c",
-  delete_on_termination: "no"}
+  delete_on_termination: "no"
+}
+
+ec2_vol_worker_swap: {
+  device_name: "/dev/xvdp",
+  volume_size: 16,
+  volume_type: "gp2",
+  zone: "us-west-1c",
+  delete_on_termination: "yes"
+}

@@ -10,7 +10,7 @@
     <idleDelay>20</idleDelay>
   </retentionStrategy>
   <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
-    <host>172.31.12.38</host>
+    <host>172.31.2.4</host>
     <port>22</port>
     <credentialsId>954dd564-ce8c-43d1-bcc5-97abffc81c57</credentialsId>
     <maxNumRetries>10</maxNumRetries>
