@@ -17,7 +17,7 @@
 
 - name: Common stuff
   hosts: all
-  remote_user: root
+  remote_user: "{{admin_user}}"
   become: true
 
   roles:
@@ -26,7 +26,7 @@
 - name: Install nginx, artifactory and scabot on the master
   hosts: master
   gather_facts: yes
-  remote_user: admin
+  remote_user: "{{admin_user}}"
   become: true
 
   roles:
@@ -38,7 +38,7 @@
 - name: Configure a publisher worker
   hosts: worker
   gather_facts: yes
-  remote_user: root
+  remote_user: "{{admin_user}}"
   become: true
 
   roles:

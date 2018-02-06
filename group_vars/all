@@ -1,4 +1,4 @@
-admin_user: "root" # on ec2 images, this is "admin"
+admin_user: "admin" # "root" for vagrant, on ec2 images, "admin"
 server_name: "scala-ci.typesafe.com"
 
 sbt_launcher_path: "/usr/local/lib/share/"
