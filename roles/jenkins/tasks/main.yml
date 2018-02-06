@@ -8,7 +8,7 @@
     path: "{{jenkins_home}}"
     fstype: ext4
     opts: noatime
-    state: present
+    state: mounted
   tags:
     - ec2
 
@@ -51,19 +51,25 @@
       state: present
       update_cache: yes
 
-- name: Copy jenkins config
-  become_user: "{{jenkins_user}}"
-  become: yes
-  synchronize:
-    src: ../files/
-    dest: "{{jenkins_home}}"
-    checksum: true
-  notify: restart jenkins
+# only do this on initial setup, because subsequent manual steps will modify it
+# - name: Copy jenkins config
+#   become_user: "{{jenkins_user}}"
+#   become: yes
+#   synchronize:
+#     src: ../files/
+#     dest: "{{jenkins_home}}"
+#     checksum: true
+#   notify: restart jenkins
 
-# - manual step:
+# - TODO (on localhost):
 # for i in copyartifact credentials cygpath dashboard-view git github github-api github-oauth greenballs job-dsl logfilesizechecker mailer parameterized-trigger slack ssh-slaves ansicolor build-timeout email-ext groovy notification rebuild ssh-credentials throttle-concurrents ; do ssh -p 8022 admin@scala-ci.typesafe.com install-plugin $i; done
 
-# - manual step: restart jenkins
+# - TODO (on localhost):
+  # restart jenkins
+
+# - TODO (on localhost):
+  # (expand variables first)
+  # cat /Users/adriaan/git/scala-jenkins-infra/roles/jenkins/templates/github_oauth.groovy | ssh -p 8022 admin@scala-ci.typesafe.com groovysh
 
 # - manual step: install the ec2-start-stop plugin
 

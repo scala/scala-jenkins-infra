@@ -24,17 +24,17 @@
   roles:
     - common
 
-- name: Install nginx, artifactory and scabot on the master
-  hosts: master
-  gather_facts: yes
-  remote_user: "{{admin_user}}"
-  become: true
-
-  roles:
-    - nginx
-    - artifactory
-    - jenkins
-    - scabot
+# - name: Install & configure nginx, artifactory, jenkins and scabot on the master
+#   hosts: master
+#   gather_facts: yes
+#   remote_user: "{{admin_user}}"
+#   become: true
+#
+#   roles:
+#     - nginx
+#     - artifactory
+#     - jenkins
+#     - scabot
 
 - name: Configure workers
   hosts: worker
