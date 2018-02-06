@@ -9,6 +9,7 @@
     fstype: ext4
     opts: noatime
     state: mounted
+  notify: daemon reload
   tags:
     - ec2
 
@@ -52,24 +53,39 @@
       update_cache: yes
 
 # only do this on initial setup, because subsequent manual steps will modify it
-# - name: Copy jenkins config
-#   become_user: "{{jenkins_user}}"
-#   become: yes
-#   synchronize:
-#     src: ../files/
-#     dest: "{{jenkins_home}}"
-#     checksum: true
-#   notify: restart jenkins
+- name: Copy jenkins config
+  become_user: "{{jenkins_user}}"
+  become: yes
+  synchronize:
+    src: ../files/
+    dest: "{{jenkins_home}}"
+    checksum: true
+  notify: restart jenkins
+
+- name: jenkins plugins
+  become: false
+  delegate_to: localhost
+  shell: for i in copyartifact credentials cygpath dashboard-view git github github-api github-oauth greenballs job-dsl logfilesizechecker mailer parameterized-trigger slack ssh-slaves ansicolor build-timeout email-ext groovy notification rebuild ssh-credentials throttle-concurrents ; do ssh -p 8022 adriaanm@scala-ci.typesafe.com install-plugin $i; done
 
 # - TODO (on localhost):
-# for i in copyartifact credentials cygpath dashboard-view git github github-api github-oauth greenballs job-dsl logfilesizechecker mailer parameterized-trigger slack ssh-slaves ansicolor build-timeout email-ext groovy notification rebuild ssh-credentials throttle-concurrents ; do ssh -p 8022 admin@scala-ci.typesafe.com install-plugin $i; done
+#
 
 # - TODO (on localhost):
   # restart jenkins
 
-# - TODO (on localhost):
-  # (expand variables first)
-  # cat /Users/adriaan/git/scala-jenkins-infra/roles/jenkins/templates/github_oauth.groovy | ssh -p 8022 admin@scala-ci.typesafe.com groovysh
+- name: github oauth
+  vars:
+    - script: "
+// for use with ssh -p 8022 admin@scala-ci.typesafe.com groovysh
+import jenkins.model.Jenkins
+import org.jenkinsci.plugins.*
+Jenkins.instance.setSecurityRealm(new GithubSecurityRealm('https://github.com/', 'https://api.github.com', '{{github_api_client_id}}', '{{github_api_client_secret}}', 'read:org,user:email'))
+Jenkins.instance.setAuthorizationStrategy(new GithubAuthorizationStrategy('adriaanm, retronym, lrytz, SethTisue, smarter, DarkDimius, chef, scala-jenkins, szeiger, dwijnand', true, true, false, 'scala', true, false, true, true))
+Jenkins.instance.save()"
+  become: false
+  delegate_to: localhost
+  shell: echo $i | ssh -p 8022 adriaanm@scala-ci.typesafe.com groovysh
+
 
 # - manual step: install the ec2-start-stop plugin
 

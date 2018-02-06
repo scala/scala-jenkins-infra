@@ -14,6 +14,7 @@
     fstype: ext4
     opts: noatime
     state: mounted
+  notify: daemon reload
   tags:
     - ec2
 
@@ -36,6 +37,7 @@
     fstype: swap
     opts: sw
     state: mounted
+  notify: daemon reload
   tags:
     - ec2
   when: swap_dev.stat.exists
@@ -44,7 +46,7 @@
 - name: Create jenkins dirs
   file: path={{item}} state=directory owner="{{jenkins_user}}" mode="0755"
   with_items:
-      - "{{jenkins_home}}
+      - "{{jenkins_home}}"
       - "{{jenkins_home}}/tmp"
       - "{{jenkins_home}}/.ssh"
       - "{{jenkins_home}}/.m2"
