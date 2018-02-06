@@ -119,13 +119,6 @@
       owner: root
       mode: "755"
 
-- name: Download sbt-extras
-  get_url:
-      url: "{{sbt_extras_url}}"
-      dest: "{{sbt_extras_path}}"
-      owner: root
-      mode: "755"
-
 - name: Install the gpg key for nodejs LTS
   apt_key:
     url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"

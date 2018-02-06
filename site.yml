@@ -1,4 +1,5 @@
 ---
+# run with `ansible-playbook site.yml
 - hosts: localhost
   connection: local
   gather_facts: False
@@ -35,11 +36,12 @@
     - jenkins
     - scabot
 
-- name: Configure a publisher worker
+- name: Configure workers
   hosts: worker
   gather_facts: yes
   remote_user: "{{admin_user}}"
   become: true
-
+  vars:
+    - jenkins_home: "/home/jenkins"
   roles:
     - worker

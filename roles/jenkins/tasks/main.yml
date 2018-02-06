@@ -34,6 +34,8 @@
       - "{{jenkins_home}}/.ssh"
 
 - name: Worker ssh key pairs
+  become_user: "{{jenkins_user}}"
+  become: yes
   shell: ssh-keygen -q -t rsa -b 4096 -f "{{jenkins_home}}/.ssh/{{item}}" -N '' -C "{{item}} adriaan+jenkins@lightbend.com"
   args:
     creates: "{{jenkins_home}}/.ssh/{{item}}"
@@ -50,68 +52,18 @@
       update_cache: yes
 
 - name: Copy jenkins config
-  copy: src=../files/ dest={{jenkins_home}} owner={{jenkins_user}}
+  become_user: "{{jenkins_user}}"
+  become: yes
+  synchronize:
+    src: ../files/
+    dest: "{{jenkins_home}}"
+    checksum: true
   notify: restart jenkins
 
+# - manual step:
+# for i in copyartifact credentials cygpath dashboard-view git github github-api github-oauth greenballs job-dsl logfilesizechecker mailer parameterized-trigger slack ssh-slaves ansicolor build-timeout email-ext groovy notification rebuild ssh-credentials throttle-concurrents ; do ssh -p 8022 admin@scala-ci.typesafe.com install-plugin $i; done
 
-# - get admin pass from /var/lib/jenkins/secrets/initialAdminPassword
-# - add ssh key to admin user
+# - manual step: restart jenkins
 
-#   build-flow-plugin
-#   slack
+# - manual step: install the ec2-start-stop plugin
 
-# - name: install plugins:
-#   ansicolor
-#   build-timeout
-#   copyartifact
-#   credentials
-#   cygpath
-#   dashboard-view
-#   email-ext
-#   git
-#   github
-#   github-api
-#   github-oauth
-#   greenballs
-#   groovy
-#   job-dsl
-#   logfilesizechecker
-#   mailer
-#   notification
-#   parameterized-trigger
-#   rebuild
-#   ssh-credentials
-#   ssh-slaves
-#   throttle-concurrents
-
-# TODO: ec2-start-stop
-
-#
-# jenkins_script 'add_gh_authentication' do
-#   command <<-EOH.gsub(/^ {4}/, '')
-#     import jenkins.model.Jenkins
-#     import org.jenkinsci.plugins.*
-#
-#     def githubRealm = new GithubSecurityRealm(
-#       '#{node['master']['github']['webUri']}',
-#       '#{node['master']['github']['apiUri']}',
-#       '#{apiVault['client-id']}',
-#       '#{apiVault['client-secret']}',
-#       '#{node['master']['github']['oauthScopes']}')
-#
-#     def githubStrategy = new GithubAuthorizationStrategy(
-#       '#{node['master']['github']['adminUserNames']}',
-#       #{node['master']['github']['authenticatedUserReadPermission']},
-#       #{node['master']['github']['useRepositoryPermissions']},
-#       #{node['master']['github']['authenticatedUserCreateJobPermission']},
-#       '#{node['master']['github']['organizationNames']}',
-#       #{node['master']['github']['allowGithubWebHookPermission']},
-#       #{node['master']['github']['allowCcTrayPermission']},
-#       #{node['master']['github']['allowAnonymousReadPermission']},
-#       #{node['master']['github']['allowAnonymousJobStatusPermission']})
-#
-#     Jenkins.instance.setSecurityRealm(githubRealm)
-#     Jenkins.instance.setAuthorizationStrategy(githubStrategy)
-#     Jenkins.instance.save()
-#   EOH
-# end

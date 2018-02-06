@@ -1,10 +1,12 @@
 ---
-# TODO: lrytz, retronym, SethTisue, szeiger
-- name: Give adriaanm's github pubkey admin access
-  authorized_key:
-    user: "{{ admin_user }}"
-    state: present
-    key: https://github.com/adriaanm.keys
+- name: Give core team admin access
+  authorized_key: user="{{admin_user}}" state="present" key="https://github.com/{{item}}.keys"
+  with_items:
+      - adriaanm
+      - lrytz
+      - SethTisue
+      - retronym
+      - szeiger
 
 - name: Install basic packages
   apt: name={{item}} state=installed
@@ -12,3 +14,10 @@
        - apt-transport-https
        - openjdk-8-jdk
        - git
+
+- name: Install sbt-extras
+  get_url:
+      url: "{{sbt_extras_url}}"
+      dest: "{{sbt_extras_path}}"
+      owner: root
+      mode: "755"
