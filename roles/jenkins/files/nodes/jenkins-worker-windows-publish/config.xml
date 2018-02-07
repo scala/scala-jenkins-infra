@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.1' encoding='UTF-8'?>
 <slave>
   <name>jenkins-worker-windows-publish</name>
   <description>Jenkins slave jenkins-worker-windows-publish</description>
@@ -9,7 +9,7 @@
     <inDemandDelay>1</inDemandDelay>
     <idleDelay>15</idleDelay>
   </retentionStrategy>
-  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
     <host>172.31.0.178</host>
     <port>22</port>
     <credentialsId>876bcf12-d295-4791-b5bb-98e1d12be978</credentialsId>
@@ -17,6 +17,7 @@
     <javaPath>&quot;C:/Program Files/Java/jdk1.8.0_121/bin/java&quot;</javaPath>
     <maxNumRetries>10</maxNumRetries>
     <retryWaitTime>60</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
   </launcher>
   <label>publish windows</label>
   <nodeProperties>

@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.1' encoding='UTF-8'?>
 <slave>
   <name>jenkins-worker-behemoth-2</name>
   <description>Jenkins slave jenkins-worker-behemoth-2</description>
@@ -9,12 +9,13 @@
     <inDemandDelay>0</inDemandDelay>
     <idleDelay>20</idleDelay>
   </retentionStrategy>
-  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
     <host>172.31.2.4</host>
     <port>22</port>
     <credentialsId>954dd564-ce8c-43d1-bcc5-97abffc81c57</credentialsId>
     <maxNumRetries>10</maxNumRetries>
     <retryWaitTime>60</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
   </launcher>
   <label>linux public</label>
   <nodeProperties>

@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version='1.1' encoding='UTF-8'?>
 <slave>
   <name>jenkins-worker-ubuntu-publish</name>
   <description>Jenkins slave jenkins-worker-ubuntu-publish</description>
@@ -9,12 +9,13 @@
     <inDemandDelay>0</inDemandDelay>
     <idleDelay>20</idleDelay>
   </retentionStrategy>
-  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.9">
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
     <host>172.31.2.2</host>
     <port>22</port>
     <credentialsId>876bcf12-d295-4791-b5bb-98e1d12be978</credentialsId>
     <maxNumRetries>10</maxNumRetries>
     <retryWaitTime>60</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
   </launcher>
   <label>linux publish</label>
   <nodeProperties>
@@ -46,5 +47,4 @@
       </envVars>
     </hudson.slaves.EnvironmentVariablesNodeProperty>
   </nodeProperties>
-  <userId>chef</userId>
 </slave>
