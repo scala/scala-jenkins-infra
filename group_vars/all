@@ -54,3 +54,29 @@ ec2_vol_worker_swap: {
   volume_type: "gp2",
   delete_on_termination: "yes"
 }
+
+# ami-6d03030d --> https://wiki.debian.org/Cloud/AmazonEC2Image/Stretch
+# the network interface specifies everything relevant (configured manually via the ec2 console, along with security groups and the IAM instance profile stuff)
+ec2_instances:  [
+  {name: "jenkins-master",                 instance_type: "m4.large",   image: "ami-6d03030d", network_interface: "eni-f9c808fc", instance_profile_name: "JenkinsMaster",         groupname: ["master"],              volumes: ["{{ec2_vol_jenkins}}", "{{ec2_vol_artifactory}}"]},
+  {name: "jenkins-worker-ubuntu-publish",  instance_type: "c4.xlarge" , image: "ami-6d03030d", network_interface: "eni-f00ecef5", instance_profile_name: "JenkinsWorkerPublish",  groupname: ["worker", "publisher"], volumes: ["{{ec2_vol_worker}}"]},
+  # TODO: ec2_vol_worker_swap
+  {name: "jenkins-worker-behemoth-1",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-0e0ccc0b", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}"]},
+  {name: "jenkins-worker-behemoth-2",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-8f0dcd8a", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}"]},
+# not managed by ansible:
+  # {name: "jenkins-worker-windows-publish", instance_type: "c4.xlarge",                         network_interface: "eni-78a74a79", instance_profile_name: "JenkinsWorkerPublish"}
+]
+
+# TODO:
+#  - reduce duplication between this and (files/nodes/*/config.xml and credentials.xml)
+#  - rotate keys on windows and kalles, and accept them
+# notes:
+#  - the ip addresses are ultimately defined by the network interface argument for the ec2 instance
+jenkins_nodes: [
+  {host: "172.31.2.2",  privateKeyFile: "/var/lib/jenkins/.ssh/id_worker_publisher"}, # 876bcf12-d295-4791-b5bb-98e1d12be978    public_ip: "54.67.33.167"
+  {host: "172.31.2.3",    privateKeyFile: "/var/lib/jenkins/.ssh/id_worker"}, # 954dd564-ce8c-43d1-bcc5-97abffc81c57            public_ip: "54.153.2.9"
+  {host: "172.31.2.4",   privateKeyFile: "/var/lib/jenkins/.ssh/id_worker"}, # 954dd564-ce8c-43d1-bcc5-97abffc81c57             public_ip: "54.153.1.99"
+  # {host: "172.31.0.178", privateKeyFile: "/var/lib/jenkins/.ssh/id_worker_windows"} # 876bcf12-d295-4791-b5bb-98e1d12be978  public_ip: "54.183.156.89",
+  # {host: "kalles.typesafe.com", privateKeyFile: "/var/lib/jenkins/.ssh/id_worker_kalles"}
+  # {host: "12.155.180.58", privateKeyFile: "/var/lib/jenkins/.ssh/id_worker"}
+]

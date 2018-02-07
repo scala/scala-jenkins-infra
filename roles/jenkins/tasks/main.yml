@@ -1,7 +1,7 @@
 ---
 - name: Create jenkins homedir
   file: path={{jenkins_home}} state=directory mode="0755"
-  
+
 - name: Mount jenkins home
   mount:
     src: "{{ec2_vol_jenkins.device_name}}"
@@ -17,7 +17,7 @@
   user: name={{jenkins_user}} home={{jenkins_home}}
 
 - name: Chmod jenkins homedir
-  file: path={{jenkins_home}} state=directory mode="0755" owner={{jenkins_user}}
+  file: path={{jenkins_home}} state=directory mode="0755"
 
 - name: Add the jenkins gpg key
   apt_key:
@@ -52,7 +52,6 @@
       state: present
       update_cache: yes
 
-# only do this on initial setup, because subsequent manual steps will modify it
 - name: Copy jenkins config
   become_user: "{{jenkins_user}}"
   become: yes
@@ -60,7 +59,30 @@
     src: ../files/
     dest: "{{jenkins_home}}"
     checksum: true
+    rsync_opts:
+      - "--chown={{jenkins_user}}:{{jenkins_user}}" # requires recent rsync!
   notify: restart jenkins
+
+# - name: Chown everything in jenkins homedir (existing volume has unknown uid, rsync seems to mess up user id too)
+#   file: path={{jenkins_home}} state=directory recurse=yes owner={{jenkins_user}} group={{jenkins_user}}
+#
+- service:
+    name: jenkins
+    state: restarted
+
+- name: Delay 20s and wait for Jenkins CLI to come up
+  become: false
+  delegate_to: localhost
+  wait_for:
+    port: 8022
+    host: 'scala-ci.typesafe.com'
+    search_regex: SSH-2.0-SSHD-CORE
+    delay: 20
+
+- name: Accept jenkins cli host key
+  become: false
+  delegate_to: localhost
+  command: "ssh -oStrictHostKeyChecking=no -p 8022 admin@scala-ci.typesafe.com version"
 
 - name: Jenkins plugins
   become: false
@@ -73,32 +95,29 @@
   shell: ssh -p 8022 admin@scala-ci.typesafe.com restart
 
 - name: Delay 20s and wait for Jenkins CLI to come up
+  become: false
+  delegate_to: localhost
   wait_for:
     port: 8022
     host: 'scala-ci.typesafe.com'
     search_regex: SSH-2.0-SSHD-CORE
     delay: 20
-  connection: local
 
+# - TODO: install the ec2-start-stop plugin (~/git/ec2-start-stop/target/ec2-start-stop.hpi)
+
+# this is the last automated step -- after this, the admin user loses admin rights (github oauth takes over)
 - name: Configure github oauth
   no_log: true
   vars:
-    - script: "
-import jenkins.model.Jenkins
-import org.jenkinsci.plugins.*
-Jenkins.instance.setSecurityRealm(new GithubSecurityRealm('https://github.com/', 'https://api.github.com', '{{github_api_client_id}}', '{{github_api_client_secret}}', 'read:org,user:email'))
-Jenkins.instance.setAuthorizationStrategy(new GithubAuthorizationStrategy('adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand', true, true, false, 'scala', true, false, true, true))
-Jenkins.instance.save()
-"
+    - script: |
+        import jenkins.model.Jenkins
+        import org.jenkinsci.plugins.*
+        Jenkins.instance.setSecurityRealm(new GithubSecurityRealm('https://github.com/', 'https://api.github.com', '{{github_api_client_id}}', '{{github_api_client_secret}}', 'read:org,user:email'))
+        Jenkins.instance.setAuthorizationStrategy(new GithubAuthorizationStrategy('adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand', true, true, false, 'scala', true, false, true, true))
+        Jenkins.instance.save()
+
   become: false
   delegate_to: localhost
   shell: echo "{{script}}" | ssh -p 8022 admin@scala-ci.typesafe.com groovysh
-
-- name: Restart jenkins
-  become: false
-  delegate_to: localhost
-  shell: ssh -p 8022 admin@scala-ci.typesafe.com restart
-
-
-# - manual step: install the ec2-start-stop plugin (~/git/ec2-start-stop/target/ec2-start-stop.hpi)
+  notify: restart jenkins
 

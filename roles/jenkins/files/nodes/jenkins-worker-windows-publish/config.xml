@@ -12,7 +12,7 @@
   <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
     <host>172.31.0.178</host>
     <port>22</port>
-    <credentialsId>876bcf12-d295-4791-b5bb-98e1d12be978</credentialsId>
+    <credentialsId>a7cd7b60-4e43-48e5-b4d9-cad515e94e5e</credentialsId>
     <jvmOptions>-Duser.home=y:/jenkins -Djava.io.tmpdir=y:/jenkins/tmp -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native</jvmOptions>
     <javaPath>&quot;C:/Program Files/Java/jdk1.8.0_121/bin/java&quot;</javaPath>
     <maxNumRetries>10</maxNumRetries>

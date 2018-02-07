@@ -84,6 +84,19 @@
     - "{{ pubkey.results }}"
   when: not 'publisher' in group_names
 
+- name: Lookup our hostname
+  shell: hostname
+  register: hostname
+
+# must connect to hostname (private ip) due to firewall
+- name: Have jenkins on master accept our host key
+  become_user: "{{jenkins_user}}"
+  delegate_to: "{{ item }}"
+  command: "ssh -oStrictHostKeyChecking=no {{hostname.stdout}} -i /var/lib/jenkins/.ssh/id_worker true"
+  with_items:
+    - "{{ groups.master }}"
+  when: not 'publisher' in group_names
+
 - name: Copy Maven settings (public jobs)
   no_log: true
   template: src="m2-settings-pub.xml" dest="{{jenkins_home}}/.m2/settings.xml"      owner="{{jenkins_user}}" mode="0600"

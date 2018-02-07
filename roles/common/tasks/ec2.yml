@@ -19,7 +19,7 @@
       Name: "{{item.name}}"
     exact_count: 1
 
-  with_items: "{{instances}}"
+  with_items: "{{ec2_instances}}"
   register: ec2
 
 - name: Ensure (existing) EBS volumes are attached to instances
@@ -62,7 +62,7 @@
 
 - name: Add new instance to host group
   add_host:
-    hostname: "{{ item.0.item.public_ip }}"
+    hostname: "{{ item.0.tagged_instances.0.public_ip }}"
     groupname: "{{ item.1 }}"
     ansible_user: admin
     ansible_ssh_private_key_file: ansible.pem # locally decrypted version of roles/common/files/ansible.pem (I store it in my ~/.ssh/ and symlink to root of this repo)

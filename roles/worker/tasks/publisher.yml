@@ -57,6 +57,18 @@
   with_items:
     - "{{ pubkey.results }}"
 
+- name: Lookup our hostname
+  shell: hostname
+  register: hostname
+
+# must connect to hostname (private ip) due to firewall
+- name: Have jenkins on master accept our host key
+  become_user: "{{jenkins_user}}"
+  delegate_to: "{{ item }}"
+  command: "ssh -oStrictHostKeyChecking=no {{hostname.stdout}} -i /var/lib/jenkins/.ssh/id_worker_publisher true"
+  with_items:
+    - "{{ groups.master }}"
+
 - name: Add chara keypair
   no_log: true
   copy: src=jenkins_lightbend_chara dest="{{jenkins_home}}/.ssh/" owner="{{jenkins_user}}" mode=0600
