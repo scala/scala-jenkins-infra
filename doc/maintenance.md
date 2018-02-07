@@ -224,7 +224,7 @@ failing, you might want to ssh to chara to troubleshoot.  The Linux
 publisher node has the necessary ssh private key, so you can do first
 ssh to jenkins-worker-ubuntu-publish, then from there do:
 
-     ssh -i /home/jenkins/.ssh/for_chara scalatest@chara.epfl.ch
+     ssh -i /home/jenkins/.ssh/jenkins_lightbend_chara scalatest@chara.epfl.ch
 
 If you need more access to chara than that, contact Fabien Salvi
 at EPFL.

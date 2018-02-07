@@ -57,14 +57,13 @@
   with_items:
     - "{{ pubkey.results }}"
 
-# TODO: regen keypair
-# - name: Add chara keypair
-#   no_log: true
-#   copy: src=for_chara dest="{{jenkins_home}}/.ssh/" owner="{{jenkins_user}}" mode=0600
+- name: Add chara keypair
+  no_log: true
+  copy: src=jenkins_lightbend_chara dest="{{jenkins_home}}/.ssh/" owner="{{jenkins_user}}" mode=0600
 
-# - name: Accept chara host key
-#   become_user: "{{jenkins_user}}"
-#   command: "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"{{jenkins_home}}/.ssh/for_chara\" true"
+- name: Accept chara host key
+  become_user: "{{jenkins_user}}"
+  command: "ssh -oStrictHostKeyChecking=no scalatest@chara.epfl.ch -i \"{{jenkins_home}}/.ssh/jenkins_lightbend_chara\" true"
 
 - name: Add gpg sbt plugin
   copy: src=gpg.sbt dest="{{jenkins_home}}/.sbt/0.13/plugins/" owner="{{jenkins_user}}"

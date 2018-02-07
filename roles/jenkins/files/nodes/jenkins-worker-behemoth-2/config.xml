@@ -42,7 +42,7 @@
           <string>sbtLauncher</string>
           <string>/usr/local/lib/share/sbt-launch.jar</string>
           <string>sshCharaArgs</string>
-          <string>(&quot;scalatest@chara.epfl.ch&quot; &quot;-i&quot; &quot;/home/jenkins/.ssh/for_chara&quot;)</string>
+          <string>(&quot;scalatest@chara.epfl.ch&quot; &quot;-i&quot; &quot;/home/jenkins/.ssh/jenkins_lightbend_chara&quot;)</string>
         </tree-map>
       </envVars>
     </hudson.slaves.EnvironmentVariablesNodeProperty>
