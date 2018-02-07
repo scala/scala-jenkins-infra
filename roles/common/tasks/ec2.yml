@@ -22,12 +22,25 @@
   with_items: "{{instances}}"
   register: ec2
 
-#
-# a list of hash/dictionaries of volumes to add to the new instance;
-# '[{"key":"value", "key":"value"}]'; keys allowed are
-# device_name: "", volume_size: 100, volume_type: "gp2", iops: 300
+- name: Ensure (existing) EBS volumes are attached to instances
+  ec2_vol:
+    aws_access_key: "{{ec2_access_key}}"
+    aws_secret_key: "{{ec2_secret_key}}"
+    region: us-west-1
 
-- name: Ensure EBS volumes are attached to instances
+    instance: "{{item.0.tagged_instances.0.id}}"
+    zone:     "{{item.0.tagged_instances.0.placement}}"
+
+    device_name:  "{{ item.1.device_name }}"
+    id:           "{{ item.1.id }}"
+
+  with_subelements:
+    - "{{ ec2.results }}"
+    - item.volumes
+
+  when: item.1.id is defined
+
+- name: Ensure (new) EBS volumes are attached to instances
   ec2_vol:
     aws_access_key: "{{ec2_access_key}}"
     aws_secret_key: "{{ec2_secret_key}}"
@@ -39,11 +52,13 @@
     device_name:           "{{ item.1.device_name }}"
     volume_size:           "{{ item.1.volume_size}}"
     volume_type:           "{{ item.1.volume_type}}"
-    delete_on_termination: "no"
+    delete_on_termination: "{{ item.1.delete_on_termination}}"
 
   with_subelements:
     - "{{ ec2.results }}"
     - item.volumes
+
+  when: item.1.id is undefined
 
 - name: Add new instance to host group
   add_host:

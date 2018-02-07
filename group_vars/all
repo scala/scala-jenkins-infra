@@ -11,7 +11,7 @@ artifactory_home: "/var/opt/jfrog/artifactory"
 artifactory_etc: "/etc/opt/jfrog/artifactory"
 artifactory_port: 8081
 
-# used both for jenkins worker and master
+# used both for jenkins worker and master, on worker jenkins_home is overridden to /home/jenkins
 jenkins_user: jenkins
 jenkins_home: "/var/lib/jenkins"
 jenkins_master_port: 8080
@@ -19,19 +19,18 @@ jenkins_master_port: 8080
 scabot_port: 8888
 
 ec2_vol_artifactory: {
-  # id : "vol-1fe1a902",
+  id : "vol-1fe1a902",
   device_name: "/dev/xvdk",
   volume_size: 500,
   volume_type: "gp2",
-  zone: "us-west-1c",
-  delete_on_termination: "no"}
+  delete_on_termination: "no"
+}
 
 ec2_vol_jenkins: {
-  # id: "vol-1ce1a901",
+  id: "vol-1ce1a901",
   device_name: "/dev/xvdj",
   volume_size: 100,
   volume_type: "gp2",
-  zone: "us-west-1c",
   delete_on_termination: "no"
 }
 
@@ -39,22 +38,19 @@ ec2_vol_worker: {
   device_name: "/dev/xvdj",
   volume_size: 100,
   volume_type: "gp2",
-  zone: "us-west-1c",
-  delete_on_termination: "no"
+  delete_on_termination: "yes"
 }
 
 ec2_vol_behemoth: {
   device_name: "/dev/xvdj",
   volume_size: 400,
   volume_type: "gp2",
-  zone: "us-west-1c",
-  delete_on_termination: "no"
+  delete_on_termination: "yes"
 }
 
 ec2_vol_worker_swap: {
   device_name: "/dev/xvdp",
   volume_size: 16,
   volume_type: "gp2",
-  zone: "us-west-1c",
   delete_on_termination: "yes"
 }
