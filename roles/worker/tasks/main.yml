@@ -25,22 +25,32 @@
     - ec2
   register: swap_dev
 
-- name: Ensure swap fs
-  filesystem:
-    fstype: swap # TODO does this work?
-    dev: "{{ec2_vol_worker_swap.device_name}}"
-  when: swap_dev.stat.exists
-
-- name: Mount swap
-  mount:
-    src: "{{ec2_vol_worker_swap.device_name}}"
-    fstype: swap
-    opts: sw
-    state: mounted
-  notify: daemon reload
-  tags:
-    - ec2
-  when: swap_dev.stat.exists
+# TODO: wait for block device
+# - name: Check if swap dev exists
+#   stat:
+#     path: "{{ec2_vol_worker_swap.device_name}}"
+#   tags:
+#     - ec2
+#   register: swap_dev
+#
+# - name: Does swap fs exist
+#   shell: "blkid -s TYPE -o value {{ec2_vol_worker_swap.device_name}}"
+#   when: swap_dev.stat.exists
+#   register: swapblk
+#
+# - name: Make swap
+#   shell: "mkswap {{ec2_vol_worker_swap.device_name}}"
+#   when: swapblk.rc == ???
+#
+# - name: Does swap fs exist
+#   shell: "swaplabel {{ec2_vol_worker_swap.device_name}}")
+#   when: swap_dev.stat.exists
+#   register: swaplabel
+#
+# - name: Ensure swap fs
+#   shell: "swapon {{ec2_vol_worker_swap.device_name}}"
+#   when: swaplabel.rc == ???
+#   notify: daemon reload
 
 
 - name: Create jenkins dirs
