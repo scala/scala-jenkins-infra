@@ -15,6 +15,9 @@
 - name: Create user
   user: name={{artifactory_user}} home={{artifactory_home}}
 
+- name: Chown everything in artifactory homedir (existing volume has unknown uid)
+  file: path={{artifactory_home}} state=directory recurse=yes owner={{artifactory_user}} group={{artifactory_user}}
+
 - name: Chmod artifactory homedir
   file: path={{artifactory_home}} state=directory mode="0755" owner={{artifactory_user}}
 
