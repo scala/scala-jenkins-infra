@@ -1,26 +1,6 @@
 ---
-- name: Create artifactory homedir
-  file: path={{artifactory_home}} state=directory mode="0755"
-  
-- name: Mount artifactory home
-  mount:
-    src: "{{ec2_vol_artifactory.device_name}}"
-    path: "{{artifactory_home}}"
-    fstype: ext4
-    opts: noatime
-    state: present
-  tags:
-    - ec2
-
 - name: Create user
   user: name={{artifactory_user}} home={{artifactory_home}}
-
-- name: Chown everything in artifactory homedir (existing volume has unknown uid)
-  file: path={{artifactory_home}} state=directory recurse=yes owner={{artifactory_user}} group={{artifactory_user}}
-
-- name: Chmod artifactory homedir
-  file: path={{artifactory_home}} state=directory mode="0755" owner={{artifactory_user}}
-
 
 - name: Add the jfrog gpg key
   apt_key:
@@ -39,6 +19,16 @@
       state: present
       update_cache: yes
 
+- name: Mount artifactory filestore
+  mount:
+    src: "{{ec2_vol_artifactory.device_name}}"
+    path: "{{artifactory_home}}/data"
+    fstype: ext4
+    opts: noatime
+    state: mounted
+  tags:
+    - ec2
+  notify: daemon reload
 
 - name: Copy artifactory config
   copy: src=artifactory.config.xml dest={{artifactory_etc}} owner={{artifactory_user}}

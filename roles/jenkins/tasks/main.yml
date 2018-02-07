@@ -84,6 +84,7 @@
   delegate_to: localhost
   command: "ssh -oStrictHostKeyChecking=no -p 8022 admin@scala-ci.typesafe.com version"
 
+# the ec2-start-stop plugin is installed by being copied (see files/plugins)
 - name: Jenkins plugins
   become: false
   delegate_to: localhost
@@ -102,8 +103,6 @@
     host: 'scala-ci.typesafe.com'
     search_regex: SSH-2.0-SSHD-CORE
     delay: 20
-
-# - TODO: install the ec2-start-stop plugin (~/git/ec2-start-stop/target/ec2-start-stop.hpi)
 
 # this is the last automated step -- after this, the admin user loses admin rights (github oauth takes over)
 - name: Configure github oauth
