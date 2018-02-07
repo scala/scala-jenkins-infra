@@ -13,7 +13,7 @@
         {name: "jenkins-worker-behemoth-1",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-0e0ccc0b", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}"],                            public_ip: "54.153.2.9",    private_ip: "172.31.2.3"},
         {name: "jenkins-worker-behemoth-2",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-8f0dcd8a", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}"],                            public_ip: "54.153.1.99",   private_ip: "172.31.2.4"},
 # not managed by ansible:
-        {name: "jenkins-worker-windows-publish", instance_type: "c4.xlarge",                         network_interface: "eni-78a74a79", instance_profile_name: "JenkinsWorkerPublish",                                                                                                    public_ip: "54.183.156.89", private_ip: "172.31.0.178"}
+        # {name: "jenkins-worker-windows-publish", instance_type: "c4.xlarge",                         network_interface: "eni-78a74a79", instance_profile_name: "JenkinsWorkerPublish",                                                                                                    public_ip: "54.183.156.89", private_ip: "172.31.0.178"}
       ]
 
   tasks:
