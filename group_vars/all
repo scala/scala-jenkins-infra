@@ -55,6 +55,13 @@ ec2_vol_worker_swap: {
   delete_on_termination: "yes"
 }
 
+# ebs on windows, mounted as y:
+# volume_size:  50
+# device_name:  "sdj"
+# disk:  'PCIROOT(0)#PCI(1F00)#PCI(1F00)#SCSI(P00T09L00)' # J is the 9th letter in base-0 --> T09(https://technet.microsoft.com/en-us/library/ee851589%28v=ws.10%29.aspx)
+# fstype:  "ntfs"
+
+
 # ami-6d03030d --> https://wiki.debian.org/Cloud/AmazonEC2Image/Stretch
 # the network interface specifies everything relevant (configured manually via the ec2 console, along with security groups and the IAM instance profile stuff)
 ec2_instances:  [
