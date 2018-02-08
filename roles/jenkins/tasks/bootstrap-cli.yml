@@ -1,0 +1,85 @@
+# Included from site.yml when configuring jenkins for the first time using --tags boot_jenkins
+#
+# It's not run by default because it's time consuming. It could in principle be run all the time, since it is mostly idempotent (in a brutish way).
+# The approach is to reset the Jenkins authentication strategy to the built-in one, and make it recognize the admin user with an ssh keypair we control,
+# restart jenkins, then use the cli (over ssh with the admin keypair) to install plugins and configure github oauth, restart again
+# after which admin is locked out
+- name: Delay 20s and wait for Jenkins CLI to come up
+  wait_for:
+    port: 8022
+    host: 'scala-ci.typesafe.com'
+    search_regex: SSH-2.0-SSHD-CORE
+    delay: 20
+
+- name: Accept jenkins cli host key
+  command: "ssh -oStrictHostKeyChecking=no -p 8022 admin@scala-ci.typesafe.com version"
+
+- name: Jenkins plugins
+  shell: for plugin in "{{item}}"; do ssh -p 8022 admin@scala-ci.typesafe.com install-plugin $plugin; done
+  with_items:
+      - https://github.com/typesafehub/ec2-start-stop/releases/download/v0.1.0/ec2-start-stop.hpi
+      - copyartifact
+      - credentials
+      - cygpath
+      - dashboard-view
+      - git
+      - github
+      - github-api
+      - github-oauth
+      - greenballs
+      - job-dsl
+      - logfilesizechecker
+      - mailer
+      - parameterized-trigger
+      - ssh-slaves
+      - ansicolor
+      - build-timeout
+      - email-ext
+      - groovy
+      - notification
+      - rebuild
+      - ssh-credentials
+      - throttle-concurrents
+
+
+- name: Restart jenkins
+  shell: ssh -p 8022 admin@scala-ci.typesafe.com restart
+
+- name: Delay 20s and wait for Jenkins CLI to come up
+  wait_for:
+    port: 8022
+    host: 'scala-ci.typesafe.com'
+    search_regex: SSH-2.0-SSHD-CORE
+    delay: 20
+
+# this is the last automated step -- after this, the admin user loses admin rights (github oauth takes over)
+- name: Configure github oauth
+  # no_log: true
+  vars:
+    - admins: 'adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand'
+    - github_api_client_id: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          38303339653331626166366432616435313531373839666561386430363964613461643434646436
+          3062346461346630393534393363393966313638373031310a383265336163333565643561303434
+          33643432663830376162366630633762363061313761373034653766346533663735363565303961
+          6165303930343235650a393264613937393066353564323165666361396231343065646534613839
+          37643331383835663137373861633730646135313736376536356136396435303466
+
+    - github_api_client_secret: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          66626363333563333336336433383964303762396362356234343531353565323435363036666435
+          3866306536646530303332626134353162393765336636620a633232626536316533613334613764
+          38366134353266643035373639326164363731366134386361376435626133353764613661393461
+          3236666264613132320a306164663638643161313364643632336134663038333664653034613138
+          66343062313961613463323766646262356639613138323862623064393532313936626638326632
+          3033353764356265633135393431623138313766306333656464
+
+    - script: |
+        import jenkins.model.Jenkins
+        import org.jenkinsci.plugins.*
+        Jenkins.instance.setSecurityRealm(new GithubSecurityRealm('https://github.com/', 'https://api.github.com', '{{github_api_client_id}}', '{{github_api_client_secret}}', 'read:org,user:email'))
+        Jenkins.instance.setAuthorizationStrategy(new GithubAuthorizationStrategy('{{admins}}', true, true, false, 'scala', true, false, true, true))
+        Jenkins.instance.save()
+
+  shell: echo "{{script}}" | ssh -p 8022 admin@scala-ci.typesafe.com groovysh
+

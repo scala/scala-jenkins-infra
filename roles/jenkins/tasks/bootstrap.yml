@@ -1,0 +1,19 @@
+# only for the initial jenkins config
+- name: Copy main jenkins config (it has a predefined admin user with a pre-configured ssh key, used in bootstrap-cli.yml)
+  copy: 
+    src: config-bootstrap.xml 
+    dest: "{{jenkins_home}}/config.xml"
+  tags: 
+    - boot_jenkins
+
+- name: Chown everything in jenkins homedir (existing volume has unknown uid, rsync seems to mess up user id too)
+  file: path={{jenkins_home}} state=directory recurse=yes owner={{jenkins_user}} group={{jenkins_user}}
+  tags:
+    - boot_jenkins
+
+- name: Restart jenkins (so that we can log in as admin via cli over ssh)
+  service:
+    name: jenkins
+    state: restarted
+  tags: 
+    - boot_jenkins
