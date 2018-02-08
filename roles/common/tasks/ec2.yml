@@ -1,7 +1,21 @@
 - name: Include ec2 credentials
   include_vars: ec2-credentials.yml
 
-- name: Launch instance
+- name: Start instances (since exact_count does not consider stopped ones, see https://github.com/ansible/ansible/issues/20867)
+  ec2:
+    aws_access_key: "{{ec2_access_key}}"
+    aws_secret_key: "{{ec2_secret_key}}"
+    keypair: ansible
+    wait: yes
+    region: us-west-1
+    instance_tags:
+      Name: "{{item.name}}"
+    state: running
+
+  with_items: "{{ec2_instances}}"
+
+
+- name: Ensure there's 1 running instance per item in ec2_instances (by EC2 tag `Name`)
   ec2:
     aws_access_key: "{{ec2_access_key}}"
     aws_secret_key: "{{ec2_secret_key}}"
