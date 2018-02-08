@@ -54,9 +54,9 @@
 
 # this is the last automated step -- after this, the admin user loses admin rights (github oauth takes over)
 - name: Configure github oauth
-  # no_log: true
+  no_log: true
   vars:
-    - admins: 'adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand'
+    - admins: 'adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand, scabot'
     - github_api_client_id: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           38303339653331626166366432616435313531373839666561386430363964613461643434646436

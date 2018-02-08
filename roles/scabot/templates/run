@@ -1,6 +1,3 @@
 #!/bin/sh
 
-source /usr/local/share/jvm/jvm-select
-jvmSelect openjdk 8
-
 java -Dhttp.port={{scabot_port}} -Dlogger.resource=prod-logger.xml -Dconfig.file=/home/scabot/production.conf -Dscabot.config.file=/home/scabot/scabot.conf -Dpidfile.path=/dev/null -jar /home/scabot/scabot/gui/target/scala-2.11/scabot.jar
