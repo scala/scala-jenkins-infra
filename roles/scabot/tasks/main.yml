@@ -8,12 +8,16 @@
       - "{{scabot_home}}/scabot"
       - "{{scabot_home}}/logs"
       - "{{scabot_home}}/.ssh"
-        
-- name: Authorize the scabot public key
-  authorized_key:
-    user: "{{ scabot_user }}"
-    state: present
-    key: "{{ scabot_public_key }}"
+
+# push to deploy with remote scabot@scabot:/home/scabot/scabot
+- name: Give core team access to push to scabot
+  authorized_key: user="{{scabot_user}}" state="present" key="https://github.com/{{item}}.keys"
+  with_items:
+      - adriaanm
+      - lrytz
+      - SethTisue
+      - retronym
+      - szeiger
 
 - name: Register scabot service with systemd
   copy: src=scabot.service dest=/etc/systemd/system
@@ -26,7 +30,12 @@
 
 - name: Create scabot runner
   template: src=run dest="{{scabot_home}}" owner="{{scabot_user}}" owner="{{scabot_user}}" mode="0755"
-    
+
+- name: Install ruby (for post-receive hook)
+  apt:
+      name: ruby
+      state: present
+
 - name: Checkout scabot repo
   become_user: "{{scabot_user}}"
   become: yes

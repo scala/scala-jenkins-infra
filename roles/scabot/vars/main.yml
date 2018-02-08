@@ -4,11 +4,6 @@ scabot_home: "/home/scabot/"
 scabot_user: "scabot"
 
 
-
-# ssh-keygen -t rsa -b 4096 -C "adriaan+scabot@lightbend.com"
-# ansible-vault encrypt scabot --out /Users/adriaan/git/scala-jenkins-infra/roles/scabot/files/id_scabot  
-scabot_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCfFsW2KPRVvwztAcCar3pM9bkUZdwqpwiyyCY6rSu90ot+2HEvcxYGBxzrgEa6A2QvqH8m3sg0JXYW064nWogq1dEKPa3Gp9HNAnuyKC0ibtT+Al5vkI26Ua02R1W/EEZDtFB8G26TS8RybZveEQAKNcGbYxSfuayaePsjNeZsjr8XoieMi/9wCGKnnSlaL4Z0GWgzyvehdBlqvjjy/62MskOelfmJpie94vH/oPhM4bVRbqhaUSXZBQdz5Cg79eXZgRLlcW5vVdZO/YtIXSsf042w84+3zc4bcnJWjXKqweVR7284SOcf/vIhar8/D1DVr3Tir8svHcbEqATIH8smV/83IUWDjw3TosjSEPn8/A5yL5GCEU3Mhotcxz8r/jc4MRyXOTz0b5OOcVP8Sgq8pNDWColGaSM0OvVXI7Gnanfl8sOJIofqeEdta1qoY+iePihhQfUYhLgjey+9jHS5+HMZtW/04zB+3CkT28atQ3Mg0G0w3W0HOHbhdI5FvoU4M5VVwdHseXpkdtU6ifbYgwmYpc7sTOGsQgDINRvFJN2c58M86gxg8ohbaB6V2z5BXdIyBHSSBHtTiUtIZ2TI4Tvq3asW7knoYaDEoskj/YGzUdm+ea7W08ZXb4XkBA86IMytdjBfYPKb007Nw1aQ5XKVQ+oQepwu+cyMC6VZ+Q== adriaan+scabot@lightbend.com"
-
 # ansible-vault encrypt_string $(knife vault show -Fjson master scabot | jq -r -e .play.cryptoSecret) | pbcopy 
 play_crypto_secret: !vault |
           $ANSIBLE_VAULT;1.1;AES256
