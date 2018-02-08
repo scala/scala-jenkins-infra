@@ -113,13 +113,12 @@ node {
 
         artifactName = &quot;jenkins.properties&quot;
         copyArtifacts(projectName: projectName, selector: specific(&quot;${built.number}&quot;), filter: &quot;**/$artifactName&quot;, flatten: true);
-        versionProps = Paths.get(&quot;${env.WORKSPACE}/$artifactName&quot;)
-        if (!Files.exists(versionProps)) {
+        if (!fileExists(&quot;${env.WORKSPACE}/$artifactName&quot;)) {
           error(&quot;Error: publish-core did not publish \&quot;$artifactName\&quot; artifact, unable to proceed.&quot;)
         }
-
+        def props = readProperties file: &apos;jenkins.properties&apos;
         // Note the scala version parameter for use in the subequent build stage
-        testParamList = testParamList + [ &quot;scalaVersion&quot; : readProperty(versionProps, &quot;maven.version.number&quot;) ]
+        testParamList = testParamList + [$class: &apos;StringParameterValue&apos;, name: &quot;scalaVersion&quot;, value: props[&apos;maven.version.number&apos;] ]
     }
     stage(&apos;Testing&apos;) {
         parallel (
@@ -127,25 +126,9 @@ node {
                 build(job: &quot;scala-$branch-validate-test&quot;, parameters: testParamList)
             }},
             ide: { node {
-                build(job: &quot;scala-$branch-integegrate-ide&quot;, parameters: testParamList)
+                build(job: &quot;scala-$branch-integrate-ide&quot;, parameters: testParamList)
             }}
         )
-    }
-}
-
-def readFile(Path path) {
-    return Files.readAllLines(path).stream().collect(java.util.stream.Collectors.joining(&quot;\n&quot;))
-}
-
-
-def readProperty(Path path, String prop) {
-    reader = Files.newBufferedReader(path)
-    try {
-        props = new java.util.Properties()
-        props.load(Files.newBufferedReader(path))
-        return props[prop]
-    } finally {
-        reader.close()
     }
 }
 

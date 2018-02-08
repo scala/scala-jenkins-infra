@@ -1,6 +1,8 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <hudson>
-  <disabledAdministrativeMonitors/>
+  <disabledAdministrativeMonitors>
+    <string>OldData</string>
+  </disabledAdministrativeMonitors>
   <version>2.105</version>
   <installState>
     <isSetupComplete>true</isSetupComplete>
@@ -25,6 +27,7 @@
   <viewsTabBar class="hudson.views.DefaultViewsTabBar"/>
   <myViewsTabBar class="hudson.views.DefaultMyViewsTabBar"/>
   <clouds/>
+  <quietPeriod>5</quietPeriod>
   <scmCheckoutRetryCount>0</scmCheckoutRetryCount>
   <views>
     <hudson.model.AllView>
@@ -124,7 +127,7 @@
       <recurse>false</recurse>
     </listView>
   </views>
-  <primaryView>all</primaryView>
+  <primaryView>scala-2.13.x</primaryView>
   <slaveAgentPort>-1</slaveAgentPort>
   <disabledAgentProtocols>
     <string>JNLP-connect</string>
