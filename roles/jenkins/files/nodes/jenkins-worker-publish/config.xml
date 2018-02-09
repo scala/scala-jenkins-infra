@@ -13,6 +13,7 @@
     <host>172.31.2.2</host>
     <port>22</port>
     <credentialsId>876bcf12-d295-4791-b5bb-98e1d12be978</credentialsId>
+    <javaPath>/usr/lib/jvm/java-8-openjdk-amd64/bin/java</javaPath>
     <maxNumRetries>10</maxNumRetries>
     <retryWaitTime>60</retryWaitTime>
     <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
