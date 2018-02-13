@@ -98,6 +98,4 @@
       - { dest: ".credentials-private-repo",  src: "credentials-private-repo" }
       - { dest: ".credentials-sonatype",      src: "credentials-sonatype" }
       - { dest: ".sonatype-curl",             src: "sonatype-curl" }
-      - { dest: ".s3credentials",             src: "s3credentials" }
-      - { dest: ".s3curl",                    src: "s3curl" }
       - { dest: ".m2/settings.xml",           src: "m2-settings.xml" } # TODO: remove pr-scala stuff, use different  credentials for private-repo for PR validation and temp release artifacts

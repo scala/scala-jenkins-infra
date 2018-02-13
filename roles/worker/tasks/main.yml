@@ -135,7 +135,6 @@
        - ant-optional
        - apt-transport-https
        - maven
-       - s3curl
        - tofrodos
 
 - name: Create sbt launcher path

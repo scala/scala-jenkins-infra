@@ -181,12 +181,49 @@ aws iam put-role-policy --role-name jenkins-master --policy-name jenkins-ebs-cre
 aws iam put-role-policy --role-name jenkins-worker --policy-name jenkins-ebs-create-vol        --policy-document file://$PWD/chef/ebs-create-vol.json
 ```
 
-TODO: once https://github.com/sbt/sbt-s3/issues/14 is fixed, remove s3credentials from nodes (use IAM profile below instead)
 ```
-aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-s3-upload      --policy-document file://$PWD/chef/jenkins-s3-upload.json
+aws iam put-role-policy --role-name jenkins-worker-publish --policy-name s3-upload-scala      --policy-document file://$PWD/chef/s3-upload-scala.json
 aws iam put-role-policy --role-name jenkins-worker-publish --policy-name jenkins-ebs-create-vol --policy-document file://$PWD/chef/ebs-create-vol.json
 ```
 
+s3-upload-scala.json
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "s3:PutObject",
+            "Resource": "arn:aws:s3:::downloads.typesafe.com.s3.amazonaws.com/scala/*"
+        }
+    ]
+}
+```
+
+ebs-create-vol.json:
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AttachVolume",
+                "ec2:CreateVolume",
+                "ec2:ModifyVolumeAttribute",
+                "ec2:DescribeVolumeAttribute",
+                "ec2:DescribeVolumeStatus",
+                "ec2:DescribeVolumes",
+                "ec2:DetachVolume",
+                "ec2:EnableVolumeIO"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+```
 
 ## Create an Elastic IP for each node
 
