@@ -26,7 +26,10 @@ github_scala_token: !vault |
           30356466393636306165316538313033326363623564353737306133643464666234323832326439
           3335363530666130353961376663363262386363356465306661
 
-# ansible-vault encrypt_string $(knife vault show -Fjson master scabot | jq -r -e .jenkins.token) | pbcopy 
+# On first jenkins bootstrap, we create the scabot user, and manually generate its jenkins api token.
+# (Jenkins requires you to log in as the user itself to see the token -- didn't automate this part.)
+# That results in a hashed token in the config file users/scabot/config.xml, and the corresponding
+# following encrypted var:
 scabot_jenkins_token: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           30656263326362333834643233376339613334383330343464626665643532333530383539626132
