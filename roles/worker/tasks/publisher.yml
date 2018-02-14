@@ -80,16 +80,11 @@
 - name: Add gpg sbt plugin
   copy: src=gpg.sbt dest="{{jenkins_home}}/.sbt/0.13/plugins/" owner="{{jenkins_user}}"
 
-#
-# # TODO: regen keypair, import private key instead of serializing secring/pubring?
-# # - name: Create gpg sec/pub ring
-# #   no_log: true
-# #   copy: src={{item}} dest="{{jenkins_home}/.gnupg/" owner="{{jenkins_user}}" mode=0600
-# #   with_items:
-# #       - secring.gpg
-# #       - pubring.gpg
-# #
-#
+- name: Import GPG signing key
+  become_user: "{{jenkins_user}}"
+  command: "gpg --import"
+  args:
+    stdin: "{{gpg_secret_signing_subkey}}"
 
 - name: Copy private credentials
   no_log: true

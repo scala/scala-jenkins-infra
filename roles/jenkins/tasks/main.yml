@@ -52,6 +52,9 @@
       state: present
       update_cache: yes
 
+# After making changes on jenkins, make sure to incorporate them back into this repo
+# using `rsync -av --existing jenkins@scala-ci.typesafe.com:~/ roles/jenkins/files`,
+# or they will be overwritten by this step from the files in roles/jenkins/files.
 - name: Copy jenkins config
   become_user: "{{jenkins_user}}"
   become: yes
