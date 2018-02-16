@@ -81,9 +81,11 @@ Add the following to your /etc/hosts file:
 
 ```
 54.67.111.226 jenkins-master
-54.67.33.167  jenkins-worker-ubuntu-publish
+54.67.33.167  jenkins-worker-publish
 54.153.2.9    jenkins-worker-behemoth-1
 54.153.1.99   jenkins-worker-behemoth-2
+54.183.156.89 jenkins-worker-behemoth-3
+
 ```
 
 Note that the IPs are stable, by allocating elastic IPs and associating them to nodes.
