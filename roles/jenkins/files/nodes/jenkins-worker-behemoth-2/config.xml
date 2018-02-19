@@ -48,5 +48,4 @@
       </envVars>
     </hudson.slaves.EnvironmentVariablesNodeProperty>
   </nodeProperties>
-  <userId>chef</userId>
 </slave>
