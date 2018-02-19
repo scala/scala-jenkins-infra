@@ -1,3 +1,5 @@
+# TODO this latest incarnation has not been tested
+
 # Included from site.yml when configuring jenkins for the first time using --tags boot_jenkins
 #
 # It's not run by default because it's time consuming. It could in principle be run all the time, since it is mostly idempotent (in a brutish way).
@@ -12,10 +14,10 @@
     delay: 20
 
 - name: Accept jenkins cli host key
-  command: "ssh -oStrictHostKeyChecking=no -p 8022 admin@scala-ci.typesafe.com version"
+  command: "ssh -oStrictHostKeyChecking=no -p 8022 scala-jenkins@scala-ci.typesafe.com version"
 
 - name: Jenkins plugins
-  shell: for plugin in "{{item}}"; do ssh -p 8022 admin@scala-ci.typesafe.com install-plugin $plugin; done
+  shell: for plugin in "{{item}}"; do ssh -p 8022 scala-jenkins@scala-ci.typesafe.com install-plugin $plugin; done
   with_items:
       - https://github.com/typesafehub/ec2-start-stop/releases/download/v0.1.0/ec2-start-stop.hpi
       - copyartifact
@@ -43,7 +45,7 @@
 
 
 - name: Restart jenkins
-  shell: ssh -p 8022 admin@scala-ci.typesafe.com restart
+  shell: ssh -p 8022 scala-jenkins@scala-ci.typesafe.com restart
 
 - name: Delay 20s and wait for Jenkins CLI to come up
   wait_for:
@@ -56,7 +58,7 @@
 - name: Configure github oauth
   no_log: true
   vars:
-    - admins: 'adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand, scabot'
+    - admins: 'adriaanm, retronym, lrytz, SethTisue, szeiger, dwijnand, scabot, scala-bench'
     - github_api_client_id: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           38303339653331626166366432616435313531373839666561386430363964613461643434646436
@@ -81,5 +83,5 @@
         Jenkins.instance.setAuthorizationStrategy(new GithubAuthorizationStrategy('{{admins}}', true, true, false, 'scala', true, false, true, true))
         Jenkins.instance.save()
 
-  shell: echo "{{script}}" | ssh -p 8022 admin@scala-ci.typesafe.com groovysh
+  shell: echo "{{script}}" | ssh -p 8022 scala-jenkins@scala-ci.typesafe.com groovysh
 
