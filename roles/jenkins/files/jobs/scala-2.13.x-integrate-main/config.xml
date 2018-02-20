@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
+      <description>Flow that bootstraps and runs a community build</description>
+      <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.13.x</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>scalac_opts</name>
+  <description>[For community-build] Scala compiler arguments, e.g., -Yopt:l:classpath, passed to project builds.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>projects</name>
+  <description>[For community-build] List of projects to build (comma-separated, no spaces).</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>sbtBuildTask</name>
+  <description>[For bootstrap] To skip testing, set to e.g. `update`. Useful when publishing a nightly to run the community build against.</description>
+  <defaultValue>testAll</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>publishToSonatype</name>
+  <description>[For bootstrap] Set to anything but "yes" to avoid publishing to sonatype. Otherwise, release builds (tagged or SCALA_VER_BASE defined) will be published.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>testStability</name>
+  <description>[For bootstrap] To avoid running the stability test, set to e.g., `no`</description>
+  <defaultValue>yes</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>moduleVersioning</name>
+  <description>[For bootstrap] Set to anything but "versions.properties" to build the latest HEAD for all modules.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_VER_BASE</name>
+  <description>[For bootstrap] Specifying this parameter will cause a release to be built. If it's empty (and HEAD does not have a tag that parses as a version), an integration release is built.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_VER_SUFFIX</name>
+  <description>[For bootstrap] Empty for a final release, otherwise, e.g., -RC1 for the first RC or -M3 for the third milestone. (Will be parsed from the tag on SCALA_REF, if any.)</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_BINARY_VER</name>
+  <description>[For bootstrap] For binary compatible releases (such as 2.11.0 and 2.11.1), the short binary version (e.g. 2.11). Otherwise, the full Scala version.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_FULL_VER</name>
+  <description>[For bootstrap] For non-snapshot releases, the scala version, otherwise the closest scala version that's a valid binary version. Used to cross-version the scala continuations plugin.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>STARR_REF</name>
+  <description>[For bootstrap] Can be set to a git ref of a separate commit that will be used to build STARR, rather than using a prebuilt STARR based on starr.version in versions.properties. Used when bootstraping compiler changes that change the ABI, e.g. changing name mangling.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>XML_VER</name>
+  <description>[For bootstrap] The version to build for scala-xml. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>PARSERS_VER</name>
+  <description>[For bootstrap] The version to build for scala-parser-combinators. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>CONTINUATIONS_VER</name>
+  <description>[For bootstrap] The version to build for scala-continuations-plugin and -library. The plugin will be cross-versioned with SCALA_FULL_VER. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SWING_VER</name>
+  <description>[For bootstrap] The version to build for scala-swing. If the version already exists, it won't be published.
+      If empty, it will be parsed from versions.pr[For bootstrap] operties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>ACTORS_MIGRATION_VER</name>
+  <description>[For bootstrap] The version to build for scala-partest. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>PARTEST_VER</name>
+  <description>[For bootstrap] The version to build for scala-partest. If the version already exists, it won't be published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALACHECK_VER</name>
+  <description>[For bootstrap] The version to build for scalacheck. Not published. If empty, it will be parsed from versions.properties (unless moduleVersioning != "versions.properties").</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>AKKA_ACTOR_VER</name>
+  <description>[For bootstrap] The version of akka-actors to include in scala-library-all.pom. NOTE: the release script will NOT build akka, the version specified here needs to be released already. If empty, it will be parsed from versions.properties.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>JLINE_VER</name>
+  <description>[For bootstrap] The version of jline to use for building the Scala project.NOTE: the release script will NOT build jline, the version specified here needs to be released already.If empty, it will be parsed from versions.properties.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        
+      </properties>
+      <scm class="hudson.scm.NullSCM"/>
+      <canRoam>true</canRoam>
+      <concurrentBuild>true</concurrentBuild>
+      <dsl>repo_user = build.buildVariableResolver.resolve("repo_user")
+repo_name = build.buildVariableResolver.resolve("repo_name")
+repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+ver = params["SCALA_VER_BASE"] + params["SCALA_VER_SUFFIX"]
+build.setDisplayName("[${build.number}] Scala dist ${ver} $repo_user/$repo_name#$repo_ref")
+
+
+if (params.repo_ref) buildParams = params
+else buildParams = params + [ "repo_ref" : "v$ver" ]
+
+buildRun = build(buildParams, "scala-2.13.x-integrate-bootstrap")
+
+upstreamBuild = buildRun.build
+// defines repo_ref, version, sbtDistVersionOverride
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
+
+if (upstreamPropsArtifact == null) {
+  out.println('Error: bootstrap did not publish "jenkins.properties" artifact, unable to proceed.')
+  build.state.setResult(Result.FAILURE)
+  return
+}
+
+buildVersionProps = new java.util.Properties()
+buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
+
+testParams = buildParams + buildVersionProps
+
+parallel (
+    { build(testParams, "scala-2.13.x-integrate-community-build") },
+)
+
+</dsl>
+
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>adriaan@lightbend.com seth.tisue@lightbend.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildNeedsWorkspace>true</buildNeedsWorkspace>
+</com.cloudbees.plugins.flow.BuildFlow>

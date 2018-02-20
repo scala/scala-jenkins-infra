@@ -1,0 +1,25 @@
+---
+- name: Install nginx
+  apt: name=nginx state=present
+
+- name: Create user
+  user: name=nginx
+
+# paths are resolved using https://github.com/ansible/ansible/issues/14341#issuecomment-234559431
+- name: Copy ssl (public)
+  copy: src=scala-ci.crt dest=/etc/nginx/ssl/ owner=root
+
+- name: Copy ssl (public)
+  copy: src=dhparam.pem dest=/etc/nginx/ssl/ owner=root
+
+- name: Copy secret key
+  no_log: true
+  copy: src=scala-ci.key.enc dest=/etc/nginx/ssl/scala-ci.key owner=root mode=0600
+
+- name: Create jenkins nginx configuration
+  template: src=nginx-jenkins.conf dest=/etc/nginx/conf.d/jenkins.conf
+  notify: restart nginx
+
+- name: Copy core nginx configuration
+  copy: src=nginx.conf dest=/etc/nginx/
+  notify: restart nginx # defined in ../handlers

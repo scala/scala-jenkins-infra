@@ -1,0 +1,55 @@
+# TODO this latest incarnation has not been tested
+
+# only for the initial jenkins config
+- name: Create scala-jenkins homedir
+  file: path="{{jenkins_home}}/users/scala-jenkins" state=directory owner="{{jenkins_user}}" mode="0755" recurse="yes"
+  tags:
+    - boot_jenkins
+
+- name: Create initial scala-jenkins user (with a pre-configured ssh key, used in bootstrap-cli.yml)
+  vars:
+    - scala_jenkins_passwordHash: !vault |
+              $ANSIBLE_VAULT;1.1;AES256
+              34663166313665373033646131333466303733663132343564626666366266633939656439363331
+              3230633536353939663036613762646636306566333638610a663838643938373438383230613031
+              61646661373532646634366235343536393063386130646636616539656561616636633731396136
+              3861653139393465360a353364316561353339303962373963386330633931623139306165663438
+              63376434393064336534663164326633643737383437653263663865303862373633393062343466
+              35316233366261316232613966323062313032343036343364323338366136633330386534333037
+              363835316562346531303931646461393461
+    - scala_jenkins_tokenHash: !vault |
+              $ANSIBLE_VAULT;1.1;AES256
+              37393132666634306366616561623634393463343261376164383966386662323839376465323963
+              3261643765613438333435316230363864393231326631630a343634613766303339396566666439
+              38646133363265343563636566386637303338343063636239316331383266366261343933613164
+              6365393037353065340a323563333765646465356634666432396462653239306230643739386361
+              32316639633030303836303262346639386662646137326563333462666363613633653661663064
+              34343239663739366539306664366135613863666535343730366639646265666363373362356332
+              66663036653235323966643966636162383562646562303264366636653232396332316531636437
+              66656631366566623463623137663033313934316239313362363833616639616362353432333961
+              38373565643932356466643437633039613438393232633636363565376334613538
+    - scala_jenkins_authorizedKeys: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCwdG1o+zxa/aLyIbLBjmcapdVqcxFfi4kWR43c7Uhx+v1J1Il09jwLiD6ABJHwiEWitG1L1RIscUQr89tYzpWyYNgqNAuNoCnm67q95r5nStB6iAqbAdXGpVDk2NbChX4Lul48zK9jJppMFiTCZw8/mReVP1K0ptqPMoUcNzq51Js/zIvew/PdaRJ4LB/uo6x7UDiG88oLPDVXODOSTpwIIDOZHsFM4+0viq3nJ3UUXkvQ2KaL7N86f30ZDNblKzu4JxmS009XO6o5rDOylT9T5q0bgo8I6a1qXvobZtqGrlKC3h3WlP702ImsV7jAyZBkjV4rFPMLt6MprzepV4yn adriaan.moors@typesafe.com'
+  template:
+    src: scala-jenkins-config.xml
+    dest: "{{jenkins_home}}/users/scala-jenkins/config.xml"
+  tags:
+    - boot_jenkins
+
+- name: Copy main jenkins config (it enables full admin access for all authenticated users)
+  copy: 
+    src: config-bootstrap.xml 
+    dest: "{{jenkins_home}}/config.xml"
+  tags: 
+    - boot_jenkins
+
+- name: Chown everything in jenkins homedir (existing volume has unknown uid, rsync seems to mess up user id too)
+  file: path={{jenkins_home}} state=directory recurse=yes owner={{jenkins_user}} group={{jenkins_user}}
+  tags:
+    - boot_jenkins
+
+- name: Restart jenkins (so that we can log in as scala-jenkins via cli over ssh)
+  service:
+    name: jenkins
+    state: restarted
+  tags: 
+    - boot_jenkins

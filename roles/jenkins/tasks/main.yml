@@ -1,0 +1,67 @@
+---
+- name: Create jenkins homedir
+  file: path={{jenkins_home}} state=directory mode="0755"
+
+- name: Mount jenkins home
+  mount:
+    src: "{{ec2_vol_jenkins.device_name}}"
+    path: "{{jenkins_home}}"
+    fstype: ext4
+    opts: noatime
+    state: mounted
+  notify: daemon reload
+  tags:
+    - ec2
+
+- name: Create user
+  user: name={{jenkins_user}} home={{jenkins_home}}
+
+- name: Chmod jenkins homedir
+  file: path={{jenkins_home}} state=directory mode="0755"
+
+- name: Add the jenkins gpg key
+  apt_key:
+    url: "https://pkg.jenkins.io/debian/jenkins.io.key"
+    state: present
+
+- name: Add apt repo for jenkins
+  apt_repository:
+    repo: "deb https://pkg.jenkins.io/debian binary/"
+    state: present
+
+- name: Create jenkins dirs
+  file: path={{item}} state=directory owner="{{jenkins_user}}" mode="0755"
+  with_items:
+      - "{{jenkins_home}}/.ssh"
+
+- name: Worker ssh key pairs
+  become_user: "{{jenkins_user}}"
+  become: yes
+  shell: ssh-keygen -q -t rsa -b 4096 -f "{{jenkins_home}}/.ssh/{{item}}" -N '' -C "{{item}} adriaan+jenkins@lightbend.com"
+  args:
+    creates: "{{jenkins_home}}/.ssh/{{item}}"
+  with_items:
+      - id_worker
+      - id_worker_publisher
+      - id_worker_kalles    # TODO: copy manually to host's authorized_keys
+      - id_worker_windows   # TODO: copy manually to host's authorized_keys
+
+- name: Install jenkins
+  apt:
+      name: jenkins
+      state: present
+      update_cache: yes
+
+# After making changes on jenkins, make sure to incorporate them back into this repo
+# using `rsync -av --existing jenkins@scala-ci.typesafe.com:~/ roles/jenkins/files`,
+# or they will be overwritten by this step from the files in roles/jenkins/files.
+- name: Copy jenkins config
+  become_user: "{{jenkins_user}}"
+  become: yes
+  synchronize:
+    src: ../files/
+    dest: "{{jenkins_home}}"
+    checksum: true
+    rsync_opts:
+      - "--chown={{jenkins_user}}:{{jenkins_user}}" # requires recent rsync!
+  notify: restart jenkins

@@ -1,0 +1,133 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.12">
+      <endpoints>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>finalized</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+      </endpoints>
+    </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.jobs.JobRestrictionProperty plugin="job-restrictions@0.6"/>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>scalaVersion</name>
+          <description>The Scala version to benchmark, e.g., &quot;2.12.1&quot; or &quot;2.12.2-b9d4089-nightly&quot;</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>sbtCommands</name>
+          <description>The sbt commands to run, as a JSON array: [&quot;compilation/jmh:run scala.tools.nsc.HotScalacBenchmark -p source=better-files&quot;, ...]</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>benchqTaskId</name>
+          <description>The `id: Long` of the task in the benchmark queue.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>1</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>true</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.7.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <name>origin</name>
+        <url>https://github.com/scala/compiler-benchmark.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.CleanCheckout/>
+    </extensions>
+  </scm>
+  <assignedNode>scalabench</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/usr/bin/env bash
+
+set -exo pipefail
+
+cd ~/code/scala
+git config --add remote.origin.fetch &apos;+refs/pull/*/head:refs/remotes/origin/pr/*&apos;
+git fetch origin -f --tags
+
+cd $WORKSPACE
+sudo ./scripts/benv reset
+sudo ./scripts/benv set -nl
+
+. ~/bench-tool-paths.sh
+
+addResolver=&apos;set resolvers in ThisBuild ++= List(&quot;scala-integration&quot; at &quot;https://scala-ci.typesafe.com/artifactory/scala-integration/&quot;, &quot;scala-release-temp&quot; at &quot;https://scala-ci.typesafe.com/artifactory/scala-release-temp/&quot;)&apos;
+setScalaVersion=&quot;set scalaVersion in ThisBuild := \&quot;$scalaVersion\&quot;&quot;
+setJmhMain=&quot;set every mainClass in Jmh in run := Some(\&quot;scala.bench.UploadingRunner\&quot;)&quot;
+echo $sbtCommands | jq &apos;.[]&apos; -r | while read cmd; do
+  sbt \
+    &quot;$addResolver&quot; \
+    &quot;$setScalaVersion&quot; \
+    &quot;$setJmhMain&quot; \
+    clean \
+    &quot;$cmd&quot;
+done
+
+sudo ./scripts/benv reset
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>**/*.json, target/profile*/**/*</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.5.2">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
+</project>

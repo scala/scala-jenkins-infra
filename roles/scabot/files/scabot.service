@@ -1,0 +1,14 @@
+[Unit]
+Description=Scabot
+
+[Service]
+User=scabot
+WorkingDirectory=/home/scabot
+ExecStart=/home/scabot/run
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

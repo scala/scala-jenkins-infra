@@ -1,0 +1,40 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<slave>
+  <name>kalles</name>
+  <description>Jenkins worker outside of ec2</description>
+  <remoteFS>/home/scala/jenkins</remoteFS>
+  <numExecutors>1</numExecutors>
+  <mode>EXCLUSIVE</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
+    <host>kalles.typesafe.com</host>
+    <port>22</port>
+    <credentialsId>e3e28611-abd6-4d1d-b128-76eac1dd892d</credentialsId>
+    <maxNumRetries>10</maxNumRetries>
+    <retryWaitTime>60</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
+  </launcher>
+  <label>benchmark</label>
+  <nodeProperties>
+    <hudson.slaves.EnvironmentVariablesNodeProperty>
+      <envVars serialization="custom">
+        <unserializable-parents/>
+        <tree-map>
+          <default>
+            <comparator class="hudson.util.CaseInsensitiveComparator"/>
+          </default>
+          <int>4</int>
+          <string>prRepoUrl</string>
+          <string>https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/</string>
+          <string>releaseTempRepoUrl</string>
+          <string>https://scala-ci.typesafe.com/artifactory/scala-release-temp/</string>
+          <string>sbtCmd</string>
+          <string>/usr/local/bin/sbt</string>
+          <string>sbtLauncher</string>
+          <string>/usr/local/lib/share/sbt-launch.jar</string>
+        </tree-map>
+      </envVars>
+    </hudson.slaves.EnvironmentVariablesNodeProperty>
+  </nodeProperties>
+  <userId>adriaanm</userId>
+</slave>

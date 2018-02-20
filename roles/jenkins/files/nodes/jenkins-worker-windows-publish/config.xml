@@ -1,0 +1,61 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<slave>
+  <name>jenkins-worker-windows-publish</name>
+  <description>Worker for publish jobs (windows)</description>
+  <remoteFS>y:\jenkins</remoteFS>
+  <numExecutors>2</numExecutors>
+  <mode>EXCLUSIVE</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Demand">
+    <inDemandDelay>0</inDemandDelay>
+    <idleDelay>5</idleDelay>
+  </retentionStrategy>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
+    <host>172.31.0.178</host>
+    <port>22</port>
+    <credentialsId>a7cd7b60-4e43-48e5-b4d9-cad515e94e5e</credentialsId>
+    <jvmOptions>-Duser.home=y:/jenkins -Djava.io.tmpdir=y:/jenkins/tmp -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native</jvmOptions>
+    <javaPath>&quot;C:/Program Files/Java/jdk1.8.0_121/bin/java&quot;</javaPath>
+    <maxNumRetries>10</maxNumRetries>
+    <retryWaitTime>60</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
+  </launcher>
+  <label>publish windows</label>
+  <nodeProperties>
+    <hudson.slaves.EnvironmentVariablesNodeProperty>
+      <envVars serialization="custom">
+        <unserializable-parents/>
+        <tree-map>
+          <default>
+            <comparator class="hudson.util.CaseInsensitiveComparator"/>
+          </default>
+          <int>12</int>
+          <string>_JAVA_OPTIONS</string>
+          <string>-Duser.home=y:/jenkins -Djava.io.tmpdir=y:/jenkins/tmp -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native</string>
+          <string>ANT_OPTS</string>
+          <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Duser.home=y:/jenkins -Djava.io.tmpdir=y:/jenkins/tmp -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native</string>
+          <string>integrationRepoUrl</string>
+          <string>https://scala-ci.typesafe.com/artifactory/scala-integration/</string>
+          <string>JAVA_HOME</string>
+          <string>C:\Program Files\Java\jdk1.8.0_121</string>
+          <string>JAVA_OPTS</string>
+          <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Duser.home=y:/jenkins -Djava.io.tmpdir=y:/jenkins/tmp -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native</string>
+          <string>MAVEN_OPTS</string>
+          <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Duser.home=y:/jenkins -Djava.io.tmpdir=y:/jenkins/tmp -Dhudson.remoting.RemoteClassLoader.force=com.sun.jna.Native</string>
+          <string>PATH</string>
+          <string>/bin:/usr/bin:/cygdrive/c/Program Files/Java/jdk1.8.0_121/bin:/cygdrive/c/Program Files/Git/Cmd:/cygdrive/c/ProgramData/chocolatey/bin</string>
+          <string>prRepoUrl</string>
+          <string>https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/</string>
+          <string>sbtLauncher</string>
+          <string>C:\sbt\sbt-launch.jar</string>
+          <string>SHELLOPTS</string>
+          <string>igncr</string>
+          <string>TMP</string>
+          <string>y:/jenkins/tmp</string>
+          <string>WIX</string>
+          <string>C:\Program Files (x86)\WiX Toolset v3.10</string>
+        </tree-map>
+      </envVars>
+    </hudson.slaves.EnvironmentVariablesNodeProperty>
+  </nodeProperties>
+  <userId>chef</userId>
+</slave>

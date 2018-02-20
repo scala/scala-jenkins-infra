@@ -1,0 +1,35 @@
+---
+- name: Create user
+  user: name={{artifactory_user}} home={{artifactory_home}}
+
+- name: Add the jfrog gpg key
+  apt_key:
+    url: "https://bintray.com/user/downloadSubjectPublicKey?username=jfrog"
+    state: present
+
+- name: Add apt repo for artifactory
+  apt_repository:
+    repo: "deb https://jfrog.bintray.com/artifactory-debs stretch main"
+    state: present
+    update_cache: yes
+
+- name: Install artifactory
+  apt:
+      name: jfrog-artifactory-oss
+      state: present
+      update_cache: yes
+
+- name: Mount artifactory filestore
+  mount:
+    src: "{{ec2_vol_artifactory.device_name}}"
+    path: "{{artifactory_home}}/data"
+    fstype: ext4
+    opts: noatime
+    state: mounted
+  tags:
+    - ec2
+  notify: daemon reload
+
+- name: Copy artifactory config
+  copy: src=artifactory.config.xml dest={{artifactory_etc}} owner={{artifactory_user}}
+  notify: restart artifactory

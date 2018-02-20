@@ -1,0 +1,5 @@
+---
+# https://github.com/systemd/systemd/issues/3568
+- name: daemon reload
+  become: true
+  shell: systemctl daemon-reload

@@ -1,0 +1,16 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<user>
+  <fullName>Bot</fullName>
+  <description>Either scala/scabot or scala/compiler-benchq</description>
+  <properties>
+    <jenkins.security.ApiTokenProperty>
+      <apiToken>{{scala_jenkins_tokenHash}}</apiToken>
+    </jenkins.security.ApiTokenProperty>
+    <hudson.security.HudsonPrivateSecurityRealm_-Details>
+      <passwordHash>#jbcrypt:$2a$10${{scala_jenkins_passwordHash}}</passwordHash>
+    </hudson.security.HudsonPrivateSecurityRealm_-Details>
+    <org.jenkinsci.main.modules.cli.auth.ssh.UserPropertyImpl>
+      <authorizedKeys>{{scala_jenkins_authorizedKeys}}</authorizedKeys>
+    </org.jenkinsci.main.modules.cli.auth.ssh.UserPropertyImpl>
+  </properties>
+</user>

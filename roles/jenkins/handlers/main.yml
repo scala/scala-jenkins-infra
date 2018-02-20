@@ -1,0 +1,9 @@
+---
+- name: restart jenkins
+  become: true
+  service: name=jenkins state=restarted enabled=yes
+
+# https://github.com/systemd/systemd/issues/3568
+- name: daemon reload
+  become: true
+  shell: systemctl daemon-reload

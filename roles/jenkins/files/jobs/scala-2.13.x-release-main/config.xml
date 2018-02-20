@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><com.cloudbees.plugins.flow.BuildFlow plugin="build-flow-plugin@0.9">
+      <description>TODO: Better description. Build, package and stage a Scala release. 
+Nightly downloads go to http://www.scala-lang.org/files/archive/nightly/2.13.x/
+Regular ones to http://www.scala-lang.org/files/archive/.</description>
+      <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.13.x</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_VER_BASE</name>
+  <description>When set, a release with version "$SCALA_VER_BASE$SCALA_VER_SUFFIX" will be built. Same effect as for tagging $repo_ref as "v$SCALA_VER_BASE$SCALA_VER_SUFFIX".</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>SCALA_VER_SUFFIX</name>
+  <description/>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        
+      </properties>
+      <scm class="hudson.scm.NullSCM"/>
+      <canRoam>true</canRoam>
+      <concurrentBuild>true</concurrentBuild>
+      <dsl>repo_user = build.buildVariableResolver.resolve("repo_user")
+repo_name = build.buildVariableResolver.resolve("repo_name")
+repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+ver = params["SCALA_VER_BASE"] + params["SCALA_VER_SUFFIX"]
+build.setDisplayName("[${build.number}] Scala dist ${ver} $repo_user/$repo_name#$repo_ref")
+
+
+if (params.repo_ref) buildParams = params
+else buildParams = params + [ "repo_ref" : "v$ver" ]
+
+buildRun = build(buildParams, "scala-2.13.x-integrate-bootstrap")
+
+upstreamBuild = buildRun.build
+// for testing, to avoid re-running the main build: upstreamBuild = jenkins.model.Jenkins.instance.items.find{it.name == "scala-2.13.x-integrate-bootstrap"}.builds[0]
+// defines repo_ref, version, sbtDistVersionOverride
+upstreamPropsArtifact = upstreamBuild.artifacts.find{it.name == "jenkins.properties"}
+
+if (upstreamPropsArtifact == null) {
+  out.println('Error: bootstrap did not publish "jenkins.properties" artifact, unable to proceed.')
+  build.state.setResult(Result.FAILURE)
+  return
+}
+
+buildVersionProps = new java.util.Properties()
+buildVersionProps.load(new java.io.FileInputStream(upstreamPropsArtifact.file))
+
+testParams = buildParams + buildVersionProps
+
+parallel (
+    { retry(2, { build(testParams, "scala-2.13.x-integrate-community-build") }) },
+    { build(testParams, "scala-2.13.x-release-package-unix") },
+    { build(testParams, "scala-2.13.x-release-package-windows") }
+)
+
+build(testParams, "scala-2.13.x-release-smoketest")
+
+build(testParams, "scala-2.13.x-release-website-archives")
+
+build(testParams, "scala-2.13.x-release-website-update-api")
+</dsl>
+
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>@midnight</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <publishers>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>adriaan@lightbend.com seth.tisue@lightbend.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildNeedsWorkspace>true</buildNeedsWorkspace>
+</com.cloudbees.plugins.flow.BuildFlow>

@@ -1,0 +1,145 @@
+# TODO: this needs to be done manually, or somehow ported to ansible
+
+force="" # set to "NOERR" to force partitioning&formatting the disk
+diskpartScript=<<-EOX.gsub(/^    /, '')
+select disk #{ebsConfig['disk']}
+attributes disk clear readonly
+online disk #{force}
+create partition primary #{force}
+select partition 1
+format FS=#{ebsConfig['fstype']} quick
+assign LETTER=#{mountPoint}
+EOX
+script "setupdisk" do
+interpreter "diskpart"
+flags "/s"
+code diskpartScript
+not_if { ::File.directory?("#{mountPoint}:\\") }
+end
+
+include_recipe 'chocolatey'
+
+# using security groups instead
+execute "no-win-firewall" do
+  command "NetSh Advfirewall set allprofiles state off"
+end
+
+
+directory 'C:\sbt'
+
+# include_recipe "sbt-extras"
+
+# The bit from chef-sbt that's missing in chef-sbt-extras...
+# (Easily find the launcher jar for those paranoid jobs that want to invoke sbt using the java command
+#  could update those scripts to use sbt-extras more carefully, I suppose.)
+# TODO: remove and rework scripts
+remote_file "#{node['sbt']['launcher_path']}" do
+  source "https://repo.lightbend.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/#{node['sbt']['version']}/sbt-launch.jar"
+  action :create
+  mode 0755
+end
+
+# the regular resource approach does not work for me
+execute 'create jenkins user' do
+  command "net user /ADD #{workerConfig["jenkinsUser"]}"
+  not_if  "net user #{workerConfig["jenkinsUser"]}"
+end
+
+# also sets core.longpaths true
+# without longpaths enabled we have:
+# - known problems with `git clean -fdx` failing
+# - suspected problems with intermittent build failures due to
+#   very long paths to some classfiles
+cookbook_file 'gitconfig-windows' do
+  path "#{jenkinsHome}/.gitconfig"
+end
+
+user workerConfig["jenkinsUser"] do
+  home jenkinsHome
+end
+
+
+node["jenkinsHomes"].each do |jenkinsHome, workerConfig|
+  if workerConfig["publish"]
+
+    # (only) needed for WIX ICE validation (http://windows-installer-xml-wix-toolset.687559.n2.nabble.com/Wix-3-5-amp-Cruise-Control-gives-errorLGHT0217-td6039205.html#a6039814)
+    # wix was failing, added jenkins to this group, rebooted (required!), then it worked
+    group "Administrators" do
+      action :modify
+      members workerConfig["jenkinsUser"]
+      append true
+    end
+  end
+end
+
+# cygwin must be installed manually...  C:\Users\Administrator\AppData\Local\Temp\Cygwin\2.7.0\setup-x86_64.exe" --site http://mirrors.kernel.org/sourceware/cygwin/ --packages default --root C:\tools\cygwin --local-package-dir C:\tools\cygwin
+#chocolatey_package 'openssh' do
+#  options '--params="/SSHServerFeature"'
+#end
+
+chocolatey_package 'git'
+chocolatey_package 'jdk8' # manually installed jdk-6u45-windows-x64 (have to explicitly select all packages or it won't install the jdk)
+chocolatey_package 'ant' do
+  version "1.9.8" # 1.10 needs jdk8, which is no go for 2.11
+end
+
+
+chocolatey_package 'wixtoolset' do
+  options '--allow-empty-checksums'
+  action [:install]
+end
+
+
+### CYGWIN: manual install, need packages openssh, curl
+
+windows_path "#{node['cygwin']['home']}\\bin" do
+  action :add
+end
+
+# map /home to a separate volume
+file "#{node['cygwin']['home']}/etc/fstab" do
+  content <<-EOH.gsub(/^    /, '')
+    none /cygdrive cygdrive binary,posix=0,user 0 0
+    Y: /home ntfs binary 0 0
+  EOH
+end
+
+cygbash="#{node['cygwin']['home']}/bin/bash.exe"
+
+# ssh-host-config takes care of setting up the user account for Tcb and other privileges needed for pubkey auth via LSA
+require 'securerandom'
+bash 'configure sshd' do
+  interpreter cygbash
+  environment ({'SHELLOPTS' => 'igncr'})
+
+  code   "ssh-host-config -y -u cyg_server -w #{SecureRandom.base64}"
+  not_if "cygrunsrv --query sshd | grep Running"
+end
+
+bash 'start sshd' do
+  interpreter cygbash
+  environment ({'SHELLOPTS' => 'igncr'})
+
+  code   "cygrunsrv --start sshd"
+  not_if "cygrunsrv --query sshd | grep Running"
+end
+
+# IMPORTANT NOTE: /etc/sshd_config should have:
+# ```
+# StrictModes no
+# PubkeyAuthentication yes
+# ```
+
+# needed to allow pubkey login on windows
+# this needs a reboot!
+bash 'config lsa' do
+  interpreter cygbash
+  environment ({'SHELLOPTS' => 'igncr'})
+
+  code   'auto_answer="yes" cyglsa-config'
+  not_if "regtool get '/HKEY_LOCAL_MACHINE/SYSTEM/CurrentControlSet/Control/Lsa/Authentication Packages' | grep cyglsa"
+end
+
+# IMPORTANT MANUAL STEP: REBOOT -- LSA install won't take effect until after a reboot
+
+

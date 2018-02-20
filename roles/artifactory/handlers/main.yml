@@ -1,0 +1,9 @@
+---
+- name: restart artifactory
+  become: true
+  service: name=artifactory state=restarted enabled=yes
+
+# https://github.com/systemd/systemd/issues/3568
+- name: daemon reload
+  become: true
+  shell: systemctl daemon-reload

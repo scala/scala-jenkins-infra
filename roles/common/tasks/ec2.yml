@@ -1,0 +1,99 @@
+- name: Include ec2 credentials
+  include_vars: ec2-credentials.yml
+
+- name: Start instances (since exact_count does not consider stopped ones, see https://github.com/ansible/ansible/issues/20867)
+  ec2:
+    aws_access_key: "{{ec2_access_key}}"
+    aws_secret_key: "{{ec2_secret_key}}"
+    keypair: ansible
+    wait: yes
+    region: us-west-1
+    instance_tags:
+      Name: "{{item.name}}"
+    state: running
+
+  with_items: "{{ec2_instances}}"
+
+
+- name: Ensure there's 1 running instance per item in ec2_instances (by EC2 tag `Name`)
+  ec2:
+    aws_access_key: "{{ec2_access_key}}"
+    aws_secret_key: "{{ec2_secret_key}}"
+    keypair: ansible
+    wait: yes
+    region: us-west-1
+    ebs_optimized: true
+    instance_profile_name: "{{item.instance_profile_name}}"
+    instance_type: "{{item.instance_type}}"
+    image: "{{item.image}}"
+    network_interface: "{{item.network_interface}}"
+    instance_tags:
+      Name: "{{item.name}}"
+    count_tag:
+      Name: "{{item.name}}"
+    exact_count: 1
+
+  with_items: "{{ec2_instances}}"
+  register: ec2
+
+- name: Ensure (existing) EBS volumes are attached to instances
+  ec2_vol:
+    aws_access_key: "{{ec2_access_key}}"
+    aws_secret_key: "{{ec2_secret_key}}"
+    region: us-west-1
+
+    instance: "{{item.0.tagged_instances.0.id}}"
+    zone:     "{{item.0.tagged_instances.0.placement}}"
+
+    device_name:  "{{ item.1.device_name }}"
+    id:           "{{ item.1.id }}"
+
+  with_subelements:
+    - "{{ ec2.results }}"
+    - item.volumes
+
+  when: item.1.id is defined
+
+- name: Ensure (new) EBS volumes are attached to instances
+  ec2_vol:
+    aws_access_key: "{{ec2_access_key}}"
+    aws_secret_key: "{{ec2_secret_key}}"
+    region: us-west-1
+
+    instance: "{{item.0.tagged_instances.0.id}}"
+    zone:     "{{item.0.tagged_instances.0.placement}}"
+
+    device_name:           "{{ item.1.device_name }}"
+    volume_size:           "{{ item.1.volume_size}}"
+    volume_type:           "{{ item.1.volume_type}}"
+    delete_on_termination: "{{ item.1.delete_on_termination}}"
+
+  with_subelements:
+    - "{{ ec2.results }}"
+    - item.volumes
+
+  when: item.1.id is undefined
+
+- name: Add new instance to host group
+  add_host:
+    hostname: "{{ item.0.tagged_instances.0.public_ip }}"
+    groupname: "{{ item.1 }}"
+    ansible_user: admin
+    ansible_ssh_private_key_file: ansible.pem # locally decrypted version of roles/common/files/ansible.pem (I store it in my ~/.ssh/ and symlink to root of this repo)
+    tags: [ec2]
+  with_subelements:
+    - "{{ ec2.results }}"
+    - item.groupname
+
+
+#
+# # - name: Wait for SSH to come up
+# #   wait_for:
+# #     host: "{{ item.public_dns_name }}"
+# #     port: 22
+# #     delay: 60
+# #     timeout: 320
+# #     state: started
+# #   with_items: "{{ ec2.instances }}"
+#
+#

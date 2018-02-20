@@ -1,0 +1,4 @@
+---
+- name: restart nginx
+  become: true # address error "interactive authentication required"
+  service: name=nginx state=restarted enabled=yes

@@ -1,0 +1,167 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.17">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.jobs.JobRestrictionProperty plugin="job-restrictions@0.6"/>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>SCALA_VER_BASE</name>
+          <description>When set, a release with version &quot;$SCALA_VER_BASE$SCALA_VER_SUFFIX&quot; will be built. Same effect as for tagging $repo_ref as &quot;v$SCALA_VER_BASE$SCALA_VER_SUFFIX&quot;.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>SCALA_VER_SUFFIX</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>jvmFlavor</name>
+          <description></description>
+          <defaultValue>openjdk</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>jvmVersion</name>
+          <description></description>
+          <defaultValue>8</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>repo_user</name>
+          <description></description>
+          <defaultValue>scala</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>repo_name</name>
+          <description></description>
+          <defaultValue>scala-dist</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>repo_ref</name>
+          <description></description>
+          <defaultValue>2.12.x</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>false</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.44">
+    <script>#!groovy
+
+def scalaRepoRef = repo_ref
+if (!params.repo_ref) scalaRepoRef = &quot;v$ver&quot;
+
+def bootstrapJobName = &quot;scala-2.12.x-integrate-bootstrap&quot;
+
+def bootstrapParams = [
+    s(&quot;repo_user&quot;, &quot;scala&quot;),
+    s(&quot;repo_name&quot;, &quot;scala&quot;),
+    s(&quot;repo_ref&quot;, scalaRepoRef),
+    s(&quot;jvmFlavor&quot;),
+    s(&quot;jvmVersion&quot;),
+    s(&quot;SCALA_VER_BASE&quot;),
+    s(&quot;SCALA_VER_SUFFIX&quot;),
+    s(&quot;sbtBuildTask&quot;, &quot;&quot;) // &quot;testAll&quot;
+]
+
+def buildPropsList = []
+def bootstrapBuild = null
+
+stage(&apos;bootstrap&apos;) {
+    setDisplayName()
+    bootstrapBuild = build(job: bootstrapJobName, parameters: bootstrapParams)
+}
+
+stage(&apos;copy artifact&apos;) {
+    node(&quot;&quot;) {
+        copyArtifacts(projectName: bootstrapJobName, selector: specific(&quot;${built.number}&quot;), filter: &apos;jenkins.properties&apos;, flatten: true);
+        def props = readProperties file: &apos;jenkins.properties&apos;
+        buildPropsList = props.entrySet().collect{&quot;${it.getKey()}=${it.getValue()}&quot;}
+    }
+}
+
+def releaseStage(scriptFile, label) {
+    node(label) { stage(name) {
+        try {
+            scalaDistCheckout()
+            ansiColor(&apos;xterm&apos;) {
+                withEnv(buildPropsList) {
+                    echo &quot;DRY RUN: ${scriptFile}&quot;
+                    //runScript(scriptFile)
+                }
+            }
+        }
+        finally {
+            archiveArtifacts artifacts: &apos;hs_err_*.log&apos;, allowEmptyArchive: true
+        }
+    }}
+}
+
+packageJobs = [:]
+packageJobs[&quot;package-unix&quot;] = { -&gt; releaseStage(&quot;release/package/unix&quot;, &quot;linux &amp;&amp; publish&quot;)}
+packageJobs[&quot;package-windows&quot;] = { -&gt; releaseStage(&quot;release/package/windows&quot;, &quot;linux &amp;&amp; publish&quot;)}
+
+parallel packageJobs
+
+releaseStage(&quot;release/smoketest&quot;, scalaVersion, &quot;linux &amp;&amp; publish&quot;)
+releaseStage(&quot;release/website/archives&quot;, scalaVersion, &quot;linux &amp;&amp; publish&quot;)
+releaseStage(&quot;release/website/update-api&quot;, scalaVersion, &quot;linux &amp;&amp; publish&quot;)
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END OF BUILD PROPER
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+def s(name) {
+    return s(name, params[name])
+}
+def s(name, value) {
+    return [$class: &apos;StringParameterValue&apos;, name: name, value: value]
+}
+
+def setDisplayName() {
+    currentBuild.setDisplayName(&quot;[${currentBuild.number}] $repo_user/$repo_name at ${repo_ref.take(6)}&quot;)
+}
+
+def scalaDistCheckout() {
+    checkout scm: [$class: &apos;GitSCM&apos;, userRemoteConfigs: [[url: &quot;https://github.com/${repo_user}/${repo_name}.git&quot;]],
+                   branches: [[name: &quot;${repo_ref}&quot;]], extensions: [[$class: &apos;CleanCheckout&apos;]]],
+            changelog: false, poll: false
+}
+
+def runScript(path) {
+    sh &quot;&quot;&quot;#!/bin/bash -ex
+    if [ -f /usr/local/share/jvm/jvm-select ]; then
+        . /usr/local/share/jvm/jvm-select;
+        jvmSelect $jvmFlavor $jvmVersion;
+    else
+        echo &apos;WARNING: jvm-select not present. using system default Java&apos;;
+    fi
+    . ${path}
+    &quot;&quot;&quot;
+}
+</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+        <description>PR integration testing: IDE</description>
+        <properties>
+        <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.7">
+          <endpoints>
+            
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>http://scala-ci.typesafe.com:8888/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+
+<com.tikal.hudson.plugins.notification.Endpoint>
+  <protocol>HTTP</protocol>
+  <format>JSON</format>
+  <url>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</url>
+  <event>all</event>
+  <timeout>30000</timeout>
+</com.tikal.hudson.plugins.notification.Endpoint>
+          </endpoints>
+        </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+        <hudson.model.ParametersDefinitionProperty>
+          <parameterDefinitions>
+            <hudson.model.StringParameterDefinition>
+  <name>repo_user</name>
+  <description>The github username for the repo to clone.</description>
+  <defaultValue>scala</defaultValue>
+</hudson.model.StringParameterDefinition>
+       <hudson.model.StringParameterDefinition>
+ <name>repo_name</name>
+ <description>The name of the repo to clone.</description>
+ <defaultValue>scala</defaultValue>
+       </hudson.model.StringParameterDefinition>
+<hudson.model.StringParameterDefinition>
+  <name>repo_ref</name>
+  <description>The git ref at ${repo_user}/${repo_name} to build.</description>
+  <defaultValue>2.13.x</defaultValue>
+</hudson.model.StringParameterDefinition>
+
+            
+<hudson.model.StringParameterDefinition>
+  <name>scalaVersion</name>
+  <description>Version of Scala to test. Set by main build flow.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>_scabot_pr</name>
+  <description>For internal use by Scabot.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+
+<hudson.model.StringParameterDefinition>
+  <name>_scabot_last</name>
+  <description>For internal use by Scabot.</description>
+  <defaultValue/>
+</hudson.model.StringParameterDefinition>
+          </parameterDefinitions>
+        </hudson.model.ParametersDefinitionProperty>
+        <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@1.8.4">
+          <maxConcurrentPerNode>2</maxConcurrentPerNode>
+          <maxConcurrentTotal>0</maxConcurrentTotal>
+          <throttleEnabled>true</throttleEnabled>
+          <throttleOption>project</throttleOption>
+        </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+      
+      </properties>
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@2.2.1">
+  <configVersion>2</configVersion>
+  <userRemoteConfigs>
+    <hudson.plugins.git.UserRemoteConfig>
+      <name>${repo_user}</name>
+      <refspec>+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head</refspec>
+      <url>https://github.com/${repo_user}/${repo_name}.git</url>
+    </hudson.plugins.git.UserRemoteConfig>
+  </userRemoteConfigs>
+  <branches>
+    <hudson.plugins.git.BranchSpec>
+      <name>${repo_ref}</name>
+    </hudson.plugins.git.BranchSpec>
+  </branches>
+  <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+  <submoduleCfg class="list"/>
+  <extensions>
+  <hudson.plugins.git.extensions.impl.CleanCheckout/>
+  </extensions>
+</scm>
+
+        <assignedNode>public</assignedNode>
+<canRoam>false</canRoam>
+        <concurrentBuild>true</concurrentBuild>
+        <builders>
+          <hudson.plugins.groovy.SystemGroovy plugin="groovy">
+  <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+    <command>repo_user = build.buildVariableResolver.resolve("repo_user")
+repo_name = build.buildVariableResolver.resolve("repo_name")
+repo_ref  = build.buildVariableResolver.resolve("repo_ref").take(12)
+build.setDisplayName("[${build.number}] $repo_user/$repo_name#$repo_ref")
+</command>
+  </scriptSource>
+</hudson.plugins.groovy.SystemGroovy>
+
+          <hudson.tasks.Shell>
+  <command>#!/bin/bash -ex
+
+source scripts/jobs/integrate/ide
+  </command>
+</hudson.tasks.Shell>
+
+        </builders>
+        <buildWrappers>
+          <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.14.1">
+             <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+               <timeoutMinutes>150</timeoutMinutes>
+             </strategy>
+             <operationList/>
+          </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+          <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.4.1">
+            <colorMapName>xterm</colorMapName>
+          </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+          <hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper plugin="logfilesizechecker@1.2">
+            <setOwn>false</setOwn>
+            <maxLogSize>0</maxLogSize>
+            <failBuild>true</failBuild>
+          </hudson.plugins.logfilesizechecker.LogfilesizecheckerWrapper>
+        </buildWrappers>
+
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>logs/**,**/surefire-reports/*</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.Mailer plugin="mailer@1.8">
+      <recipients>pr-scala-integrate-ide@lightbend.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+</project>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <!-- 
+    Maven repos are not safe for concurrent access, thus give each job its own.
+    The WORKSPACE env var is set by jenkins to the path of the current job's workspace.
+    This settings file will cause ant/maven to break if WORKSPACE is not set (to a writeable directory).
+    I don't know how to encode a fall back, but I assume it's not needed as this is ~jenkins/.m2/settings.xml
+  -->
+  <localRepository>${WORKSPACE}/m2repo</localRepository>
+
+  <servers>
+    <server>
+      <id>sonatype-nexus</id>
+      <username>{{sonatype_user}}</username>
+      <password>{{sonatype_pass | escape}}</password>
+    </server>
+    <server>
+      <id>private-repo</id>
+      <username>{{repos_private_user}}</username>
+      <password>{{repos_private_pass | escape}}</password>
+    </server>
+    <!-- <server>
+      <id>mirror</id>
+      <username>jenkins</username>
+      <password></password>
+    </server> -->
+  </servers>
+
+  <mirrors>
+    <mirror>
+      <id>central-cache</id>
+      <name>Central Cache for Scala CI</name>
+      <url>     {{repos_caching_proxy_central_url}}</url>
+      <mirrorOf>{{repos_caching_proxy_central_mirrorOf}}</mirrorOf>
+    </mirror>
+
+    <mirror>
+      <id>jcenter-cache</id>
+      <name>JCenter Cache for Scala CI</name>
+      <url>     {{repos_caching_proxy_jcenter_url}}</url>
+      <mirrorOf>{{repos_caching_proxy_jcenter_mirrorOf}}</mirrorOf>
+    </mirror>
+
+    <!--
+      codehaus doesn't exist anymore. it doesn't 404, but serves up
+      bad POMs, so we disable it globally by overriding with a mirror
+      with an invalid URL.
+      this entry could be removed after the scala-ide/scala-refactoring
+      repo removes their reference to codehaus-snapshots from their pom.xml
+    -->
+    <mirror>
+      <id>codehaus-snapshots-mirror</id>
+      <name>Maven Codehaus snapshot repository</name>
+      <url>file:///codehaus-does-not-exist-anymore</url>
+      <mirrorOf>codehaus-snapshots</mirrorOf>
+    </mirror>
+  </mirrors>
+
+
+</settings>

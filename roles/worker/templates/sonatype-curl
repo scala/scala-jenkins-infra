@@ -1,0 +1,1 @@
+user = {{ sonatype_user }}:{{ sonatype_pass }}
