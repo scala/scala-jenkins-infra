@@ -1,13 +1,49 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.17">
-  <actions/>
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.7"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.2.7">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
+    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.12">
+      <endpoints>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>http://scala-ci.typesafe.com:8888/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>all</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>all</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+      </endpoints>
+    </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
     <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
-      <autoRebuild>true</autoRebuild>
+      <autoRebuild>false</autoRebuild>
       <rebuildDisabled>false</rebuildDisabled>
     </com.sonyericsson.rebuild.RebuildSettings>
+    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.jobs.JobRestrictionProperty plugin="job-restrictions@0.6"/>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
@@ -63,6 +99,24 @@
           <defaultValue></defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>jobsGlob</name>
+          <description>Select test script(s) using a Ant-style Glob</description>
+          <defaultValue>scripts/jobs/validate/test,scripts/jobs/validate/test/*,scripts/jobs/integrate/ide</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>jvmFlavor</name>
+          <description>Java flavor to use (oracle/openjdk).</description>
+          <defaultValue>openjdk</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>jvmVersion</name>
+          <description>Java version to use (6/7/8/9).</description>
+          <defaultValue>8</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -76,62 +130,85 @@
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.44">
-    <script>//
-// This is written using the &quot;Scripted Pipeline&quot; (https://jenkins.io/doc/book/pipeline/syntax/#scripted-pipeline)
-// not the declarative DSL.
-//
-// Useful docs: https://jenkins.io/doc/pipeline/steps/workflow-basic-steps
+    <script>#!groovy
 
-//
-import java.nio.file.*
+def testJobsPaths = []
+def scalaVersion = &quot;&quot;
 
-node {
-    branch = &apos;2.12.x&apos;
-    // TODO would be cleaner to construct this from params, by my groovy-fu failed me.
-    paramList = [
-        [$class: &apos;StringParameterValue&apos;, name: &apos;repo_user&apos;, value: &quot;${repo_user}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;repo_name&apos;, value: &quot;${repo_name}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;repo_ref&apos;, value: &quot;${repo_ref}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;prDryRun&apos;, value: &quot;${prDryRun}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;antBuildArgs&apos;, value: &quot;${antBuildArgs}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;testExtraArgs&apos;, value: &quot;${testExtraArgs}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;testTarget&apos;, value: &quot;${testTarget}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;_scabot_pr&apos;, value: &quot;${_scabot_pr}&quot;],
-        [$class: &apos;StringParameterValue&apos;, name: &apos;_scabot_last&apos;, value: &quot;${_scabot_last}&quot;]
-    ]
-    testParamList = paramList // we&apos;ll add after `publishCore`
+stage(&apos;publish&apos;) {
+    node(&quot;public&quot;) {
+        try {
+            setDisplayName()
+            scalaCheckout()
+            ansiColor(&apos;xterm&apos;) {
+                runScript(&quot;scripts/jobs/validate/publish-core&quot;)
+            }
+            def props = readProperties file: &apos;jenkins.properties&apos;
+            scalaVersion = props[&apos;maven.version.number&apos;]
+            testJobsPaths = findFiles(glob: jobsGlob)
 
-    stage(&apos;Publish Core&apos;) {
-        projectName = &quot;scala-$branch-validate-publish-core&quot;
-        built = build(job: projectName, parameters: paramList)
-
-        // Copy version.properties to this workspace
-
-        // TODO: could this be done more cleanly by having publish-core
-        //       &quot;stash&quot; the artifact into the the triggering upstream build (this pipeline)
-        //       https://jenkins.io/doc/pipeline/steps/workflow-basic-steps/#code-stash-code-stash-some-files-to-be-used-later-in-the-build
-
-        artifactName = &quot;jenkins.properties&quot;
-        copyArtifacts(projectName: projectName, selector: specific(&quot;${built.number}&quot;), filter: &quot;**/$artifactName&quot;, flatten: true);
-        if (!fileExists(&quot;${env.WORKSPACE}/$artifactName&quot;)) {
-          error(&quot;Error: publish-core did not publish \&quot;$artifactName\&quot; artifact, unable to proceed.&quot;)
+        } finally {
+            archiveArtifacts artifacts: &apos;hs_err_*.log,jenkins.properties&apos;, allowEmptyArchive: true
         }
-        def props = readProperties file: &apos;jenkins.properties&apos;
-        // Note the scala version parameter for use in the subequent build stage
-        testParamList = testParamList + [$class: &apos;StringParameterValue&apos;, name: &quot;scalaVersion&quot;, value: props[&apos;maven.version.number&apos;] ]
-    }
-    stage(&apos;Testing&apos;) {
-        parallel (
-            validatetest: { node {
-                build(job: &quot;scala-$branch-validate-test&quot;, parameters: testParamList)
-            }},
-            ide: { node {
-                build(job: &quot;scala-$branch-integrate-ide&quot;, parameters: testParamList)
-            }}
-        )
     }
 }
 
+def testStage(scalaVersion, scriptFile) {
+    def name = (scriptFile.name == &quot;test&quot;) ? &quot;test&quot; : &quot;test-${scriptFile.name}&quot;
+    // We need to wrap what we return in a Groovy closure, or else it&apos;s invoked
+    // when this method is called, not when we pass it to parallel.
+    // To do this, you need to wrap the code below in { }, and either return
+    // that explicitly, or use { -&gt; } syntax.
+    action = { -&gt;
+        node(&quot;public&quot;) { stage(name) {
+            try {
+                println(&quot;Starting stage ${name} to run ${scriptFile} on ${env.NODE_NAME}@${env.EXECUTOR_NUMBER} in ${env.WORKSPACE}&quot;)
+                scalaCheckout()
+                env[&apos;scalaVersion&apos;] = scalaVersion
+                ansiColor(&apos;xterm&apos;) {
+                    runScript(scriptFile)
+                }
+            }
+            finally {
+                println(&quot;Ending stage ${name} to run ${scriptFile} on ${env.NODE_NAME}@${env.EXECUTOR_NUMBER} in ${env.WORKSPACE}&quot;)
+
+                archiveArtifacts artifacts: &apos;hs_err_*.log,**/test-reports/**/*.xml,build/junit/TEST-*,build/osgi/TEST-*&apos;, allowEmptyArchive: true
+                junit allowEmptyResults: true, testResults: &apos;**/test-reports/**/*.xml&apos;
+            }
+        }}
+    }
+    [name, action]
+}
+
+parallel testJobsPaths.collectEntries{testStage(scalaVersion, it)}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END OF BUILD PROPER
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+def setDisplayName() {
+    currentBuild.setDisplayName(&quot;[${currentBuild.number}] $repo_user/$repo_name#$_scabot_pr at ${repo_ref.take(6)}&quot;)
+}
+
+def scalaCheckout() {
+    checkout changelog: false, poll: false, scm: [$class: &apos;GitSCM&apos;, branches: [[name: &apos;${repo_ref}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;CleanCheckout&apos;]], submoduleCfg: [], userRemoteConfigs: [[name: &apos;${repo_user}&apos;, refspec: &apos;+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head&apos;, url: &apos;https://github.com/${repo_user}/${repo_name}.git&apos;]]]
+}
+
+def runScript(path) {
+    sh &quot;&quot;&quot;#!/bin/bash -ex
+    if [ -f /usr/local/share/jvm/jvm-select ]; then
+        . /usr/local/share/jvm/jvm-select;
+        jvmSelect $jvmFlavor $jvmVersion;
+    else
+        echo &apos;WARNING: jvm-select not present. using system default Java&apos;;
+    fi
+    echo scalaVersion=\$scalaVersion
+    echo BASH_VERSION=&quot;\$BASH_VERSION&quot;
+    . ${path}
+    &quot;&quot;&quot;
+}
 </script>
     <sandbox>false</sandbox>
   </definition>

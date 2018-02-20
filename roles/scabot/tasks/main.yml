@@ -18,6 +18,7 @@
       - SethTisue
       - retronym
       - szeiger
+      - scala-jenkins # this is how we push from travis ci
 
 - name: Register scabot service with systemd
   copy: src=scabot.service dest=/etc/systemd/system
