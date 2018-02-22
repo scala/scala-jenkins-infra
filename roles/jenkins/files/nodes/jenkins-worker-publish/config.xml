@@ -47,21 +47,5 @@
         </tree-map>
       </envVars>
     </hudson.slaves.EnvironmentVariablesNodeProperty>
-    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.nodes.JobRestrictionProperty plugin="job-restrictions@0.6">
-      <jobRestriction class="com.synopsys.arc.jenkinsci.plugins.jobrestrictions.restrictions.logic.MultipleOrJobRestriction">
-        <restrictions>
-          <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.restrictions.logic.OrJobRestriction>
-            <first class="com.synopsys.arc.jenkinsci.plugins.jobrestrictions.restrictions.job.RegexNameRestriction">
-              <regexExpression>^scala-\d+\.\d+.x-(integrate-bootstrap|integrate-windows|release-package-unix|release-package-windows|release-website-archives|release-website-update-api)$</regexExpression>
-              <checkShortName>false</checkShortName>
-            </first>
-            <second class="com.synopsys.arc.jenkinsci.plugins.jobrestrictions.restrictions.job.RegexNameRestriction">
-              <regexExpression>bootstrap-benchmark</regexExpression>
-              <checkShortName>false</checkShortName>
-            </second>
-          </com.synopsys.arc.jenkinsci.plugins.jobrestrictions.restrictions.logic.OrJobRestriction>
-        </restrictions>
-      </jobRestriction>
-    </com.synopsys.arc.jenkinsci.plugins.jobrestrictions.nodes.JobRestrictionProperty>
   </nodeProperties>
 </slave>

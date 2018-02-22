@@ -1,42 +1,11 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin="workflow-job@2.17">
-  <actions/>
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.2.7"/>
+  </actions>
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.12">
-      <endpoints>
-        <com.tikal.hudson.plugins.notification.Endpoint>
-          <protocol>HTTP</protocol>
-          <format>JSON</format>
-          <urlInfo>
-            <urlOrId>http://scala-ci.typesafe.com:8888/jenkins</urlOrId>
-            <urlType>PUBLIC</urlType>
-          </urlInfo>
-          <event>all</event>
-          <timeout>30000</timeout>
-          <loglines>0</loglines>
-          <retries>0</retries>
-        </com.tikal.hudson.plugins.notification.Endpoint>
-        <com.tikal.hudson.plugins.notification.Endpoint>
-          <protocol>HTTP</protocol>
-          <format>JSON</format>
-          <urlInfo>
-            <urlOrId>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</urlOrId>
-            <urlType>PUBLIC</urlType>
-          </urlInfo>
-          <event>all</event>
-          <timeout>30000</timeout>
-          <loglines>0</loglines>
-          <retries>0</retries>
-        </com.tikal.hudson.plugins.notification.Endpoint>
-      </endpoints>
-    </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
-    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
-      <autoRebuild>false</autoRebuild>
-      <rebuildDisabled>false</rebuildDisabled>
-    </com.sonyericsson.rebuild.RebuildSettings>
-    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.jobs.JobRestrictionProperty plugin="job-restrictions@0.6"/>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
         <hudson.model.StringParameterDefinition>
@@ -112,6 +81,39 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
+    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.13-SNAPSHOT">
+      <endpoints>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>http://scala-ci.typesafe.com:8888/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>all</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>all</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+      </endpoints>
+    </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.jobs.JobRestrictionProperty plugin="job-restrictions@0.6"/>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
       <maxConcurrentPerNode>0</maxConcurrentPerNode>
       <maxConcurrentTotal>0</maxConcurrentTotal>
@@ -120,6 +122,7 @@
       <throttleOption>project</throttleOption>
       <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
       <paramsToUseForLimit></paramsToUseForLimit>
+      <configVersion>1</configVersion>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.44">
