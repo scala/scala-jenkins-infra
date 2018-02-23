@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <settings>
-  <!-- 
+  <!--
     Maven repos are not safe for concurrent access, thus give each job its own.
     The WORKSPACE env var is set by jenkins to the path of the current job's workspace.
     This settings file will cause ant/maven to break if WORKSPACE is not set (to a writeable directory).
@@ -10,21 +10,29 @@
 
   <servers>
     <server>
-      <id>sonatype-nexus</id>
-      <username>{{sonatype_user}}</username>
-      <password>{{sonatype_pass | escape}}</password>
-    </server>
-    <server>
-      <id>private-repo</id>
+      <id>pr-scala</id>
       <username>{{repos_private_user}}</username>
       <password>{{repos_private_pass | escape}}</password>
     </server>
-    <!-- <server>
-      <id>mirror</id>
-      <username>jenkins</username>
-      <password></password>
-    </server> -->
   </servers>
+
+  <profiles>
+    <profile>
+      <id>pr-scala</id> <!-- for IDE integration, I think -->
+      <repositories>
+        <repository>
+          <id>pr-scala</id>
+          <name>Scala PR validation snapshots</name>
+          <url>{{repos_private_pr_snap}}</url>
+        </repository>
+        <repository>
+          <id>scala-integration</id>
+          <name>Scala Release snapshots</name>
+          <url>{{repos_private_integration}}</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 
   <mirrors>
     <mirror>
@@ -55,6 +63,5 @@
       <mirrorOf>codehaus-snapshots</mirrorOf>
     </mirror>
   </mirrors>
-
 
 </settings>

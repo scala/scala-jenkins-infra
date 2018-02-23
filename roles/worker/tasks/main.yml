@@ -102,7 +102,7 @@
 
 - name: Copy Maven settings (public jobs)
   no_log: true
-  template: src="m2-settings-pub.xml" dest="{{jenkins_home}}/.m2/settings.xml"      owner="{{jenkins_user}}" mode="0600"
+  template: src="m2-settings.xml" dest="{{jenkins_home}}/.m2/settings.xml"      owner="{{jenkins_user}}" mode="0600"
 
 - name: Copy Private repo credentials (public jobs)
   no_log: true
@@ -162,6 +162,3 @@
   apt:
     name: nodejs
     state: present
-
-- include_tasks: publisher.yml
-  when: "'publisher' in group_names"
