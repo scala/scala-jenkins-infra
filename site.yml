@@ -7,9 +7,6 @@
   gather_facts: False
   tasks:
     - include_tasks: roles/common/tasks/ec2.yml
-  tags:
-    - always
-    - boot_jenkins
 
 - name: Common stuff
   hosts: all
@@ -50,24 +47,3 @@
     - jenkins_home: "/home/jenkins"
   roles:
     - publisher
-
-# To create the inital jenkins config, use `ansible-playbook site.yml --tags boot_jenkins` (after first doing a normal run)
-- name: Bootstrap jenkins
-  hosts: master
-  gather_facts: yes
-  remote_user: "{{admin_user}}"
-  become: true
-  tasks:
-    - include_tasks: roles/jenkins/tasks/bootstrap.yml
-  tags:
-    - boot_jenkins
-
-- name: Finish jenkins bootstrap using jenkins cli
-  hosts: localhost
-  connection: local
-  gather_facts: False
-  become: false
-  tasks:
-    - include_tasks: roles/jenkins/tasks/bootstrap-cli.yml
-  tags:
-    - boot_jenkins

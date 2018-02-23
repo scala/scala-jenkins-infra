@@ -1,6 +1,6 @@
 # TODO this latest incarnation has not been tested
 
-# Included from site.yml when configuring jenkins for the first time using --tags boot_jenkins
+# Included from bootstrap.yml
 #
 # It's not run by default because it's time consuming. It could in principle be run all the time, since it is mostly idempotent (in a brutish way).
 # The approach is to reset the Jenkins authentication strategy to the built-in one, and make it recognize the admin user with an ssh keypair we control,

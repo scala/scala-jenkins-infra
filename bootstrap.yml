@@ -1,0 +1,23 @@
+---
+# To create the inital jenkins config, use `ansible-playbook bootstrap.yml` (after first doing a normal run of site.yml)
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+    - include_tasks: roles/common/tasks/ec2.yml
+
+- name: Bootstrap jenkins
+  hosts: master
+  gather_facts: yes
+  remote_user: "{{admin_user}}"
+  become: true
+  tasks:
+    - include_tasks: roles/jenkins/tasks/bootstrap.yml
+
+- name: Finish jenkins bootstrap using jenkins cli
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  become: false
+  tasks:
+    - include_tasks: roles/jenkins/tasks/bootstrap-cli.yml

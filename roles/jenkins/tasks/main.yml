@@ -59,7 +59,7 @@
   become_user: "{{jenkins_user}}"
   become: yes
   synchronize:
-    src: ../files/
+    src: "../files/"
     dest: "{{jenkins_home}}"
     checksum: true
     rsync_opts:
