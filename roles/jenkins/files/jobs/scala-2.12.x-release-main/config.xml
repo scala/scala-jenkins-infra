@@ -53,6 +53,12 @@
           <defaultValue>2.12.x</defaultValue>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>sbtBuildTask</name>
+          <description></description>
+          <defaultValue>testAll</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
     <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
@@ -81,7 +87,7 @@ def bootstrapParams = [
     s(&quot;jvmVersion&quot;),
     s(&quot;SCALA_VER_BASE&quot;),
     s(&quot;SCALA_VER_SUFFIX&quot;),
-    s(&quot;sbtBuildTask&quot;, &quot;&quot;) // &quot;testAll&quot;
+    s(&quot;sbtBuildTask&quot;)
 ]
 
 def buildPropsList = []
@@ -94,20 +100,19 @@ stage(&apos;bootstrap&apos;) {
 
 stage(&apos;copy artifact&apos;) {
     node(&quot;&quot;) {
-        copyArtifacts(projectName: bootstrapJobName, selector: specific(&quot;${built.number}&quot;), filter: &apos;jenkins.properties&apos;, flatten: true);
+        copyArtifacts(projectName: bootstrapJobName, selector: specific(&quot;${bootstrapBuild.number}&quot;), filter: &apos;jenkins.properties&apos;, flatten: true);
         def props = readProperties file: &apos;jenkins.properties&apos;
         buildPropsList = props.entrySet().collect{&quot;${it.getKey()}=${it.getValue()}&quot;}
     }
 }
 
 def releaseStage(scriptFile, label) {
-    node(label) { stage(name) {
+    node(label) { stage(scriptFile) {
         try {
             scalaDistCheckout()
             ansiColor(&apos;xterm&apos;) {
                 withEnv(buildPropsList) {
-                    echo &quot;DRY RUN: ${scriptFile}&quot;
-                    //runScript(scriptFile)
+                    runScript(scriptFile)
                 }
             }
         }
