@@ -1,3 +1,6 @@
+# will get config from files/{{jenkins_variant}}
+jenkins_variant: "public"
+
 # FYI: the password for scala-jenkins (used for initial setup, and CI / benchmarking bots)
 scala_jenkins_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
