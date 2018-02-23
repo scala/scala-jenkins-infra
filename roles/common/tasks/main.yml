@@ -21,3 +21,23 @@
       dest: "{{sbt_extras_path}}"
       owner: root
       mode: "755"
+
+
+# TODO: unattended apt upgrades (manually configured on master already)
+#
+# # cat /etc/apt/apt.conf.d/50unattended-upgrades
+#
+# Unattended-Upgrade::Origins-Pattern {
+#         "origin=Debian,codename=${distro_codename},label=Debian-Security";
+#         "site=pkg.jenkins.io";
+#         "site=jfrog.bintray.com";
+# };
+#
+# # cat /etc/apt/apt.conf.d/20auto-upgrades
+#
+# APT::Periodic::Enable "1";
+# APT::Periodic::Update-Package-Lists "1";
+# APT::Periodic::Download-Upgradeable-Packages "1";
+# APT::Periodic::Unattended-Upgrade "7";
+# APT::Periodic::Verbose "2";
+# APT::Periodic::AutocleanInterval "21";
