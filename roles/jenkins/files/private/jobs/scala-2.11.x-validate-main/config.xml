@@ -1,0 +1,192 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.17">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.12">
+      <endpoints>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>http://scala-ci.typesafe.com:8888/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>all</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+        <com.tikal.hudson.plugins.notification.Endpoint>
+          <protocol>HTTP</protocol>
+          <format>JSON</format>
+          <urlInfo>
+            <urlOrId>https://scala-ci.typesafe.com/benchq/webhooks/jenkins</urlOrId>
+            <urlType>PUBLIC</urlType>
+          </urlInfo>
+          <event>all</event>
+          <timeout>30000</timeout>
+          <loglines>0</loglines>
+          <retries>0</retries>
+        </com.tikal.hudson.plugins.notification.Endpoint>
+      </endpoints>
+    </com.tikal.hudson.plugins.notification.HudsonNotificationProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.27">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <com.synopsys.arc.jenkinsci.plugins.jobrestrictions.jobs.JobRestrictionProperty plugin="job-restrictions@0.6"/>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>repo_user</name>
+          <description></description>
+          <defaultValue>scala</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>repo_name</name>
+          <description></description>
+          <defaultValue>scala</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>repo_ref</name>
+          <description></description>
+          <defaultValue>2.11.x</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>prDryRun</name>
+          <description></description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>antBuildArgs</name>
+          <description>Extra arguments for the ant build. For example, `-Dscalac.args=\&quot;-Xcheckinit\&quot;`.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>testExtraArgs</name>
+          <description>Ant test targets to call. The default is &apos;test.core docs.done&apos;.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>_scabot_pr</name>
+          <description>For internal use by Scabot.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>_scabot_last</name>
+          <description>For internal use by Scabot.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>jobsGlob</name>
+          <description>Select test script(s) using a Ant-style Glob</description>
+          <defaultValue>scripts/jobs/validate/test,scripts/jobs/validate/test/*,scripts/jobs/integrate/ide</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.throttleconcurrents.ThrottleJobProperty plugin="throttle-concurrents@2.0.1">
+      <maxConcurrentPerNode>0</maxConcurrentPerNode>
+      <maxConcurrentTotal>0</maxConcurrentTotal>
+      <categories class="java.util.concurrent.CopyOnWriteArrayList"/>
+      <throttleEnabled>false</throttleEnabled>
+      <throttleOption>project</throttleOption>
+      <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
+      <paramsToUseForLimit></paramsToUseForLimit>
+    </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.44">
+    <script>#!groovy
+
+def testJobsPaths = []
+def scalaVersion = &quot;&quot;
+
+stage(&apos;publish&apos;) {
+    node(&quot;public&quot;) {
+        try {
+            setDisplayName()
+            scalaCheckout()
+            ansiColor(&apos;xterm&apos;) {
+                runScript(&quot;scripts/jobs/validate/publish-core&quot;)
+            }
+            def props = readProperties file: &apos;jenkins.properties&apos;
+            scalaVersion = props[&apos;maven.version.number&apos;]
+            testJobsPaths = findFiles(glob: jobsGlob)
+
+        } finally {
+            archiveArtifacts artifacts: &apos;hs_err_*.log,jenkins.properties&apos;, allowEmptyArchive: true
+        }
+    }
+}
+
+def testStage(scalaVersion, scriptFile) {
+    def name = (scriptFile.name == &quot;test&quot;) ? &quot;test&quot; : &quot;test-${scriptFile.name}&quot;
+    // We need to wrap what we return in a Groovy closure, or else it&apos;s invoked
+    // when this method is called, not when we pass it to parallel.
+    // To do this, you need to wrap the code below in { }, and either return
+    // that explicitly, or use { -&gt; } syntax.
+    action = { -&gt;
+        node(&quot;public&quot;) { stage(name) {
+            try {
+                println(&quot;Starting stage ${name} to run ${scriptFile} on ${env.NODE_NAME}@${env.EXECUTOR_NUMBER} in ${env.WORKSPACE}&quot;)
+                scalaCheckout()
+                env[&apos;scalaVersion&apos;] = scalaVersion
+                ansiColor(&apos;xterm&apos;) {
+                    runScript(scriptFile)
+                }
+            }
+            finally {
+                println(&quot;Ending stage ${name} to run ${scriptFile} on ${env.NODE_NAME}@${env.EXECUTOR_NUMBER} in ${env.WORKSPACE}&quot;)
+
+                archiveArtifacts artifacts: &apos;hs_err_*.log,**/test-reports/**/*.xml,build/junit/TEST-*,build/osgi/TEST-*&apos;, allowEmptyArchive: true
+                junit allowEmptyResults: true, testResults: &apos;**/test-reports/**/*.xml&apos;
+            }
+        }}
+    }
+    [name, action]
+}
+
+parallel testJobsPaths.collectEntries{testStage(scalaVersion, it)}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END OF BUILD PROPER
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+def setDisplayName() {
+    currentBuild.setDisplayName(&quot;[${currentBuild.number}] $repo_user/$repo_name#$_scabot_pr at ${repo_ref.take(6)}&quot;)
+}
+
+def scalaCheckout() {
+    checkout changelog: false, poll: false, scm: [$class: &apos;GitSCM&apos;, branches: [[name: &apos;${repo_ref}&apos;]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: &apos;CleanCheckout&apos;]], submoduleCfg: [], userRemoteConfigs: [[name: &apos;${repo_user}&apos;, refspec: &apos;+refs/heads/*:refs/remotes/${repo_user}/* +refs/pull/*/head:refs/remotes/${repo_user}/pr/*/head&apos;, url: &apos;https://github.com/${repo_user}/${repo_name}.git&apos;]]]
+}
+
+def runScript(path) {
+    sh &quot;&quot;&quot;#!/bin/bash -ex
+    if [ -f /usr/local/share/jvm/jvm-select ]; then
+        . /usr/local/share/jvm/jvm-select;
+        jvmSelect $jvmFlavor $jvmVersion;
+    else
+        echo &apos;WARNING: jvm-select not present. using system default Java&apos;;
+    fi
+    echo scalaVersion=\$scalaVersion
+    echo BASH_VERSION=&quot;\$BASH_VERSION&quot;
+    . ${path}
+    &quot;&quot;&quot;
+}
+</script>
+    <sandbox>false</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

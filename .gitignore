@@ -3,3 +3,4 @@
 .chef/
 .vagrant/
 ec2-credentials.yml
+ansible.pem

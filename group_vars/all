@@ -34,6 +34,13 @@ ec2_vol_jenkins: {
   delete_on_termination: "no"
 }
 
+ec2_vol_jenkins_private: {
+  device_name: "/dev/xvdj",
+  volume_size: 100,
+  volume_type: "gp2",
+  delete_on_termination: "no"
+}
+
 ec2_vol_worker: {
   device_name: "/dev/xvdj",
   volume_size: 100,
@@ -66,11 +73,15 @@ ec2_vol_worker_swap: {
 # the network interface specifies everything relevant (configured manually via the ec2 console, along with security groups and the IAM instance profile stuff)
 ec2_instances:  [
   {name: "jenkins-master",                 instance_type: "m4.large",   image: "ami-6d03030d", network_interface: "eni-f9c808fc", instance_profile_name: "JenkinsMaster",         groupname: ["master"],              volumes: ["{{ec2_vol_jenkins}}", "{{ec2_vol_artifactory}}"]},
-  {name: "jenkins-worker-publish",         instance_type: "c4.xlarge" , image: "ami-6d03030d", network_interface: "eni-f00ecef5", instance_profile_name: "JenkinsWorkerPublish",  groupname: ["worker", "publisher"], volumes: ["{{ec2_vol_worker}}"]},
-  # TODO: ec2_vol_worker_swap
+
   {name: "jenkins-worker-behemoth-1",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-0e0ccc0b", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}", "{{ec2_vol_worker_swap}}"]},
   {name: "jenkins-worker-behemoth-2",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-8f0dcd8a", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}", "{{ec2_vol_worker_swap}}"]},
   {name: "jenkins-worker-behemoth-3",      instance_type: "c4.2xlarge", image: "ami-6d03030d", network_interface: "eni-33478936", instance_profile_name: "JenkinsWorker",         groupname: ["worker"],              volumes: ["{{ec2_vol_behemoth}}", "{{ec2_vol_worker_swap}}"]},
+
+# private subnet:
+  {name: "jenkins-master-private",         instance_type: "t2.large",  image: "ami-6d03030d", network_interface: "eni-TODO", instance_profile_name: "JenkinsMasterPrivate",  groupname: ["master-private"], volumes: ["{{ec2_vol_jenkins_private}}"]},
+  {name: "jenkins-worker-publish",         instance_type: "c4.xlarge", image: "ami-6d03030d", network_interface: "eni-TODO: f00ecef5", instance_profile_name: "JenkinsWorkerPublish",  groupname: ["worker", "publisher"], volumes: ["{{ec2_vol_worker}}"]},
+
 # not managed by ansible:
   # {name: "jenkins-worker-windows-publish", instance_type: "c4.xlarge",                         network_interface: "eni-78a74a79", instance_profile_name: "JenkinsWorkerPublish"}
 ]

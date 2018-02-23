@@ -1,0 +1,51 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<slave>
+  <name>jenkins-worker-behemoth-2</name>
+  <description>Worker behemoth-2</description>
+  <remoteFS>/home/jenkins</remoteFS>
+  <numExecutors>3</numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Demand">
+    <inDemandDelay>0</inDemandDelay>
+    <idleDelay>5</idleDelay>
+  </retentionStrategy>
+  <launcher class="hudson.plugins.sshslaves.SSHLauncher" plugin="ssh-slaves@1.25.1">
+    <host>172.31.2.4</host>
+    <port>22</port>
+    <credentialsId>954dd564-ce8c-43d1-bcc5-97abffc81c57</credentialsId>
+    <javaPath>/usr/lib/jvm/java-8-openjdk-amd64/bin/java</javaPath>
+    <maxNumRetries>10</maxNumRetries>
+    <retryWaitTime>60</retryWaitTime>
+    <sshHostKeyVerificationStrategy class="hudson.plugins.sshslaves.verifiers.KnownHostsFileKeyVerificationStrategy"/>
+  </launcher>
+  <label>linux public</label>
+  <nodeProperties>
+    <hudson.slaves.EnvironmentVariablesNodeProperty>
+      <envVars serialization="custom">
+        <unserializable-parents/>
+        <tree-map>
+          <default>
+            <comparator class="hudson.util.CaseInsensitiveComparator"/>
+          </default>
+          <int>8</int>
+          <string>ANT_OPTS</string>
+          <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Djava.io.tmpdir=/home/jenkins/tmp</string>
+          <string>integrationRepoUrl</string>
+          <string>https://scala-ci.typesafe.com/artifactory/scala-integration/</string>
+          <string>JAVA_OPTS</string>
+          <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Djava.io.tmpdir=/home/jenkins/tmp</string>
+          <string>MAVEN_OPTS</string>
+          <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Djava.io.tmpdir=/home/jenkins/tmp</string>
+          <string>prRepoUrl</string>
+          <string>https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/</string>
+          <string>sbtCmd</string>
+          <string>/usr/local/bin/sbt</string>
+          <string>sbtLauncher</string>
+          <string>/usr/local/lib/share/sbt-launch.jar</string>
+          <string>sshCharaArgs</string>
+          <string>(&quot;scalatest@chara.epfl.ch&quot; &quot;-i&quot; &quot;/home/jenkins/.ssh/jenkins_lightbend_chara&quot;)</string>
+        </tree-map>
+      </envVars>
+    </hudson.slaves.EnvironmentVariablesNodeProperty>
+  </nodeProperties>
+</slave>

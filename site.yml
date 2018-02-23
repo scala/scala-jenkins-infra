@@ -1,5 +1,6 @@
 ---
-# run with `ansible-playbook site.yml`
+# by default, this is for use with vagrant
+# to provision EC2, make sure you have ansible.pem, ec2-credentials.yml and run with `ansible-playbook site.yml --tags provision_ec2`
 # NOTES:
 #   - when starting over, delete known_host entries for instances (54.67.111.226 54.67.33.167 54.153.2.9 54.153.1.99), or ansible will refuse to connect
 - hosts: localhost
@@ -7,6 +8,8 @@
   gather_facts: False
   tasks:
     - include_tasks: roles/common/tasks/ec2.yml
+  tags:
+    - provision_ec2
 
 - name: Common stuff
   hosts: all
@@ -27,6 +30,16 @@
     - artifactory
     - jenkins
     - scabot
+
+- name: Install private jenkins instance
+  hosts: master-private
+  gather_facts: yes
+  remote_user: "{{admin_user}}"
+  become: true
+  vars:
+    - jenkins_variant: "private"
+  roles:
+    - jenkins
 
 - name: Configure workers
   hosts: worker
