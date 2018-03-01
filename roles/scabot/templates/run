@@ -1,3 +1,7 @@
 #!/bin/sh
 
 java -Dhttp.port={{scabot_port}} -Dlogger.resource=prod-logger.xml -Dconfig.file=/home/scabot/production.conf -Dscabot.config.file=/home/scabot/scabot.conf -Dpidfile.path=/dev/null -jar /home/scabot/scabot/gui/target/scala-2.11/scabot.jar
+
+# -Dplay.http.parser.maxMemoryBuffer=655360
+# -Dlogback.debug=true
+# -Dlogger.file=/home/scabot/scabot-debug-logger.xml 

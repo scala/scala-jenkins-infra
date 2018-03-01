@@ -27,7 +27,7 @@
   template: src=scabot.conf dest="{{scabot_home}}" owner="{{scabot_user}}"
 
 - name: Configure scabot (prod)
-  template: src=scabot-production.conf dest="{{scabot_home}}" owner="{{scabot_user}}"
+  template: src=production.conf dest="{{scabot_home}}" owner="{{scabot_user}}"
 
 - name: Create scabot runner
   template: src=run dest="{{scabot_home}}" owner="{{scabot_user}}" owner="{{scabot_user}}" mode="0755"
