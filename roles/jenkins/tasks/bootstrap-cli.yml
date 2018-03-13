@@ -19,7 +19,7 @@
 - name: Jenkins plugins
   shell: for plugin in "{{item}}"; do ssh -p 8022 scala-jenkins@scala-ci.typesafe.com install-plugin $plugin; done
   with_items:
-      - https://github.com/typesafehub/ec2-start-stop/releases/download/v0.1.1/ec2-start-stop.hpi
+      - https://github.com/lightbend/ec2-start-stop/releases/download/v0.1.1/ec2-start-stop.hpi
       - copyartifact
       - credentials
       - cygpath

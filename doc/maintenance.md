@@ -208,7 +208,7 @@ the node from being idled.  Don't forget to press "Bring this node
 back online" when you're done.
 
 ## "ERROR: null" in slave agent launch log
-There are probably multiple instances with the same name on EC2: https://github.com/adriaanm/ec2-start-stop/issues/4
+There are probably multiple instances with the same name on EC2: https://github.com/lightbend/ec2-start-stop/issues/4
 Workaround: make sure EC2 instance names are unique.
 
 ## Retry bootstrap
