@@ -120,7 +120,7 @@ Verify that you can actually ssh to the various machines.
 
 But note that only master is always up.  You can bring any node up by
 launching the associated worker on Jenkins, which uses the
-https://github.com/typesafehub/ec2-start-stop Jenkins plugin.
+https://github.com/lightbend/ec2-start-stop Jenkins plugin.
 
 ## AWS setup
 
