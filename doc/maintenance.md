@@ -183,6 +183,17 @@ that explains what you did, when, and why.
 
 # Troubleshooting
 
+## Artifactory offline?
+
+try `sudo systemctl restart artifactory.service` on jenkins-master
+
+lately (April/May 2018) it has been going down pretty regularly.
+Adriaan writes, "I think the problem is that when it gets updated
+through apt-get, the daemon fails to restart.  I removed the jfrog
+source from nano `/etc/apt/apt.conf.d/50unattended-upgrades` so now we
+have to manually upgrade it once in a while, but hopefully it will
+stay up."
+
 ## Worker offline?
 
 From the [list of nodes](https://scala-ci.typesafe.com/computer/),
