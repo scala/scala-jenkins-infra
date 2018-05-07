@@ -99,7 +99,7 @@ Add the following to your `~/.ssh/config`:
 
 ```
 Host jenkins-master
-  User ec2-user
+  User admin
 
 Host jenkins-worker-behemoth-1
   User ubuntu
