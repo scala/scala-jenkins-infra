@@ -9,8 +9,9 @@
       - szeiger
 
 - name: Install basic packages
-  apt: name={{item}} state=installed
+  apt: name={{item}} state=present
   with_items:
+       - acl # so that become_user works (uses setfacl)
        - apt-transport-https
        - openjdk-8-jdk
        - git

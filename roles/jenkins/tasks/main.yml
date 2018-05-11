@@ -34,7 +34,6 @@
   with_items:
       - "{{jenkins_home}}/.ssh"
 
-# hmm, this fails on initial bootstrap, even though create jenkins user step is above
 - name: Worker ssh key pairs
   become_user: "{{jenkins_user}}"
   become: yes
@@ -53,16 +52,17 @@
       state: present
       update_cache: yes
 
+# TODO: enable, but currently commented out to make sure we don't override jenkins config (it's not tracked automatically)
 # After making changes on jenkins, make sure to incorporate them back into this repo
 # using `rsync -av --existing jenkins@scala-ci.typesafe.com:~/ roles/jenkins/files`,
 # or they will be overwritten by this step from the files in roles/jenkins/files.
-- name: Copy jenkins config
-  become_user: "{{jenkins_user}}"
-  become: yes
-  synchronize:
-    src: ../files/
-    dest: "{{jenkins_home}}"
-    checksum: true
-    rsync_opts:
-      - "--chown={{jenkins_user}}:{{jenkins_user}}" # requires recent rsync!
-  notify: restart jenkins
+# - name: Copy jenkins config
+#   become_user: "{{jenkins_user}}"
+#   become: yes
+#   synchronize:
+#     src: ../files/
+#     dest: "{{jenkins_home}}"
+#     checksum: true
+#     rsync_opts:
+#       - "--chown={{jenkins_user}}:{{jenkins_user}}" # requires recent rsync!
+#   notify: restart jenkins
