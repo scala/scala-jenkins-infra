@@ -124,7 +124,15 @@
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers/>
+  <triggers>
+    <hudson.triggers.TimerTrigger>
+      <spec>@daily</spec>
+    </hudson.triggers.TimerTrigger>
+    <hudson.triggers.SCMTrigger>
+      <spec>H/5 * * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
   <concurrentBuild>true</concurrentBuild>
   <builders>
     <hudson.plugins.groovy.SystemGroovy plugin="groovy@2.0">
@@ -140,6 +148,22 @@ build.setDisplayName(&quot;[${build.number}] $repo_user/$repo_name#$repo_ref&quo
       </source>
     </hudson.plugins.groovy.SystemGroovy>
     <hudson.tasks.Shell>
+      <command>cat &lt;&lt; &apos;EOF&apos; &gt; ./logparser.conf
+ok /warning: Ignoring option/
+ok /[Ii]llegal reflective access/
+ok /Please consider reporting this to the maintainers/
+ok /illegal access operations/
+warning /build did not complete./
+ok /SLF4J: /
+error /\[error\]/
+warning /:error\]/
+warning /[Ww]arning/
+warning / WARNING:/
+start /.*--== (Extracting dependencies|Building|Console Notifications)/
+EOF
+	</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
       <command>#!/bin/bash -ex
 if [ -f /usr/local/share/jvm/jvm-select ]; then
   source /usr/local/share/jvm/jvm-select
@@ -153,6 +177,13 @@ source scripts/jobs/integrate/community-build
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <hudson.plugins.logparser.LogParserPublisher plugin="log-parser@2.0">
+      <unstableOnWarning>false</unstableOnWarning>
+      <failBuildOnError>false</failBuildOnError>
+      <showGraphs>false</showGraphs>
+      <useProjectRule>true</useProjectRule>
+      <projectRulePath>logparser.conf</projectRulePath>
+    </hudson.plugins.logparser.LogParserPublisher>
     <hudson.tasks.Mailer plugin="mailer@1.20">
       <recipients>adriaan@lightbend.com seth.tisue@lightbend.com</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
@@ -161,8 +192,8 @@ source scripts/jobs/integrate/community-build
   </publishers>
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
-      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
-        <timeoutMinutes>720</timeoutMinutes>
+      <strategy class="hudson.plugins.build_timeout.impl.NoActivityTimeOutStrategy">
+        <timeoutSecondsString>900</timeoutSecondsString>
       </strategy>
       <operationList/>
     </hudson.plugins.build__timeout.BuildTimeoutWrapper>

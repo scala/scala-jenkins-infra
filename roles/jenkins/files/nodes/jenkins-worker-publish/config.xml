@@ -27,7 +27,7 @@
           <default>
             <comparator class="hudson.util.CaseInsensitiveComparator"/>
           </default>
-          <int>8</int>
+          <int>9</int>
           <string>ANT_OPTS</string>
           <string>-Dfile.encoding=UTF-8 -server -XX:+AggressiveOpts -XX:+UseParNewGC -Xmx2G -Xss1M -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=128M -Dpartest.threads=4 -Djava.io.tmpdir=/home/jenkins/tmp</string>
           <string>integrationRepoUrl</string>

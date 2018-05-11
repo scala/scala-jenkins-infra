@@ -1,5 +1,6 @@
 <?xml version='1.1' encoding='UTF-8'?>
 <project>
+  <actions/>
   <description> Stage a Scala distribution on sonatype using scripts/job/integrate/bootstrap.&#xd;
 It builds locker and uses it to build and publish the required modules as well as the&#xd;
 Scala compiler/library for this release, and generates an updated versions.properties&#xd;
@@ -11,7 +12,7 @@ that captures the modules/STARR used.&#xd;
    </description>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.12">
+    <com.tikal.hudson.plugins.notification.HudsonNotificationProperty plugin="notification@1.13-SNAPSHOT">
       <endpoints>
         <com.tikal.hudson.plugins.notification.Endpoint>
           <protocol>HTTP</protocol>
@@ -207,6 +208,7 @@ that captures the modules/STARR used.&#xd;
       <throttleOption>project</throttleOption>
       <limitOneJobWithMatchingParams>false</limitOneJobWithMatchingParams>
       <paramsToUseForLimit></paramsToUseForLimit>
+      <configVersion>1</configVersion>
     </hudson.plugins.throttleconcurrents.ThrottleJobProperty>
   </properties>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@3.7.0">
@@ -231,7 +233,7 @@ that captures the modules/STARR used.&#xd;
   </scm>
   <assignedNode>linux &amp;&amp; publish</assignedNode>
   <canRoam>false</canRoam>
-  <disabled>false</disabled>
+  <disabled>true</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers/>
