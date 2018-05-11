@@ -34,6 +34,7 @@
   with_items:
       - "{{jenkins_home}}/.ssh"
 
+# hmm, this fails on initial bootstrap, even though create jenkins user step is above
 - name: Worker ssh key pairs
   become_user: "{{jenkins_user}}"
   become: yes

@@ -1,7 +1,4 @@
 ---
-- name: Create user
-  user: name={{artifactory_user}} home={{artifactory_home}}
-
 - name: Add the jfrog gpg key
   apt_key:
     url: "https://bintray.com/user/downloadSubjectPublicKey?username=jfrog"
@@ -19,6 +16,10 @@
       state: present
       update_cache: yes
 
+- name: Create user
+  user: name={{artifactory_user}} home={{artifactory_home}}
+
+# TODO: in addition to the data, should store /var/opt/jfrog/artifactory/{etc,misc, logs} on separate volume as well
 - name: Mount artifactory filestore
   mount:
     src: "{{ec2_vol_artifactory.device_name}}"
