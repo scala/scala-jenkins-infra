@@ -46,7 +46,7 @@ Tips for addressing gradually dwindling free space:
       (`jobs/*/builds`) that we're unlikely to need to refer to again.
       There are different ways to do this; see e.g.
       [this Stack Overflow question](https://stackoverflow.com/questions/13052390/jenkins-remove-old-builds-with-command-line).
-      Example command that worked for me: `curl -u SethTisue:myauthkey -X POST 'https://scala-ci.typesafe.com/job/scala-2.11.x-integrate-community-build/[750-900]/doDeleteAll'` where `SethTisue` is my GitHub user name and `myauthkey` is actually a hex thing I generated [on GitHub](https://github.com/settings/tokens).
+      Example command that worked for me: `curl -u SethTisue:myauthkey -X POST 'https://scala-ci.typesafe.com/job/scala-2.11.x-integrate-community-build/[750-900]/doDelete'` where `SethTisue` is my GitHub user name and `myauthkey` is actually a hex thing I generated [on GitHub](https://github.com/settings/tokens).
 
 Tips for addressing a temporary free-space issue on the behemoths:
 
