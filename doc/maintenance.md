@@ -35,14 +35,18 @@ Tips for addressing gradually dwindling free space:
   `/home/jenkins/tmp`.  ssh in and just blow away everything in there
   (but not while a job is running!).
 * on jenkins-master, both the `/` partition and the `/var/lib/jenkins`
-  partition are possible concerns.  In the root partition,
-  `sudo apt-get clean` should reclaim some space.
-  Under `/var/lib/jenkins`, the culprit may vary. Poke around with commands like
-  `find` and `du` and see where the space is going.  `ncdu -x`
-  is useful. (`-x` prevents crossing volume boundaries.)
-  If you can't
-  find anything else to delete, you can delete some old builds
-  (`jobs/*/builds`) that we're unlikely to need to refer to again.
+  partition are possible concerns.
+  * In the root partition,
+    `sudo apt-get clean` should reclaim some space.
+  * Under `/var/lib/jenkins`, the culprit may vary. Poke around with commands like
+    `find` and `du` and see where the space is going.  `ncdu -x`
+    is useful. (`-x` prevents crossing volume boundaries.)
+    * If you can't
+      find anything else to delete, you can delete some old builds
+      (`jobs/*/builds`) that we're unlikely to need to refer to again.
+      There are different ways to do this; see e.g.
+      [this Stack Overflow question](https://stackoverflow.com/questions/13052390/jenkins-remove-old-builds-with-command-line).
+      Example command that worked for me: `curl -u SethTisue:myauthkey -X POST 'https://scala-ci.typesafe.com/job/scala-2.11.x-integrate-community-build/[750-900]/doDeleteAll'` where `SethTisue` is my GitHub user name and `myauthkey` is actually a hex thing I generated [on GitHub](https://github.com/settings/tokens).
 
 Tips for addressing a temporary free-space issue on the behemoths:
 
