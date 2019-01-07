@@ -9,25 +9,10 @@ a collection of notes)
 
 # Selected AMIs
 
-  - jenkins-master: ami-3b14f27f (Amazon Linux AMI 2015.03 on HVM Instance Store 64-bit for US West N. California)
-  - ubuntu:         ami-2915e16d (search for "vivid hvm:ebs-ssd us-west-1" on https://cloud-images.ubuntu.com/locator/ec2/)
-  - windows:        ami-76227116 (source: amazon/Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.01.11)
+  - linux:   ami-6d03030d (Debian Stretch) --> https://wiki.debian.org/Cloud/AmazonEC2Image/Stretch
+  - windows: ami-76227116 (source: amazon/Windows_Server-2012-R2_RTM-English-64Bit-Base-2017.01.11)
 
-Eventually we would like to move jenkins-master off Amazon Linux and
-onto Ubuntu.
-
-## Alternative windows AMIs
-
-(some old, maybe no longer useful notes)
-
-too stripped down (bootstraps in 8 min, though): ami-23a5b666 Windows_Server-2012-R2_RTM-English-64Bit-Core-2014.12.10
-userdata.txt: `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
-
-older: ami-e9a4b7ac amazon/Windows_Server-2008-SP2-English-64Bit-Base-2014.12.10
-userdata.txt: '<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"}</script>'
-
-older: ami-6b34252e Windows_Server-2008-R2_SP1-English-64Bit-Base-2014.11.19
-doesn't work: ami-59a8bb1c Windows_Server-2003-R2_SP2-English-64Bit-Base-2014.12.10
+(Don't bother automating too much on windows. We could drop it and use our appveyor setup exclusively.)
 
 # About ssh keys
 
@@ -62,41 +47,14 @@ chmod 0600 ~/.ssh/typesafe-scala-aws-$AWS_USER.pem
 
 ## Adding users
 
-Create two users: one for admin ([aws console](https://typesafe-scala.signin.aws.amazon.com/console)) access (generate a password), one for CLI access (using the access key). The `awscli` package provides the `aws` cli, which is used by knife for ec2 provisioning. Add the script user to the `jenkins-knife` group, the console user to the `admin` group.
+Create two users: one for admin ([aws console](https://typesafe-scala.signin.aws.amazon.com/console)) access (generate a password), one for CLI access (using the access key).
 
 Once you have your usernames, run `aws configure`. Enter the access key for your `user-scripts` username, set the default region to `us-west-1`. Test by running `aws ec2 describe-instances`.
 
-## Create a script user for use with knife
-
-Never run scripts as root. Best to have a completely separate user.
-
-This user needs the following policy (WIP!):
-```
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iam:List*",
-        "iam:Get*",
-        "iam:PassRole",
-        "iam:PutRolePolicy"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Action": "ec2:*",
-      "Effect": "Allow",
-      "Resource": "*"
-    }
-  ]
-}
-```
 
 ## Create security group (ec2 firewall)
 
-CONFIGURATOR_IP is the ip of the machine running knife to initiate the bootstrap -- it can be removed once chef-client is running.
+CONFIGURATOR_IP is the ip of the machine running ansible to initiate the bootstrap (TODO is this still true?)
 
 
 ```
@@ -232,52 +190,6 @@ TODO: attach to elastic IPs
 
 # Configuring the jenkins cluster
 
-## Secure data
-
-can be done before bootstrap
-
-from http://jtimberman.housepub.org/blog/2013/09/10/managing-secrets-with-chef-vault/
-
-NOTE: the JSON must not have a field "id"!!!
-
-## Organization validation key
-
-(not sure where this goes, temporally)
-
-Obtain the organization validation key from Adriaan and put it to `$PWD/.chef/config/$CHEF_ORG-validator.pem`. (Q: When is this key used exactly? https://docs.chef.io/chef_private_keys.html says it's when a new node runs `chef-client` for the first time.)
-
-## Chef user with keypair for jenkins cli access
-
-```
-eval "$(chef shell-init zsh)" # use chef's ruby, which has the net/ssh gem
-ruby chef/keypair.rb > $PWD/.chef/keypair.json
-ruby chef/keypair.rb > $PWD/.chef/scabot-keypair.json
-
-## extract private key to $PWD/.chef/scabot.pem
-
-knife vault create master scala-jenkins-keypair \
-  --json $PWD/.chef/keypair.json \
-  --search 'name:jenkins*' \
-  --admins adriaan
-
-knife vault create master scabot-keypair \
-  --json $PWD/.chef/scabot-keypair.json \
-  --search 'name:jenkins-master' \
-  --admins adriaan
-
-knife vault create master scabot \
-  {
-    "jenkins": {
-      "token": "..."
-    },
-    "github": {
-      "scala":    {"token": "..."}
-    }
-  }
-  --search 'name:jenkins-master' \
-  --admins adriaan
-
-```
 
 ## For github oauth
 
@@ -285,116 +197,13 @@ https://github.com/organizations/scala/settings/applications --> https://github.
  - Authorization callback URL = https://scala-ci.typesafe.com/securityRealm/finishLogin
 
 ```
-knife vault create master github-api \
-  '{"client-id":"<Client ID>","client-secret":"<Client secret>"}' \
-  --search 'name:jenkins-master' \
-  --admins adriaan
+  '{"client-id":"<Client ID>","client-secret":"<Client secret>"}'
 ```
 
-
-## Workers that need to publish
-```
-knife vault create worker-publish sonatype \
-  '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-ubuntu-publish' \
-  --admins adriaan
-
-knife vault create worker-publish private-repo \
-  '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-ubuntu-publish' \
-  --admins adriaan
-
-knife vault create worker-publish s3-downloads \
-  '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-*-publish' \
-  --admins adriaan
-
-knife vault create worker-publish chara-keypair \
-  --json $PWD/.chef/config/chara-keypair.json \
-  --search 'name:jenkins-worker-ubuntu-publish' \
-  --admins adriaan
-
-knife vault create worker-publish gnupg \
-  --json   $PWD/.chef/config/gnupg.json \
-  --search 'name:jenkins-worker-ubuntu-publish' \
-  --admins adriaan
-
-knife vault create worker private-repo-public-jobs \
-  '{"user":"XXX","pass":"XXX"}' \
-  --search 'name:jenkins-worker-behemoth-*' \
-  --admins adriaan
-
-```
 
 # Bootstrap
 
-NOTE:
-
-  - name is important (used to allow access to vault etc); it can't be changed later, and duplicates aren't allowed (can bite when repeating knife ec2 create)
-  - can't access the vault on bootstrap (see After bootstrap below)
-  - AWS machines have a persistent root partition.
-  - make sure the security group allows inbound from the machine used to bootstrap chef on the ec2 instance
-
-
-```
-   --subnet subnet-4bb3b80d --associate-eip 54.67.111.226 \
-   --server-connect-attribute public_ip_address           \
-
-knife ec2 server create -N jenkins-master                  \
-   --flavor m3.large                                       \
-   --region us-west-1                                      \
-   -I ami-3b14f27f                                         \
-   -G Master --ssh-user ec2-user                           \
-   --iam-profile JenkinsMaster                             \
-   --security-group-ids sg-7afd2d1f                        \
-   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem \
-   --run-list "scala-jenkins-infra::master-init"
-
-knife ec2 server create -N jenkins-worker-windows-publish \
-   --flavor c4.xlarge                                     \
-   --region us-west-1                                     \
-   -I ami-76227116 --user-data chef/userdata/win2012.txt  \
-   --iam-profile JenkinsWorkerPublish                     \
-   --ebs-optimized --ebs-volume-type gp2                  \
-   --security-group-ids sg-1dec3d78                       \
-   --subnet subnet-4bb3b80d --associate-eip 54.183.156.89 \
-   --server-connect-attribute public_ip_address           \
-   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem             \
-   --run-list "scala-jenkins-infra::worker-init"
-
-
-// NOTE: c3.large is much slower than c3.xlarge (scala-release-2.11.x-build takes 2h53min vs 1h40min )
-
-# NOTE: Make sure to first remove the ips in $workerIp from your ~/.ssh/known_hosts.
-# Also remove the corresponding worker from the chef server (can be only one with the same name).
-
-workerName=(jenkins-worker-behemoth-1 jenkins-worker-behemoth-2 jenkins-worker-ubuntu-publish)
-workerIp=(54.153.2.9 54.153.1.99 54.67.33.167)
-workerFlavor=(c4.2xlarge c4.2xlarge c4.xlarge)
-
-for worker in 1 2 3
-do knife ec2 server create -N ${workerName[$worker]}             \
-   --flavor ${workerFlavor[$worker]}                             \
-   --region us-west-1                                            \
-   -I ami-81afbcc4 --ssh-user ubuntu                             \
-   --hint ec2                                                    \
-   --iam-profile JenkinsWorker                                   \
-   --ebs-optimized --ebs-volume-type gp2                         \
-   --security-group-ids sg-ecb06389                              \
-   --subnet subnet-4bb3b80d --associate-eip ${workerIp[$worker]} \
-   --server-connect-attribute public_ip_address                  \
-   --identity-file ~/.ssh/typesafe-scala-aws-$AWS_USER.pem       \
-   --run-list "scala-jenkins-infra::worker-init"
-done
-```
-
-### NOTES
-- `--hint ec2` should enable ec2 detection (so that `node[:ec2]` gets populated by ohai);
-  It does the equivalent of `ssh ${workerIp[$worker]} sudo mkdir -p /etc/chef/ohai/hints/ && sudo touch /etc/chef/ohai/hints/ec2.json`
-
-- userdata.txt must be one line, no line endings (mac/windows issues?)
-  `<script>winrm quickconfig -q & winrm set winrm/config/service @{AllowUnencrypted="true"} & winrm set winrm/config/service/auth @{Basic="true"} & netsh advfirewall firewall set rule group="remote administration" new enable=yes & netsh advfirewall firewall add rule name="WinRM Port" dir=in action=allow protocol=TCP  localport=5985</script>`
-
+This uses ansible, see notes in site.yml.
 
 ## After bootstrap
 
@@ -407,35 +216,15 @@ follow the instructions in [adding-nodes.md](adding-nodes.md)
 
 The jenkins token for scabot has to be configured manually:
  - get the API token from https://scala-ci.typesafe.com/user/scala-jenkins/configure
- - use it create `scabot-jenkins.json` as follows
- ```
- {
-   "id": "scabot",
-   "jenkins": {
-     "token": "<TOKEN>"
-   }
- }
- ```
- - do `knife vault update master scabot -J scabot-jenkins.json`
+ - encrypt it and store it as scala_jenkins_token in roles/scabot/vars/main.yml
+
 
 ## Artifactory
 
  - Set admin password.
  - create repos (TODO: automate)
  - Create scala-ci user that can push to scala-integration and scala-pr-validation-snapshots,
- - coordinate scala-ci credentials with jenkins via
-```
-knife vault update worker-publish private-repo -J private-repo.json
-```
-
-where `private-repo.json`:
-```
-{
-  "id": "private-repo",
-  "user": "scala-ci",
-  "pass": "???"
-}
-```
+ - coordinate scala-ci credentials with jenkins via `repos_private_pass`
 
 ## GitHub webhook
 

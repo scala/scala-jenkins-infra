@@ -40,29 +40,6 @@ via Chef.  Everything is scripted and the scripts version-controlled
 so the servers can automatically be rebuilt at anytime.  This is all
 described in more detail below.
 
-### Chef
-
-Here's a [Chef 101](https://docs.chef.io/chef_overview.html).
-
-And/or, the basics relevant here are as follows:
-
-* Nodes (on EC2) run chef-client, which pulls config from
-  "cookbooks" puts it into effect.
-* Cookbooks can belong to our organization (typesafe-scala)
-  or be shared (Chef Supermarket).
-* We use a hosted server: http://manage.chef.io/
-* The server holds cookbooks and stores reports uploaded from the nodes.
-* If our organization config needs changes, workstations (i.e. your
-  machine) edit cookbooks and upload them to the server
-* `knife`: tool to interact with nodes or objects on the server
-* `chef`: tool to work with the chef-repo, which holds the cookbooks
-* public-key encryption:
-    * Keypair for each node (private on node, public on server)
-    * Validator keypair for the organization
-    * Private key required for first chef-client connection on a new node
-    * This automatically installs the node’s private key, validator should be removed
-    * Keypair for each user (you!): used by `knife` and `chef` command line tools
-    * Detailed instructions in [client-setup.md](client-setup.md)
 
 ### Pull request validation
 
@@ -188,9 +165,7 @@ Linux and Ubuntu, respectively.  They can `sudo`.
 
 ### How we built it
 
-The idea is to use Chef to configure EC2 instances for both the master and the slaves. The Jenkins configs are generated from Chef recipes. Everything is versioned, with server and workers not allowed to maintain state.
-
-The architecture is inspired by https://erichelgeson.github.io/blog/2014/05/10/automating-your-automation-federated-jenkins-with-chef/
+The first iteration used Chef. We've now moved to ansible. See site.yml and the various config files / templates under `roles/`. There's also a `Vagrantfile` for local experimentation.
 
 ### More documentation
 
@@ -200,8 +175,6 @@ The architecture is inspired by https://erichelgeson.github.io/blog/2014/05/10/a
   machine to talk to the existing CI infrastructure
 * [maintenance.md](maintenance.md): how to maintain, troubleshoot,
   and update the CI infrastructure
-* [staging.md](staging.md): how to use Vagrant to test changes
-  locally
 * [genesis.md](genesis.md): how the infrastructure was initially
   created, and how to re-create it if needed
      * [recreate-jenkins-master.md](recreate-jenkins-master.md)

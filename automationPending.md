@@ -50,8 +50,6 @@ uid                  Scala Project <scala-internals@googlegroups.com>
 sub   2048R/202D3646 2013-04-30 [expires: 2019-05-16]
 ```
 
-### How to automate
-Update chef vault "worker-publish" / "gnupg" items "pubring-base64", "secring-base64" with new content, as found on the worker.
 
 ## Alternate JDK installation
 

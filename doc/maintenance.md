@@ -1,13 +1,5 @@
 # Maintenance
 
-## Checking status
-
-Pointing your browser to https://manage.chef.io and logging in will
-take you to https://manage.chef.io/organizations/typesafe-scala/nodes
-which shows node names, IP addresses, uptimes, etc.
-
-It also shows when each node last checked for updated cookbooks ("Last Check-In").
-
 ## ssh access
 
 For troubleshooting Jenkins in particular it's often to helpful to ssh
@@ -139,11 +131,6 @@ back online" when you're done.
 There are probably multiple instances with the same name on EC2: https://github.com/lightbend/ec2-start-stop/issues/4
 Workaround: make sure EC2 instance names are unique.
 
-## Retry bootstrap
-
-```
-knife bootstrap -c $PWD/.chef/knife.rb jenkins-worker-ubuntu-publish --ssh-user ubuntu --sudo -c $PWD/.chef/knife.rb -N jenkins-worker-ubuntu-publish -r "scala-jenkins-infra::worker-init"
-```
 
 ## Need chara access?
 
@@ -185,7 +172,6 @@ cord $IP  # log in using password above, open a command line, and do:
   winrm set winrm/config/service @{AllowUnencrypted="true"}
   winrm set winrm/config/service/auth @{Basic="true"}
 
-knife bootstrap -V windows winrm $IP
 ```
 
 random CoRD tips:

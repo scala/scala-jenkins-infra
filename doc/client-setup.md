@@ -9,65 +9,6 @@ instructions would work on Linux as well, with minor changes.)
 One-time setup instructions for the CI infrastructure _as a whole_
 are in a separate document, [genesis.md](genesis.md).
 
-## Install chef and knife clients
-
-```
-brew cask install chefdk
-eval "$(chef shell-init zsh)" # set up gem environment
-gem install knife-ec2 knife-windows knife-github-cookbooks chef-vault
-```
-
-tips/troubleshooting:
-
-* you might choose to `gem install --user-install` instead so only your
-  own `~/.gem` directory is affected (and so you don't need `sudo`)
-* if you're on Mac OS X 10.11, make sure you are using ChefDK 0.8.0
-  or higher, so as not to run afoul of
-  https://github.com/chef/chef-dk/issues/419
-* if `gem install` gives an error message about unsatisfiable
-  constraints on the version of the chef-config gem, add `-f`
-  to force-ignore the problem `¯\_(ツ)_/¯` and cross your fingers
-  that nothing goes wrong as a result
-
-## Get credentials for the typesafe-scala chef.io organization
-
-Join chef.io (https://manage.chef.io/signup), and ask on Slack to be invited to the typesafe-scala org.
-
-For the CLI to work, you need:
-```
-export CHEF_ORG="typesafe-scala"
-```
-
-If your username on chef.io does not match the local username on your machine, you also need
-```
-export CHEF_USER="[username]"
-```
-
-## Get your public key added
-
-Open a pull request, modeled on https://github.com/scala/scala-jenkins-infra/pull/106,
-to add your own ssh public key (not an Amazon-provided key; a personal key of your
-own) to `attributes/pubkeys.rb`, so you can use your key to ssh to the various servers.
-
-## Set up directories
-
-```
-mkdir -p ~/git/cookbooks
-cd ~/git/cookbooks
-git init .
-git commit --allow-empty -m "Initial"
-git config core.autocrlf false
-hub clone scala/scala-jenkins-infra
-cd scala-jenkins-infra
-ln -sh ~/git/cookbooks $PWD/.chef/
-mkdir .chef/config
-```
-
-(The `core.autocrlf` thing may be needed to prevent "fatal: CRLF would be replaced by LF" errors when cloning cookbook repos, depending on your global git config.)
-
-You can then generate and download your private key on https://manage.chef.io/organizations/typesafe-scala/users. Put it in `~/git/cookbooks/scala-jenkins-infra/.chef/config/$CHEF_USER.pem`. Then you can use knife without further config. See `.chef/knife.rb` for key locations.
-
-Test if knife works correctly by running `knife cookbook list`.
 
 ## Hosts and SSH config
 
@@ -98,22 +39,40 @@ it's only ssh-able from jenkins-master itself; see below.)
 Add the following to your `~/.ssh/config`:
 
 ```
-Host jenkins-master
+Host jenkins-worker-publish
+  IdentityFile /Users/adriaan/.ssh/ansible.pem
   User admin
 
 Host jenkins-worker-behemoth-1
-  User ubuntu
+  IdentityFile /Users/adriaan/.ssh/ansible.pem
+  User admin
 
 Host jenkins-worker-behemoth-2
-  User ubuntu
+  IdentityFile /Users/adriaan/.ssh/ansible.pem
+  User admin
 
-Host jenkins-worker-ubuntu-publish
-  User ubuntu
+Host jenkins-worker-behemoth-3
+  IdentityFile /Users/adriaan/.ssh/ansible.pem
+  User admin
+
+Host jenkins-master
+  IdentityFile /Users/adriaan/.ssh/ansible.pem
+  User admin
 
 Host scabot
   HostName jenkins-master
-  IdentityFile $PWD/.chef/scabot.pem
   User scabot
+
+Host jenkins-worker-windows-publish
+  HostName 172.31.0.178
+  IdentityFile ~/.ssh/scala-jenkins.pem
+  User jenkins
+  ProxyCommand ssh -q -W %h:%p jenkins-master
+
+Host influxdb
+  HostName 172.31.0.100
+  User ubuntu
+  ProxyCommand ssh -q -W %h:%p jenkins-master
 ```
 
 Verify that you can actually ssh to the various machines.
@@ -186,25 +145,7 @@ ssh'ing to jenkins-master first.  From jenkins-master, do:
 which should get you to a Cygwin prompt.  (If it doesn't work, maybe
 you forgot to bring the Windows node online first?)
 
-Missing key?  If you find that `~/.ssh/jenkins_id_rsa` isn't
-present on jenkins-master, you can recreate it as follows.
-The keypair is stored in our Chef vault (as provided by the chef-vault
-cookbook) as `scala-jenkins-keypair`.  Here's how to retrieve it:
-
-    knife vault show --format json master scala-jenkins-keypair \
-      | jq -r .private_key > jenkins_id_rsa
-    knife vault show --format json master scala-jenkins-keypair \
-      | jq -r .public_key  > jenkins_id_rsa.pub
-
-From there, you can `scp` it up to `~/.ssh` on jenkins-master.
-
-If you get "master/scala-jenkins-keypair is not encrypted with your
-public key", that means you must ask one of the existing vault admins
-to do e.g.
-
-    knife vault update master scala-jenkins-keypair \
-      -A adriaan,tisue,lrytz \
-      --search 'name:jenkins-master
+Keys are stored using ansible vault.
 
 ### Remote access (graphical)
 

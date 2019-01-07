@@ -3,7 +3,7 @@ in overview.md. some pieces may be only historical now)
 
 # Design for scala-ci.typesafe.com
 
-Jenkins on EC2, configured using chef
+Jenkins on EC2, configured using ansible (not documented since it happened in a rush when moving away from chef...)
 
 * centered around GitHub & future move to Travis CI
    * no nightly builds (not supported on Travis) -- run integration on every merge
@@ -16,11 +16,10 @@ Jenkins on EC2, configured using chef
    * job-specific params incorporated into job title
 * use jenkins strictly as a job scheduler/dashboard
    *  archive logs, builds elsewhere
-   *  configuration is handled by chef
+   *  configuration is handled by ansible
 * the jenkins server/workers are considered stateless & opaque
-   * infrastructure is fully defined by chef cookbook
+   * infrastructure is fully defined in ansible config
    * worker nodes have home directory mounted on device that is wiped on reboot (ephemeral storage on EC2)
-   * chef-client runs on boot, and every 30 minutes
    * as little information as possible in jenkins job config: standardize common stuff & extract logic to scripts
 * use maven to store and communicate compiled artifacts
    * every commit has artifacts on our artifactory, use them for running test suite downstream, git bisect,...
