@@ -291,15 +291,6 @@ knife vault create master github-api \
   --admins adriaan
 ```
 
-## For nginx ssl
-
-```
-knife vault create master scala-ci-key \
-  --json scalaci-key.json \
-  --search 'name:jenkins-master' \
-  --admins adriaan
-```
-
 
 ## Workers that need to publish
 ```
