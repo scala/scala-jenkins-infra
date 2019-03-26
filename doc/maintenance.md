@@ -32,7 +32,8 @@ Tips for addressing gradually dwindling free space:
     `find` and `du` and see where the space is going.  `ncdu -x`
     is useful. (`-x` prevents crossing volume boundaries.)
   * In the root partition,
-    `sudo apt-get clean` should reclaim some space.
+     - `sudo apt-get clean` should reclaim some space; 
+     - sometimes `/var/log/nginx/access.log` grows like crazy when running a lot of community builds. Those can be deleted (or `mv`'d to /var/lib/jenkins where there's more space)
   * Under `/var/lib/jenkins`, if you can't
       find anything else to delete, you can delete some old builds
       (`jobs/*/builds`) that we're unlikely to need to refer to again.
