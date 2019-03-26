@@ -44,6 +44,9 @@ Tips for addressing gradually dwindling free space:
 Tips for addressing a temporary free-space issue on the behemoths:
 
 * Usually the problem is in `/home/jenkins`.
+* A common cause for temporary greatly increased disk usage is closely
+  spaced bumping of the community build Scala SHAs, and/or doing
+  community build runs with PR snapshot SHAs.
 * You can use the "Clear Workspace" button in the Jenkins UI.
 * Alternatively, on the command line, in `/home/jenkins/workspace`,
   you can blow away `*/{dbuild,clones,target}-*`.  (Not while a
