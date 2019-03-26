@@ -28,12 +28,12 @@ Tips for addressing gradually dwindling free space:
   (but not while a job is running!).
 * on jenkins-master, both the `/` partition and the `/var/lib/jenkins`
   partition are possible concerns.
-  * In the root partition,
-    `sudo apt-get clean` should reclaim some space.
-  * Under `/var/lib/jenkins`, the culprit may vary. Poke around with commands like
+  * In either partition, the culprit may vary. Poke around with commands like
     `find` and `du` and see where the space is going.  `ncdu -x`
     is useful. (`-x` prevents crossing volume boundaries.)
-    * If you can't
+  * In the root partition,
+    `sudo apt-get clean` should reclaim some space.
+  * Under `/var/lib/jenkins`, if you can't
       find anything else to delete, you can delete some old builds
       (`jobs/*/builds`) that we're unlikely to need to refer to again.
       There are different ways to do this; see e.g.
