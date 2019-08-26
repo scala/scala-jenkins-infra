@@ -47,10 +47,19 @@ Tips for addressing a temporary free-space issue on the behemoths:
 * A common cause for temporary greatly increased disk usage is closely
   spaced bumping of the community build Scala SHAs, and/or doing
   community build runs with PR snapshot SHAs.
-* You can use the "Clear Workspace" button in the Jenkins UI.
-* Alternatively, on the command line, in `/home/jenkins/workspace`,
-  you can blow away `*/{dbuild,clones,target}-*`.  (Not while a
-  community build job is running!)
+* The easiest way to address it is to clear a community build job's
+  workspace.
+  * Deleting that many files takes a long time (10+ minutes).
+  * Therefore, the "Clear Workspace" button in the Jenkins UI is not the best way to do this,
+    since the UI will time out will before the workspace finishes clearing.
+  * Instead, stop any community build jobs running on the worker in question,
+    then ssh to the worker, `cd` to `/home/jenkins/workspace`, then
+    e.g. `mv scala-2.12.x-integrate-community-build trashme`. With the
+    old directory moved aside, it's now safe to restart the job.
+    But then also, you want to `rm -rf trashme &; disown %`.
+    You don't want the node to go down before the `rm` process finishes,
+    so make sure you queue up a new job run in Jenkins, that will keep
+    the node up.
 * From time to time we can delete `~/.dbuild`, `~/.ivy2`, `~/.m2`
 
 
