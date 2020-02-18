@@ -140,7 +140,8 @@ configure" than on Linux, comments Adriaan.)
 You can't ssh directly to the Windows node, but you can get there by
 ssh'ing to jenkins-master first.  From jenkins-master, do:
 
-    ssh -i ~/.ssh/jenkins_id_rsa jenkins@172.31.0.178
+    sudo su jenkins
+    ssh -i ~/.ssh/id_worker_windows jenkins@172.31.0.178
 
 which should get you to a Cygwin prompt.  (If it doesn't work, maybe
 you forgot to bring the Windows node online first?)
