@@ -4,7 +4,7 @@ repos_private_integration: "https://{{server_name}}/artifactory/scala-integratio
 repos_private_pr_snap: "https://{{server_name}}/artifactory/scala-pr-validation-snapshots/"
 
 repos_caching_proxy_central_mirrorOf: "central" # TODO: add ",sonatype.release,sonatype.snapshot"
-repos_caching_proxy_central_url: "https://{{server_name}}/artifactory/central/"
+repos_caching_proxy_central_url: "https://{{server_name}}/artifactory/maven-central/"
 repos_caching_proxy_jcenter_mirrorOf: "jcenter" # TODO: add ",sonatype.release,sonatype.snapshot"
 repos_caching_proxy_jcenter_url: "https://{{server_name}}/artifactory/jcenter/"
 
