@@ -24,29 +24,29 @@ But we still need it because
 <details>
   <summary>Add the following to your <code>~/.ssh/config</code></summary>
 
-  ```
-  Host jenkins-master
-    HostName 54.67.111.226
-    User admin
-  
-  Host jenkins-worker-behemoth-1
-    HostName 54.153.2.9
-    User admin
-  
-  Host jenkins-worker-behemoth-2
-    HostName 54.153.1.99
-    User admin
-  
-  Host jenkins-worker-behemoth-3
-    HostName 54.183.156.89
-    User admin
-  
-  # no public ip, jumphost through master
-  Host influxdb
-    HostName 172.31.0.100
-    User ubuntu
-    ProxyCommand ssh -q -W %h:%p jenkins-master
-  ```
+```
+Host jenkins-master
+  HostName 54.67.111.226
+  User admin
+
+Host jenkins-worker-behemoth-1
+  HostName 54.153.2.9
+  User admin
+
+Host jenkins-worker-behemoth-2
+  HostName 54.153.1.99
+  User admin
+
+Host jenkins-worker-behemoth-3
+  HostName 54.183.156.89
+  User admin
+
+# no public ip, jumphost through master
+Host influxdb
+  HostName 172.31.0.100
+  User ubuntu
+  ProxyCommand ssh -q -W %h:%p jenkins-master
+```
 
 </details>
 
@@ -86,11 +86,79 @@ The config file is `/opt/jfrog/artifactory/var/etc/system.yaml`.
 
 The `access` service has its own db at `/opt/jfrog/artifactory/var/data/access/derby`.
 
+#### Disk Usage
+
+Artifactory disk usage report: https://scala-ci.typesafe.com/ui/admin/monitoring/storage-summary.
+
+<details>
+  <summary>Steps to delete old builds from <code>scala-pr-validation-snapshots</code>:</summary>
+
+Create a file `search.json`, adjust the cutoff date on the last line:
+
+```
+items.find({
+  "repo": "scala-pr-validation-snapshots",
+  "$or": [ { "name": { "$match": "scala-compiler*" } }, {"name": { "$match": "scala-reflect*" } }, { "name": { "$match": "scala-library*" } }, { "name": { "$match": "scala-dist*" } }, { "name": { "$match": "scala-partest*" } }, { "name": { "$match": "scalap*" } } ],
+  "created": { "$lt": "2020-01-01" }
+})
+```
+
+`curl -u 'lukas:SEEEKREET' -X POST "https://scala-ci.typesafe.com/artifactory/api/search/aql" -T search.json > artifacts.json`
+
+In an up-to-date Scala 2.13.x checkout, the following tests which of the artifacts correspond to revisions that were actually merged into scala/scala. Builds for those revisions are kept, builds for revisions that never made it are added to `to-delete.txt`.
+
+```bash
+n=$(cat artifacts.json | jq -r '.results[] | .path' | uniq | wc -l)
+for p in $(cat artifacts.json | jq -r '.results[] | .path' | uniq); do
+  n=$((n-1))
+  sha=$(echo $p | awk -F'-' '{print $(NF-1)}')
+  if git branch --contains $sha | grep 2.13.x > /dev/null; then
+    echo "$sha y - $n"
+  else
+    echo "$sha n - $n"
+    echo $p >> to-delete.txt
+  fi
+done
+```
+
+Delete the artifacts; best run it on `ssh jenkins-master` for performance.
+
+```bash
+n=$(cat to-delete.txt | wc -l)
+for p in $(cat to-delete.txt); do
+  n=$((n-1))
+  echo "$p - $n"
+  curl -u 'lukas:PASSWORDSEKRET' -X DELETE "https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots/$p"
+done
+```
+
+After that
+  - Empty "Trash Can"
+    - `curl -I -u 'lukas:SEEEKREET' -X POST "https://scala-ci.typesafe.com/artifactory/api/trash/empty"`
+  - Run artifactory's "Garbage Collection" [20 times (😆)](https://jfrog.com/knowledge-base/why-does-removing-deleting-old-artifacts-is-not-affecting-the-artifactory-disk-space-usage/)
+    - `for i in {1..20}; do curl -I -u 'lukas:SEEEKREET' -X POST "https://scala-ci.typesafe.com/artifactory/api/system/storage/gc"; done`
+    - wait for it to complete, it runs in the background. check Binaries Size / Artifacts Size in Storage
+  - Run "Prune Unreferenced Data"
+    - `api/system/storage/optimize`
+  - https://jfrog.com/knowledge-base/what-is-the-difference-between-garbage-collector-and-prune-unreferenced-data-processes-in-artifactory/
+
+Other measures
+  - Artifacts - Trash Can - right click - Empty
+  - Derby database (`/var/opt/jfrog/artifactory/data/derby/seg0`) may be big. Admin - Advanced - Maintenance, run "Compress the Internal Database".
+    - Did not work for me. "lock could not be obtained due to a deadlock".
+    - Doc says "We recommend running this when Artifactory activity is low, since compression may not be able to complete when storage is busy (in which case the storage will not be affected)."
+
+</details>
+
 ### Scabot
 
 [Scabot](https://github.com/scala/scabot) triggers Jenkins builds and updates their state on github commits / PRs.
 
 ## Details
+
+### Disk usage
+
+Use `ncdu -x /path` to analyze disk usage.
 
 ### Unattended Upgrades
 
