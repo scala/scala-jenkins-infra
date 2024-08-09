@@ -86,7 +86,26 @@ The config file is `/opt/jfrog/artifactory/var/etc/system.yaml`.
 
 The `access` service has its own db at `/opt/jfrog/artifactory/var/data/access/derby`.
 
-#### Disk Usage
+### Scabot
+
+[Scabot](https://github.com/scala/scabot) triggers Jenkins builds and updates their state on github commits / PRs.
+
+## Details
+
+### AWS CLI
+
+  - `brew install awscli`
+  - via okta, go to AWS IAM
+  - unfold the "EngOps Scala" entry, click "Access keys" to get the `SSO start URL` and `SSO Region`
+  - `aws configure sso`
+  - set `AWS_DEFAULT_PROFILE`
+  - `aws ec2 describe-instances` to test
+
+### Disk usage
+
+Use `ncdu -x /path` to analyze disk usage.
+
+### Artifactory Disk Usage
 
 Artifactory disk usage report: https://scala-ci.typesafe.com/ui/admin/monitoring/storage-summary.
 
@@ -151,15 +170,7 @@ Other measures
 
 </details>
 
-### Scabot
 
-[Scabot](https://github.com/scala/scabot) triggers Jenkins builds and updates their state on github commits / PRs.
-
-## Details
-
-### Disk usage
-
-Use `ncdu -x /path` to analyze disk usage.
 
 ### Unattended Upgrades
 
