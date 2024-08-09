@@ -143,8 +143,9 @@ After that
   - https://jfrog.com/knowledge-base/what-is-the-difference-between-garbage-collector-and-prune-unreferenced-data-processes-in-artifactory/
 
 Other measures
-  - Artifacts - Trash Can - right click - Empty
-  - Derby database (`/var/opt/jfrog/artifactory/data/derby/seg0`) may be big. Admin - Advanced - Maintenance, run "Compress the Internal Database".
+  - https://scala-ci.typesafe.com/ui/admin/artifactory/configuration/artifactory_general "Empty Trash Can"
+  - Derby database (`/var/opt/jfrog/artifactory/data/derby/seg0`) may be big.
+    - https://scala-ci.typesafe.com/ui/admin/artifactory/advanced/maintenance "Compress the Internal Database".
     - Did not work for me. "lock could not be obtained due to a deadlock".
     - Doc says "We recommend running this when Artifactory activity is low, since compression may not be able to complete when storage is busy (in which case the storage will not be affected)."
 
