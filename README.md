@@ -170,6 +170,35 @@ Other measures
 
 </details>
 
+### Resize Drives / File Systems
+
+Enlarging drives and their partitions seems to work well, even for the root partition of a running system (Debian).
+
+  - Take a snapshot of the EBS Volume, wait for it to be completed
+  - Use "Modify volume" and increase the size
+  - Increase the partition and file system sizes ([details here](https://docs.aws.amazon.com/ebs/latest/userguide/recognize-expanded-volume-linux.html))
+    - `sudo growpart /dev/nvme0n1 1` (if there are partitions)
+    - `sudo resize2fs /dev/nvme0n1p1`
+
+### Recreate Drive
+
+To recreate a drive / file system (to shrink it, or to move to a different file system), create a new EBS volume, mount it and copy the data over using `rsync`.
+  - new EBS volume, gp3, 400g, default iops/throughput. us-west-1c.
+  - attach to instance as `/dev/xvdN`
+  - `lsblk`
+  - `mkfs -t ext4 -N 50000000 /dev/xvdN` (`-N` to specify the [number of inodes](https://github.com/scala/community-build/issues/1633); `df -hi` to display)
+  - `mkdir /home/jenkins-new`
+  - `chown jenkins:root /home/jenkins-new`
+  - `blkid` to show UUID
+  - fstab: `UUID=YYYYYYYYYYYYYYYY /home/jenkins-new ext4 noatime 0 0`
+  - `systemctl daemon-reload`
+  - `mount -a`
+  - `chown jenkins:root /home/jenkins-new`
+  - `rsync -a -H --info=progress2 --info=name0 /home/jenkins/ /home/jenkins-new/`
+    -  `-H` is important, git checkouts use hard links
+  - fstab, mount new volume at `/home/jenkins`. comment out old volume
+  - `systemctl daemon-reload`
+  - `reboot` (old volume might be in use)
 
 
 ### Unattended Upgrades
