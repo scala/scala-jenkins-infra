@@ -90,6 +90,8 @@ The `access` service has its own db at `/opt/jfrog/artifactory/var/data/access/d
 
 [Scabot](https://github.com/scala/scabot) triggers Jenkins builds and updates their state on github commits / PRs.
 
+  - Logs: `journalctl -u scabot -f -n 100`
+
 ## Details
 
 ### AWS CLI
