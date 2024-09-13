@@ -19,6 +19,18 @@ But we still need it because
   - where would we put PR / integration builds?
   - where would we get enough resources to run the community build?
 
+
+## Webhooks, tokens, accounts etc
+
+  - Jenkins auth via GitHub. GitHub OAuth App owned by the Scala org: https://github.com/organizations/scala/settings/applications/154904
+  - Scabot posts build status to GitHub using an access token of the scala-jenkins user: https://github.com/settings/tokens
+  - Scabot starts Jenkins builds using an access token of the scala-jenkins user (log in to GitHub as scala-jenkins, then to Jenkins): https://scala-ci.typesafe.com/user/scala-jenkins/security/
+  - GitHub webhooks to notify scabot: https://github.com/scala/scala/settings/hooks
+  - Jenkins webhooks to notify scabot: Job configuration, notifications: e.g., https://scala-ci.typesafe.com/job/scala-2.13.x-validate-main/configure
+  - Jenkins workers: ssh, credentials: https://scala-ci.typesafe.com/manage/credentials/
+  - Jenkins plugin to start / stop workers: auth unclear, see README in https://github.com/lightbend-labs/ec2-start-stop
+
+
 ## SSH access
 
 <details>
@@ -62,7 +74,9 @@ Handles jenkins, `/artifactory`, `/grafana`, `/benchq`, ...
 
 ### Jenkins
 
-Auth goes via GitHub.
+Auth goes via GitHub. In the [configuraton](https://scala-ci.typesafe.com/manage/configureSecurity/) there's a field "Admin User Names".
+
+AWS Workers are started / stopped by custom jenkins plugin: https://github.com/lightbend-labs/ec2-start-stop
 
 TODO: how to get logs?
   - After a recent upgrade, scabot was no longer receiving job notifications from jenkins (it fixed itself...)
