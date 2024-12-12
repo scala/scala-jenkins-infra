@@ -64,7 +64,7 @@ Host influxdb
 
 
 
-## Installed Services
+## Installed services
 
 ### nginx
 
@@ -121,7 +121,16 @@ The `access` service has its own db at `/opt/jfrog/artifactory/var/data/access/d
 
 Use `ncdu -x /path` to analyze disk usage.
 
-### Artifactory Disk Usage
+### Jenkins workers disk space
+
+  - Change "Idle delay" of Jenkins worker to 500 (https://scala-ci.typesafe.com/computer/jenkins-worker-behemoth-1/configure)
+    - prevents shutting down while the files are being deleted
+  - `ssh jenkins-worker-behemoth-1`
+  - delete `/home/jenkins/workspace/*community*`, `/home/jenkins/.dbuild`, `/home/jenkins/workspace/*tmp`
+  - Revert "Idle delay" to 5
+  - More details: https://github.com/scala/community-build/wiki/Maintenance#servers-run-out-of-disk-space
+
+### Artifactory disk usage
 
 Artifactory disk usage report: https://scala-ci.typesafe.com/ui/admin/monitoring/storage-summary.
 
@@ -186,7 +195,7 @@ Other measures
 
 </details>
 
-### Resize Drives / File Systems
+### Resize drives / file systems
 
 Enlarging drives and their partitions seems to work well, even for the root partition of a running system (Debian).
 
@@ -196,7 +205,7 @@ Enlarging drives and their partitions seems to work well, even for the root part
     - `sudo growpart /dev/nvme0n1 1` (if there are partitions)
     - `sudo resize2fs /dev/nvme0n1p1`
 
-### Recreate Drive
+### Recreate drive
 
 To recreate a drive / file system (to shrink it, or to move to a different file system), create a new EBS volume, mount it and copy the data over using `rsync`.
   - new EBS volume, gp3, 400g, default iops/throughput. us-west-1c.
@@ -217,7 +226,7 @@ To recreate a drive / file system (to shrink it, or to move to a different file 
   - `reboot` (old volume might be in use)
 
 
-### Unattended Upgrades
+### Unattended upgrades
 
 Enabled on master and behemoths
   - default config on behemoths, installs all updates.
