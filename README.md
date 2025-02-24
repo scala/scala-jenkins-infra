@@ -90,15 +90,27 @@ TODO: how to get logs?
 Repositories:
   - `scala-pr-validation-snapshots`
   - `scala-integration` for mergely builds
-  - `dbuild` is an aggregate of cached remote repositories. used for the community build.
+  - `dbuild` / `dbuild-ivy` are aggregates of cached remote repositories. used for the community build.
 
-The config file is `/opt/jfrog/artifactory/var/etc/system.yaml`.
+File locations
+  - config file: `/opt/jfrog/artifactory/var/etc/system.yaml`
+  - `sudo tail -f /opt/jfrog/artifactory/var/log/console.log` has aggregated logs, logs for individual services in the same directory
+  - `/opt/jfrog/artifactory/var` is a symlink to `/var/opt/jfrog/artifactory`
+  - `/var/opt/jfrog/artifactory/data` is a separate mount (600G volume)
+  - `data/filestore` stores the data (artifacts are stored with their hash as filename for deduplication, possible sharding)
+  - `data/backup` for manual and automated backups
 
-`/opt/jfrog/artifactory/var/log/console.log` has aggregated logs, logs for individual services in the same directory.
+Database
+  - apt-installed postgres, details see `system.yaml`
+  - `/var/lib/postgresql` is a symlink to `/var/opt/jfrog/artifactory/data/postgresql-data` on the 600G artifactory volume
 
-`/opt/jfrog/artifactory/var/data/derby` is the main database for our artifactory; its large (19G in Aug 2024).
-
-The `access` service has its own db at `/opt/jfrog/artifactory/var/data/access/derby`.
+Upgrading artifactory
+  - breaking changes seem common! release notes: https://jfrog.com/help/r/jfrog-release-information/artifactory-self-hosted-releases
+  - `jfrog-artifactory-oss` apt package
+  - backup: use "Export System" in the UI to `/var/opt/jfrog/artifactory/data/backup/export`, check "Exclude Content"
+    - `sudo tail -f /opt/jfrog/artifactory/var/log/console.log` to see if it's done, UI will time out
+    - restore: [start with an empty database](https://jfrog.com/help/r/jfrog-installation-setup-documentation/create-the-artifactory-postgresql-database), import from `/var/opt/jfrog/artifactory/data/backup/export/...`
+    - `data/filestore` should not be affected. maybe there's a danger if GC starts when running the empty instance?
 
 ### Scabot
 
