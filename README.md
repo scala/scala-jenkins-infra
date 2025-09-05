@@ -138,7 +138,7 @@ Use `ncdu -x /path` to analyze disk usage.
   - Change "Idle delay" of Jenkins worker to 500 (https://scala-ci.typesafe.com/computer/jenkins-worker-behemoth-1/configure)
     - prevents shutting down while the files are being deleted
   - `ssh jenkins-worker-behemoth-1`
-  - delete `/home/jenkins/workspace/*community*`, `/home/jenkins/.dbuild`, `/home/jenkins/workspace/*tmp`
+  - `sudo rm -rf /home/jenkins/workspace/*community* /home/jenkins/.dbuild /home/jenkins/workspace/*tmp /home/jenkins/.cache/coursier`
   - Revert "Idle delay" to 5
   - More details: https://github.com/scala/community-build/wiki/Maintenance#servers-run-out-of-disk-space
 
