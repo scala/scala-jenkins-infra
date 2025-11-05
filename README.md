@@ -140,6 +140,7 @@ Use `ncdu -x /path` to analyze disk usage.
   - `ssh jenkins-worker-behemoth-1`
   - `sudo mkdir /home/jenkins/trash`
   - `sudo mv /home/jenkins/workspace/*community* /home/jenkins/.dbuild /home/jenkins/workspace/*tmp /home/jenkins/.cache/coursier /home/jenkins/trash`
+  - `sudo -u jenkins /home/jenkins/cs setup` (say 'n' to add to `PATH`)
   - `sudo rm -rf /home/jenkins/trash`
   - Revert "Idle delay" to 5
   - More details: https://github.com/scala/community-build/wiki/Maintenance#servers-run-out-of-disk-space
