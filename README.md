@@ -263,3 +263,11 @@ root@ip-172-31-10-237:~# cat /etc/chrony/sources.d/aws.sources
 #https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configure-ec2-ntp.html
 server 169.254.169.123 prefer iburst minpoll 4 maxpoll 4
 ```
+
+### Memory Usage
+
+8G is in reality too tight for jenkins-master. It got stuck a couple of times (June 2026). Implemented some remedy:
+
+- Added 8G swap (`/var/lib/jenkins/swapfile`)
+- Capped Jenkins heap 2G (`sudo systemctl edit jenkins`)
+- Capped scabot heap 512M (`sudo nano /home/scabot/run`)
